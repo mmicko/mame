@@ -64,11 +64,13 @@ option(BUILD_TOOLS "Enable building tools." ON)
 option(BUILD_TESTS "Enable building tests." ON)
 option(BUILD_BENCHMARKS "Enable building benchmarks." ON)
 
-# newoption {
-# 	trigger = "osd",
-# 	description = "Choose OSD layer implementation",
-# }
-set(OSD "" CACHE STRING "Choose OSD layer implementation")
+if(WIN32)
+  set(OSD_DEFAULT "windows")
+else()
+  set(OSD_DEFAULT "sdl")
+endif()
+set(OSD ${OSD_DEFAULT} CACHE STRING "Choose OSD layer implementation")
+
 # 
 # newoption {
 # 	trigger = 'with-bundled-sdl2',
@@ -84,18 +86,10 @@ set(OSD "" CACHE STRING "Choose OSD layer implementation")
 # 		{ "ubuntu-intrepid",   "ubuntu-intrepid"    },
 # 	},
 # }
-# 
-# newoption {
-# 	trigger = "target",
-# 	description = "Building target",
-# }
-set(TARGET "" CACHE STRING "Building target")
 
-# newoption {
-# 	trigger = "subtarget",
-# 	description = "Building subtarget",
-# }
-set(SUBTARGET "" CACHE STRING "Building subtarget")
+set(TARGET "mame" CACHE STRING "Building target")
+
+set(SUBTARGET "mame" CACHE STRING "Building subtarget")
 
 # 
 # newoption {
