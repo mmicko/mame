@@ -3,7 +3,26 @@
 
 cmake_minimum_required(VERSION 3.12)
 
-project(mame CXX C)
+set(TARGET "mame" CACHE STRING "Building target")
+
+set(SUBTARGET "mame" CACHE STRING "Building subtarget")
+
+if(WIN32)
+  set(OSD_DEFAULT "windows")
+else()
+  set(OSD_DEFAULT "sdl")
+endif()
+set(OSD ${OSD_DEFAULT} CACHE STRING "Choose OSD layer implementation")
+
+if(${TARGET} MATCHES ${SUBTARGET})
+    set(projectname ${TARGET})
+elseif(${SUBTARGET} MATCHES "mess")
+    set(projectname ${SUBTARGET})
+else()
+    set(projectname ${TARGET}${SUBTARGET})
+endif()
+
+project(${projectname} CXX C)
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
   enable_language(OBJCXX)
 endif()
@@ -64,12 +83,6 @@ option(BUILD_TOOLS "Enable building tools." ON)
 option(BUILD_TESTS "Enable building tests." ON)
 option(BUILD_BENCHMARKS "Enable building benchmarks." ON)
 
-if(WIN32)
-  set(OSD_DEFAULT "windows")
-else()
-  set(OSD_DEFAULT "sdl")
-endif()
-set(OSD ${OSD_DEFAULT} CACHE STRING "Choose OSD layer implementation")
 
 # 
 # newoption {
@@ -87,9 +100,6 @@ set(OSD ${OSD_DEFAULT} CACHE STRING "Choose OSD layer implementation")
 # 	},
 # }
 
-set(TARGET "mame" CACHE STRING "Building target")
-
-set(SUBTARGET "mame" CACHE STRING "Building subtarget")
 
 # 
 # newoption {
@@ -309,12 +319,9 @@ endif()
 set(GEN_DIR "${CMAKE_SOURCE_DIR}/build/generated")
 
 
-# 
-# if (_OPTIONS["target"] == nil) then return false end
 if ("${TARGET}" STREQUAL "")
   message(FATAL_ERROR "Target for build must be specified")
 endif()
-# if (_OPTIONS["subtarget"] == nil) then return false end
 if ("${SUBTARGET}" STREQUAL "")
   message(FATAL_ERROR "Subtarget for build must be specified")
 endif()
