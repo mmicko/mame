@@ -83,9 +83,9 @@ set(VIDEOS "")
 set(BUSES "")
 set(FORMATS "")
 
-option(BUILD_TOOLS "Enable building tools." ON)
-option(BUILD_TESTS "Enable building tests." ON)
-option(BUILD_BENCHMARKS "Enable building benchmarks." ON)
+option(TOOLS "Enable building tools." ON)
+option(TESTS "Enable building tests." ON)
+option(BENCHMARKS "Enable building benchmarks." ON)
 
 
 # 
@@ -805,7 +805,7 @@ include(scripts/cmake/osd/${OSD}/osd.cmake)
 
 # libs
 add_project_to_group_and_include(libs utils scripts/cmake/lib/utils.cmake)
-if (("NETLIST" IN_LIST MACHINES) OR BUILD_TOOLS)
+if (("NETLIST" IN_LIST MACHINES) OR TOOLS)
   add_project_to_group_and_include(libs netlist scripts/cmake/lib/netlist.cmake)
 endif()
 add_project_to_group_and_include(libs formats scripts/cmake/lib/formats.cmake)
@@ -831,15 +831,15 @@ endif()
 include(scripts/cmake/main.cmake)
 mainProject(${TARGET} ${SUBTARGET})
  
-if (BUILD_TOOLS)
+if (TOOLS)
   include(scripts/cmake/tools.cmake)
 endif()
  
-if (BUILD_TESTS)
+if (TESTS)
   include(scripts/cmake/tests.cmake)
 endif()
 
-if (BUILD_BENCHMARKS)
+if (BENCHMARKS)
   include(scripts/cmake/benchmarks.cmake)
 endif()
 
