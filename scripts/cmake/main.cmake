@@ -1,15 +1,14 @@
-#-- license:BSD-3-Clause
-#-- copyright-holders:MAMEdev Team
+### license:BSD-3-Clause
+### copyright-holders:MAMEdev Team
 #
-#---------------------------------------------------------------------------
-#--
-#--   main.lua
-#--
-#--   Rules for building main binary
-#--
-#---------------------------------------------------------------------------
-#
-#function mainProject(_target, _subtarget)
+############################################################################
+###
+###   main.lua
+###
+###   Rules for building main binary
+###
+############################################################################
+
 macro(mainProject _target _subtarget)
 #if (_OPTIONS["SOURCES"] == nil) then
 #	if (_target == _subtarget) then
@@ -52,6 +51,11 @@ endif()
 
 add_project_to_group(emulator ${projectname})
 
+if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
+    if(MAP)
+        target_link_options(${projectname} PRIVATE "-Wl,-Map,${projectname}.map")
+    endif()
+endif()
 #	uuid (os.uuid(_target .."_" .. _subtarget))
 #	kind "ConsoleApp"
 #

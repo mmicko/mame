@@ -39,7 +39,11 @@ endif()
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+#if (SEPARATE_BIN)
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+#else()
+#  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
+#endif()
 
 set(STANDALONE false)
 set(MAME_DIR "${CMAKE_SOURCE_DIR}")
@@ -101,101 +105,34 @@ option(BUILD_BENCHMARKS "Enable building benchmarks." ON)
 # }
 
 
-# newoption {
-# 	trigger = "PROFILE",
-# 	description = "Enable profiling.",
-# }
-# 
-# newoption {
-# 	trigger = "SYMBOLS",
-# 	description = "Enable symbols.",
-# }
-# 
+option(PROFILE "Enable profiling." OFF)
+option(SYMBOLS "Enable symbols." OFF)
 # newoption {
 # 	trigger = "SYMLEVEL",
 # 	description = "Symbols level.",
 # }
-# 
-# newoption {
-# 	trigger = "PROFILER",
-# 	description = "Include the internal profiler.",
-# }
-# 
+
+option(PROFILER "Include the internal profiler." OFF)
+
 # newoption {
 # 	trigger = "OPTIMIZE",
 # 	description = "Optimization level.",
 # }
-# 
-# newoption {
-# 	trigger = "MAP",
-# 	description = "Generate a link map.",
-# }
-# 
+option(MAP "Generate a link map." OFF)
 
 option(NOASM "Disable implementations based on assembler code." OFF)
 option(FORCE_DRC_C_BACKEND "Force DRC C backend." OFF)
 option(NOWERROR "Do not stop on errors." OFF)
 option(DEPRECATED "Generate deprecation warnings during compilation." OFF)
 
-
-# newoption {
-# 	trigger = "SSE2",
-# 	description = "SSE2 optimized code and SSE2 code generation.",
-# 	allowed = {
-# 		{ "0",   "Disabled"     },
-# 		{ "1",   "Enabled"      },
-# 	}
-# }
-# 
-# newoption {
-# 	trigger = "SSE3",
-# 	description = "SSE3 optimized code and SSE3 code generation.",
-# 	allowed = {
-# 		{ "0",   "Disabled"     },
-# 		{ "1",   "Enabled"      },
-# 	}
-# }
-# 
-# newoption {
-# 	trigger = "OPENMP",
-# 	description = "OpenMP optimized code.",
-# 	allowed = {
-# 		{ "0",   "Disabled"     },
-# 		{ "1",   "Enabled"      },
-# 	}
-# }
-# 
-# newoption {
-# 	trigger = "SEPARATE_BIN",
-# 	description = "Use separate bin folders.",
-# 	allowed = {
-# 		{ "0",   "Disabled"     },
-# 		{ "1",   "Enabled"      },
-# 	}
-# }
-# 
-
+option(SSE2 "SSE2 optimized code and SSE2 code generation." OFF)
+option(SSE3 "SSE3 optimized code and SSE3 code generation." OFF)
+option(OPENMP "OpenMP optimized code." OFF)
+option(SEPARATE_BIN "Use separate bin folders." OFF)
 option(SHADOW_CHECK "Shadow checks." OFF)
-# 
-# newoption {
-# 	trigger = "STRIP_SYMBOLS",
-# 	description = "Symbols stripping.",
-# 	allowed = {
-# 		{ "0",   "Disabled"     },
-# 		{ "1",   "Enabled"      },
-# 	}
-# }
-# 
-# 
-# newoption {
-# 	trigger = "SHLIB",
-# 	description = "Generate shared libs.",
-# 	allowed = {
-# 		{ "0",   "Static libs"  },
-# 		{ "1",   "Shared libs"  },
-# 	}
-# }
-# 
+option(STRIP_SYMBOLS "Symbols stripping." OFF)
+option(SHLIB "Generate shared libs." OFF)
+
 # newoption {
 # 	trigger = "SOURCES",
 # 	description = "List of sources to compile.",
@@ -373,14 +310,10 @@ add_compile_definitions($<$<CONFIG:DEBUG>:MAME_DEBUG>)
 add_compile_definitions($<$<CONFIG:DEBUG>:MAME_PROFILER>)
 #add_compile_definitions($<$<CONFIG:DEBUG>:BGFX_CONFIG_DEBUG=1>)
 
-# configuration { }
-# 
-# if _OPTIONS["PROFILER"]=="1" then
-# 	defines{
-# 		"MAME_PROFILER", -- define MAME_PROFILER if we are a profiling build
-# 	}
-# end
-# 
+if(PROFILER)
+  add_compile_definitions(MAME_PROFILER) # define MAME_PROFILER if we are a profiling build
+endif()
+
 add_compile_definitions($<$<CONFIG:RELEASE>:NDEBUG>)
 
 if(WIN32)
@@ -511,13 +444,12 @@ add_compile_options(-pipe)
 # 		"-fno-optimize-sibling-calls",
 # 	}
 # end
-# 
-# --# we need to disable some additional implicit optimizations for profiling
-# if _OPTIONS["PROFILE"] then
-# 	buildoptions {
-# 		"-mno-omit-leaf-frame-pointer",
-# 	}
-# end
+ 
+
+# we need to disable some additional implicit optimizations for profiling
+if(PROFILE)
+  add_compile_options(-mno-omit-leaf-frame-pointer)
+endif()
 
 # only show shadow warnings when enabled
 if(SHADOW_CHECK)
@@ -528,16 +460,12 @@ endif()
 if(NOT DEPRECATED)
   add_compile_options(-Wno-deprecated-declarations)
 endif()
-# 
-# -- add profiling information for the compiler
-# if _OPTIONS["PROFILE"] then
-# 	buildoptions {
-# 		"-pg",
-# 	}
-# 	linkoptions {
-# 		"-pg",
-# 	}
-# end
+
+# add profiling information for the compiler
+if(PROFILE)
+  add_compile_options(-pg)
+  add_link_options(-pg)
+endif()
 # 
 # if _OPTIONS["SYMBOLS"]~=nil and _OPTIONS["SYMBOLS"]~="0" then
 # 	flags {
@@ -568,59 +496,26 @@ add_compile_options(-fno-strict-aliasing)
 # 	}
 # configuration {  }
 # 
-# if _OPTIONS["SHLIB"] then
-# 	buildoptions {
-# 		"-fPIC"
-# 	}
-# end
-# 
-# if _OPTIONS["SSE2"]=="1" then
-# 	buildoptions {
-# 		"-msse",
-# 		"-msse2"
-# 	}
-# end
-# 
-# if _OPTIONS["SSE3"]=="1" then
-# 	buildoptions {
-# 		"-msse",
-# 		"-msse2",
-# 		"-msse3"
-# 	}
-# end
-# 
-# 
-# if _OPTIONS["OPENMP"]=="1" then
-# 	buildoptions {
-# 		"-fopenmp",
-# 	}
-# 	linkoptions {
-# 		"-fopenmp"
-# 	}
-# 	defines {
-# 		"USE_OPENMP=1",
-# 	}
-# 
-# else
-# 	buildoptions {
-add_compile_options(-Wno-unknown-pragmas)
-# 	}
-# end
+if(SHLIB)
+  add_compile_options(-fPIC)
+endif()
 
-# if _OPTIONS["MAP"] then
-# 	if (_OPTIONS["target"] == _OPTIONS["subtarget"]) then
-# 		linkoptions {
-# 			"-Wl,-Map," .. "../../../../" .. _OPTIONS["target"] .. ".map"
-# 		}
-# 	else
-# 		linkoptions {
-# 			"-Wl,-Map," .. "../../../../"  .. _OPTIONS["target"] .. _OPTIONS["subtarget"] .. ".map"
-# 		}
-# 
-# 	end
-# end
-# 
-# 
+if(SSE2)
+  add_compile_options(-msse -msse2)
+endif()
+
+if(SSE3)
+  add_compile_options(-msse -msse2 -msse3)
+endif()
+if(OPENMP)
+  add_compile_options(-fopenmp)
+  add_link_options(-fopenmp)
+  add_compile_definitions(USE_OPENMP=1)
+else()
+  add_compile_options(-Wno-unknown-pragmas)
+endif()
+
+
 
 
 # add a basic set of warnings
@@ -677,12 +572,8 @@ add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual>)
 # 		}
 # 	end
 # end
-# 
-# --ifneq (,$(findstring thread,$(SANITIZE)))
-# --CCOMFLAGS += -fPIE
-# --endif
-# 
-# 
+ 
+
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 6)
     message(FATAL_ERROR "Clang version 6.0 or later needed. Found ${CMAKE_CXX_COMPILER_VERSION}.")
