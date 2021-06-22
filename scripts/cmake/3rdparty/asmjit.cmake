@@ -114,7 +114,7 @@ set(ASMJIT_SRCS
 	${MAME_DIR}/3rdparty/asmjit/src/asmjit/x86/x86rapass_p.h
 )
 
-add_library(asmjit STATIC ${ASMJIT_SRCS})
+add_library(asmjit ${LIBTYPE} ${ASMJIT_SRCS})
 
 if((CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang") AND (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8))
 	target_compile_definitions(asmjit PRIVATE TARGET_OS_OSX=1)

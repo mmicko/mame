@@ -91,7 +91,7 @@ set(UTILS_SRCS
 	${MAME_DIR}/src/lib/util/zippath.h
 )
 
-add_library(utils STATIC ${UTILS_SRCS})
+add_library(utils ${LIBTYPE} ${UTILS_SRCS})
 
 addprojectflags(utils)
 

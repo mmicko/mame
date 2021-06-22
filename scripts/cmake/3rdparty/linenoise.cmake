@@ -3,4 +3,4 @@ set(LINENOISE_SRCS
 	${MAME_DIR}/3rdparty/linenoise/linenoise.c
 )
 
-add_library(linenoise STATIC ${LINENOISE_SRCS})
+add_library(linenoise ${LIBTYPE} ${LINENOISE_SRCS})

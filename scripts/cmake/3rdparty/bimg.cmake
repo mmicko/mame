@@ -15,7 +15,7 @@ set(BIMG_SRCS
 	${MAME_DIR}/3rdparty/bimg/3rdparty/astc-codec/src/decoder/weight_infill.cc
 )
 
-add_library(bimg STATIC ${BIMG_SRCS})
+add_library(bimg ${LIBTYPE} ${BIMG_SRCS})
 
 target_link_libraries(bimg PUBLIC bx)
 

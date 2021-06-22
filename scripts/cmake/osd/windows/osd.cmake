@@ -244,7 +244,7 @@ set(OCORE_SRCS
     ${MAME_DIR}/src/osd/modules/file/winsocket.cpp
     ${MAME_DIR}/src/osd/modules/lib/osdlib_win32.cpp
 )
-add_library(ocore STATIC ${OCORE_SRCS})
+add_library(ocore ${LIBTYPE} ${OCORE_SRCS})
 osd_cfg(ocore)
 
 target_include_directories(ocore PRIVATE 

@@ -22,6 +22,6 @@ set(YMFM_SRCS
     ${MAME_DIR}/3rdparty/ymfm/src/ymfm_ssg.h
 )
 
-add_library(ymfm STATIC ${YMFM_SRCS})
+add_library(ymfm ${LIBTYPE} ${YMFM_SRCS})
 
 target_compile_definitions(ymfm PRIVATE YMFM_MAME)

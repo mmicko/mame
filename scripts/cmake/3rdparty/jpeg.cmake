@@ -47,7 +47,7 @@ set(JPEG_SRCS
 	${MAME_DIR}/3rdparty/libjpeg/jmemansi.c
 )
 
-add_library(jpeg STATIC ${JPEG_SRCS})
+add_library(jpeg ${LIBTYPE} ${JPEG_SRCS})
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	target_compile_options(jpeg PRIVATE /wd4100) # warning C4100: 'xxx' : unreferenced formal parameter

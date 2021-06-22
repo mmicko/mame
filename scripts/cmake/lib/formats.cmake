@@ -2066,7 +2066,7 @@ list(APPEND FORMATS_SRCS
 )
 endif()
 
-add_library(formats STATIC ${FORMATS_SRCS})
+add_library(formats ${LIBTYPE} ${FORMATS_SRCS})
 
 addprojectflags(formats)
 

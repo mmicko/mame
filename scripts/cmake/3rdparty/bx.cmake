@@ -22,7 +22,7 @@ set(BX_SRCS
 	${MAME_DIR}/3rdparty/bx/src/url.cpp
 )
 
-add_library(bx STATIC ${BX_SRCS})
+add_library(bx ${LIBTYPE} ${BX_SRCS})
 
 target_compile_definitions(bx PUBLIC
 	__STDC_LIMIT_MACROS

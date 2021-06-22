@@ -4,7 +4,7 @@ set(EXPAT_SRCS
 	${MAME_DIR}/3rdparty/expat/lib/xmltok.c
 )
 
-add_library(expat STATIC ${EXPAT_SRCS})
+add_library(expat ${LIBTYPE} ${EXPAT_SRCS})
 
 # fake out the enough of expat_config.h to get by
 # could possibly add more defines here for specific targets

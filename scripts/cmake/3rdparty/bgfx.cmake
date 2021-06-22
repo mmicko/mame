@@ -37,7 +37,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	)
 endif()
 
-add_library(bgfx STATIC ${BGFX_SRCS} ${BGFX_MACOSX_SRCS})
+add_library(bgfx ${LIBTYPE} ${BGFX_SRCS} ${BGFX_MACOSX_SRCS})
 
 target_link_libraries(bgfx PRIVATE bx bimg)
 

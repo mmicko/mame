@@ -6,7 +6,7 @@ set(LUALIBS_SRCS
     ${MAME_DIR}/3rdparty/lua-linenoise/linenoise.c
 )
 
-add_library(lualibs STATIC ${LUALIBS_SRCS})
+add_library(lualibs ${LIBTYPE} ${LUALIBS_SRCS})
 
 target_link_libraries(lualibs PUBLIC lua sqlite3 linenoise zlib)
 

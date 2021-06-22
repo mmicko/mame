@@ -136,7 +136,7 @@ set(FRONTEND_SRCS
 	${GEN_DIR}/emu/copying.ipp
 )
 
-add_library(frontend STATIC ${FRONTEND_SRCS})
+add_library(frontend ${LIBTYPE} ${FRONTEND_SRCS})
 
 #project ("frontend")
 #uuid ("e98e14c4-82a4-4988-ba29-01c90c817ab8")

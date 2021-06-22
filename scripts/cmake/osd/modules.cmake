@@ -218,7 +218,7 @@ if (NOT NO_OPENGL)
 	)
 endif()
 
-add_library(${_project} STATIC ${_sources} ${MODULES_SRCS})
+add_library(${_project} ${LIBTYPE} ${_sources} ${MODULES_SRCS})
 
 target_include_directories(${_project} PRIVATE ${MAME_DIR}/3rdparty/asio/include)
 #
@@ -344,7 +344,7 @@ set(QTDEBUGGER_SRCS
 #			${GEN_DIR}/osd/modules/debugger/qt/deviceswindow.moc.cpp
 #			${GEN_DIR}/osd/modules/debugger/qt/deviceinformationwindow.moc.cpp
 #		}
-add_library(qtdbg STATIC ${QTDEBUGGER_SRCS})
+add_library(qtdbg ${LIBTYPE} ${QTDEBUGGER_SRCS})
 add_project_to_group(libs qtdbg)
 #		defines {
 #			"USE_QTDEBUG=1

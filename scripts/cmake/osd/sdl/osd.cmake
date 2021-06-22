@@ -508,7 +508,7 @@ else()
     )
 endif()
 
-add_library(ocore STATIC ${OCORE_SRCS})
+add_library(ocore ${LIBTYPE} ${OCORE_SRCS})
 
 osd_cfg(ocore)
 

@@ -176,7 +176,7 @@ macro(createProjects_mame_tiny _target  _subtarget)
 		${GEN_DIR}/mame/layout/upndown.lh
 	)
 
-	add_library(mame_tiny STATIC ${MAME_TINY_SRCS})
+	add_library(mame_tiny ${LIBTYPE} ${MAME_TINY_SRCS})
 
 	target_include_directories(mame_tiny PRIVATE
 		${MAME_DIR}/src/osd

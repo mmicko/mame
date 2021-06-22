@@ -35,7 +35,7 @@ set(PORTAUDIO_SRCS_ADDITIONAL
 )
 endif()
 
-add_library(portaudio STATIC ${PORTAUDIO_SRCS} ${PORTAUDIO_SRCS_ADDITIONAL})
+add_library(portaudio ${LIBTYPE} ${PORTAUDIO_SRCS} ${PORTAUDIO_SRCS_ADDITIONAL})
 
 target_include_directories(portaudio PRIVATE
 	${MAME_DIR}/3rdparty/portaudio/include

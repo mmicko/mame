@@ -251,7 +251,7 @@ set(EMU_SRCS
 )
 
 #kind (LIBTYPE)
-add_library(emu STATIC ${EMU_SRCS})
+add_library(emu ${LIBTYPE} ${EMU_SRCS})
 addprojectflags(emu)
 #precompiledheaders()
 #options {

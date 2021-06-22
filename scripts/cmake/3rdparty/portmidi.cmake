@@ -34,7 +34,7 @@ set(PORTMIDI_SRCS_ADDITIONAL
 )
 endif()
 
-add_library(portmidi STATIC ${PORTMIDI_SRCS} ${PORTMIDI_SRCS_ADDITIONAL})
+add_library(portmidi ${LIBTYPE} ${PORTMIDI_SRCS} ${PORTMIDI_SRCS_ADDITIONAL})
 
 target_include_directories(portmidi PRIVATE
 	${MAME_DIR}/3rdparty/portmidi/pm_common

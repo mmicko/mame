@@ -16,7 +16,7 @@ set(FLAC_SRCS
 	${MAME_DIR}/3rdparty/libflac/src/libFLAC/window.c
 )
 
-add_library(flac STATIC ${FLAC_SRCS})
+add_library(flac ${LIBTYPE} ${FLAC_SRCS})
 
 target_include_directories(flac PRIVATE
 	${MAME_DIR}/3rdparty/libflac/src/libFLAC/include

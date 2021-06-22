@@ -160,12 +160,11 @@ option(SHLIB "Generate shared libs." OFF)
 # 
 # dofile ("extlib.lua")
 # 
-# if _OPTIONS["SHLIB"]=="1" then
-# 	LIBTYPE = "SharedLib"
-# else
-# 	LIBTYPE = "StaticLib"
-# end
-# 
+if(SHLIB)
+  set(LIBTYPE SHARED)
+else()
+	set(LIBTYPE STATIC)
+endif()
 
 find_package(PythonInterp 3.6 REQUIRED)
 

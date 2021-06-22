@@ -304,7 +304,7 @@ set(SOFTFLOAT3_SRCS
 
 set_source_files_properties(${SOFTFLOAT3_SRCS} PROPERTIES LANGUAGE "CXX")
 
-add_library(softfloat3 STATIC ${SOFTFLOAT3_SRCS})
+add_library(softfloat3 ${LIBTYPE} ${SOFTFLOAT3_SRCS})
 
 target_compile_definitions(softfloat3 PRIVATE
 	SOFTFLOAT_ROUND_ODD

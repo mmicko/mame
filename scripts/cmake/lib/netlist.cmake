@@ -186,7 +186,7 @@ set(NETLIST_SRCS
 	${MAME_DIR}/src/lib/netlist/generated/nlm_modules_lib.cpp
 )
 
-add_library(netlist STATIC ${NETLIST_SRCS})
+add_library(netlist ${LIBTYPE} ${NETLIST_SRCS})
 
 addprojectflags(netlist)
 

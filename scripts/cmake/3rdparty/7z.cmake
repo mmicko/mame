@@ -43,7 +43,7 @@ set(7Z_SRCS
 	# ${MAME_DIR}/3rdparty/lzma/C/XzIn.c
 )
 
-add_library(7z STATIC ${7Z_SRCS})
+add_library(7z ${LIBTYPE} ${7Z_SRCS})
 
 target_compile_definitions(7z PRIVATE
 	_7ZIP_PPMD_SUPPPORT

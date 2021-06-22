@@ -15,7 +15,7 @@ include(scripts/cmake/video.cmake)
 include(scripts/cmake/machine.cmake)
 include(scripts/cmake/bus.cmake)
 
-add_library(optional STATIC ${CPU_SRCS} ${SOUND_SRCS} ${VIDEO_SRCS} ${MACHINE_SRCS} ${BUS_SRCS})
+add_library(optional ${LIBTYPE} ${CPU_SRCS} ${SOUND_SRCS} ${VIDEO_SRCS} ${MACHINE_SRCS} ${BUS_SRCS})
 add_project_to_group(devices optional)
 addprojectflags(optional)
 
@@ -34,7 +34,7 @@ target_include_directories(optional PRIVATE
 	${MAME_DIR}/3rdparty/libflac/include
 )
 
-add_library(dasm STATIC ${DASM_SRCS})
+add_library(dasm ${LIBTYPE} ${DASM_SRCS})
 add_project_to_group(devices dasm)
 
 addprojectflags(dasm)

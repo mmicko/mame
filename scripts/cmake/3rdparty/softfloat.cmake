@@ -6,7 +6,7 @@ set(SOFTFLOAT_SRCS
 
 set_source_files_properties(${SOFTFLOAT_SRCS} PROPERTIES LANGUAGE "CXX")
 
-add_library(softfloat STATIC ${SOFTFLOAT_SRCS})
+add_library(softfloat ${LIBTYPE} ${SOFTFLOAT_SRCS})
 
 target_include_directories(softfloat PRIVATE ${MAME_DIR}/src/osd)
 

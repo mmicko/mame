@@ -14,7 +14,7 @@ set(BENCHMARK_SRCS
 	${MAME_DIR}/3rdparty/benchmark/src/re_std.cc
 )
 
-add_library(benchmark STATIC ${BENCHMARK_SRCS})
+add_library(benchmark ${LIBTYPE} ${BENCHMARK_SRCS})
 add_project_to_group(benchmarks benchmark)
 
 target_compile_definitions(benchmark PRIVATE HAVE_STD_REGEX)

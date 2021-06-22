@@ -34,7 +34,7 @@ set(LUA_SRCS
 	${MAME_DIR}/3rdparty/lua/src/lutf8lib.c
 )
 
-add_library(lua STATIC ${LUA_SRCS})
+add_library(lua ${LIBTYPE} ${LUA_SRCS})
 
 target_compile_definitions(lua PUBLIC
 	LUA_COMPAT_ALL

@@ -12,7 +12,7 @@ set(ZLIB_SRCS
 	${MAME_DIR}/3rdparty/zlib/zutil.c
 )
 
-add_library(zlib STATIC ${ZLIB_SRCS})
+add_library(zlib ${LIBTYPE} ${ZLIB_SRCS})
 
 if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
 	target_compile_options(zlib PRIVATE -Wno-strict-prototypes)
