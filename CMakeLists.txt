@@ -101,37 +101,6 @@ option(BUILD_BENCHMARKS "Enable building benchmarks." ON)
 # }
 
 
-# 
-# newoption {
-# 	trigger = "gcc_version",
-# 	description = "GCC compiler version",
-# }
-# 
-# newoption {
-# 	trigger = "CC",
-# 	description = "CC replacement",
-# }
-# 
-# newoption {
-# 	trigger = "CXX",
-# 	description = "CXX replacement",
-# }
-# 
-# newoption {
-# 	trigger = "LD",
-# 	description = "LD replacement",
-# }
-# 
-# newoption {
-# 	trigger = "AR",
-# 	description = "AR replacement",
-# }
-# 
-# newoption {
-# 	trigger = "TOOLCHAIN",
-# 	description = "Toolchain prefix"
-# }
-# 
 # newoption {
 # 	trigger = "PROFILE",
 # 	description = "Enable profiling.",
@@ -155,41 +124,6 @@ option(BUILD_BENCHMARKS "Enable building benchmarks." ON)
 # newoption {
 # 	trigger = "OPTIMIZE",
 # 	description = "Optimization level.",
-# }
-# 
-# newoption {
-# 	trigger = "ARCHOPTS",
-# 	description = "Additional options for target C/C++/Objective-C/Objective-C++ compilers and linker.",
-# }
-# 
-# newoption {
-# 	trigger = "ARCHOPTS_C",
-# 	description = "Additional options for target C++ compiler.",
-# }
-# 
-# newoption {
-# 	trigger = "ARCHOPTS_CXX",
-# 	description = "Additional options for target C++ compiler.",
-# }
-# 
-# newoption {
-# 	trigger = "ARCHOPTS_OBJC",
-# 	description = "Additional options for target Objective-C compiler.",
-# }
-# 
-# newoption {
-# 	trigger = "ARCHOPTS_OBJCXX",
-# 	description = "Additional options for target Objective-C++ compiler.",
-# }
-# 
-# newoption {
-# 	trigger = "OPT_FLAGS",
-# 	description = "OPT_FLAGS.",
-# }
-# 
-# newoption {
-# 	trigger = "LDOPTS",
-# 	description = "Additional linker options",
 # }
 # 
 # newoption {
@@ -268,11 +202,6 @@ option(SHADOW_CHECK "Shadow checks." OFF)
 # }
 # 
 # newoption {
-# 	trigger = "PLATFORM",
-# 	description = "Target machine platform (x86,arm,...)",
-# }
-# 
-# newoption {
 # 	trigger = "DEBUG_DIR",
 # 	description = "Default directory for debugger.",
 # }
@@ -292,11 +221,6 @@ option(SHADOW_CHECK "Shadow checks." OFF)
 # 	description = "Specifies the santizer(s) to use."
 # }
 # 
-# newoption {
-# 	trigger = "PROJECT",
-# 	description = "Select projects to be built. Will look into project folder for files.",
-# }
-# 
 # dofile ("extlib.lua")
 # 
 # if _OPTIONS["SHLIB"]=="1" then
@@ -311,11 +235,7 @@ find_package(PythonInterp 3.6 REQUIRED)
 if(NOASM AND (NOT FORCE_DRC_C_BACKEND))
  	set(FORCE_DRC_C_BACKEND ON)
 endif()
-# 
-# if(_OPTIONS["TOOLCHAIN"] == nil) then
-# 	_OPTIONS['TOOLCHAIN'] = ""
-# end
-# 
+
 set(GEN_DIR "${CMAKE_SOURCE_DIR}/build/generated")
 
 
@@ -325,17 +245,6 @@ endif()
 if ("${SUBTARGET}" STREQUAL "")
   message(FATAL_ERROR "Subtarget for build must be specified")
 endif()
-# 
-# if (_OPTIONS["target"] == _OPTIONS["subtarget"]) then
-# 	solution (_OPTIONS["target"])
-# else
-# 	if (_OPTIONS["subtarget"]=="mess") then
-# 		solution (_OPTIONS["subtarget"])
-# 	else
-# 		solution (_OPTIONS["target"] .. _OPTIONS["subtarget"])
-# 	end
-# end
-# 
 
 set(CMAKE_CONFIGURATION_TYPES Debug Release)
 if (NOT CMAKE_BUILD_TYPE)
@@ -353,13 +262,6 @@ set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED on)
 set(CMAKE_C_EXTENSIONS ON)
 
-
-# 
-# flags {
-# 	"StaticRuntime",
-# 	"Cpp17",
-# }
-# 
 # configuration { "vs20*" }
 # 	buildoptions {
 if (MSVC)
@@ -446,30 +348,11 @@ endif()
 # end
 # 
 
-# 
-# if (_OPTIONS["PROJECT"] ~= nil) then
-# 	PROJECT_DIR = path.join(path.getabsolute(".."),"projects",_OPTIONS["PROJECT"]) .. "/"
-# 	if (not os.isfile(path.join("..", "projects", _OPTIONS["PROJECT"], "scripts", "target", _OPTIONS["target"],_OPTIONS["subtarget"] .. ".lua"))) then
-# 		error("File definition for TARGET=" .. _OPTIONS["target"] .. " SUBTARGET=" .. _OPTIONS["subtarget"] .. " does not exist")
-# 	end
-# 	dofile (path.join(".." ,"projects", _OPTIONS["PROJECT"], "scripts", "target", _OPTIONS["target"],_OPTIONS["subtarget"] .. ".lua"))
-# end
-# if (_OPTIONS["SOURCES"] == nil and _OPTIONS["PROJECT"] == nil) then
-# 	if (not os.isfile(path.join("target", _OPTIONS["target"],_OPTIONS["subtarget"] .. ".lua"))) then
-# 		error("File definition for TARGET=" .. _OPTIONS["target"] .. " SUBTARGET=" .. _OPTIONS["subtarget"] .. " does not exist")
-# 	end
-# 	dofile (path.join("target", _OPTIONS["target"],_OPTIONS["subtarget"] .. ".lua"))
-# end
 
+if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake/target/${TARGET}/${SUBTARGET}.cmake)
+  message(FATAL_ERROR "File definition for TARGET=${TARGET} SUBTARGET=${SUBTARGET} does not exist")
+endif()
 include(scripts/cmake/target/${TARGET}/${SUBTARGET}.cmake)
-# 
-# configuration { "gmake or ninja" }
-# 	flags {
-# 		"SingleOutputDir",
-# 	}
-# 
-# dofile ("toolchain.lua")
-# 
 
 if(WIN32 AND CMAKE_SIZEOF_VOID_P EQUAL 8)
   add_compile_definitions(X64_WINDOWS_ABI)
@@ -596,12 +479,10 @@ add_compile_definitions(PUGIXML_HEADER_ONLY)
 # 	}
 # end
 # 
-# if _OPTIONS["NOASM"]=="1" then
-# 	defines {
-# 		"MAME_NOASM"
-# 	}
-# end
-# 
+if (NOASM)
+  add_compile_definitions(MAME_NOASM)
+endif()
+ 
 if(NOT FORCE_DRC_C_BACKEND AND NOT BIGENDIAN)
   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     add_compile_definitions(NATIVE_DRC=drcbe_x64)
@@ -679,12 +560,6 @@ endif()
 # 	}
 add_compile_options(-O3)
 add_compile_options(-fno-strict-aliasing)
-# 	if _OPTIONS["OPT_FLAGS"] then
-# 		buildoptions {
-# 			_OPTIONS["OPT_FLAGS"]
-# 		}
-# 	end
-# end
 # 
 # configuration { "mingw-clang" }
 # 	buildoptions {
@@ -692,39 +567,6 @@ add_compile_options(-fno-strict-aliasing)
 # 		"-Wno-nonportable-include-path", -- workround for clang 9.0.0 case sensitivity bug when including GL/glext.h
 # 	}
 # configuration {  }
-# 
-# if _OPTIONS["ARCHOPTS"] then
-# 	buildoptions {
-# 		_OPTIONS["ARCHOPTS"]
-# 	}
-# 	linkoptions {
-# 		_OPTIONS["ARCHOPTS"]
-# 	}
-# end
-# 
-# if _OPTIONS["ARCHOPTS_C"] then
-# 	buildoptions_c {
-# 		_OPTIONS["ARCHOPTS_C"]
-# 	}
-# end
-# 
-# if _OPTIONS["ARCHOPTS_CXX"] then
-# 	buildoptions_cpp {
-# 		_OPTIONS["ARCHOPTS_CXX"]
-# 	}
-# end
-# 
-# if _OPTIONS["ARCHOPTS_OBJC"] then
-# 	buildoptions_objc {
-# 		_OPTIONS["ARCHOPTS_OBJC"]
-# 	}
-# end
-# 
-# if _OPTIONS["ARCHOPTS_OBJCXX"] then
-# 	buildoptions_objcpp {
-# 		_OPTIONS["ARCHOPTS_OBJCXX"]
-# 	}
-# end
 # 
 # if _OPTIONS["SHLIB"] then
 # 	buildoptions {
@@ -764,13 +606,7 @@ add_compile_options(-fno-strict-aliasing)
 add_compile_options(-Wno-unknown-pragmas)
 # 	}
 # end
-# 
-# if _OPTIONS["LDOPTS"] then
-# 	linkoptions {
-# 		_OPTIONS["LDOPTS"]
-# 	}
-# end
-# 
+
 # if _OPTIONS["MAP"] then
 # 	if (_OPTIONS["target"] == _OPTIONS["subtarget"]) then
 # 		linkoptions {
@@ -904,25 +740,14 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   endif()
 endif()
 
-# if (_OPTIONS["PLATFORM"]=="arm") then
-# 	buildoptions {
-# 		"-Wno-cast-align",
-# 	}
-# end
+message(STATUS "Platform: ${CMAKE_SYSTEM_PROCESSOR}")
+
+if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "arm")
+  add_compile_options(-Wno-cast-align)
 endif()
 
+endif()
 
-# local subdir
-# if (_OPTIONS["target"] == _OPTIONS["subtarget"]) then
-# 	subdir = _OPTIONS["osd"] .. "/" .. _OPTIONS["target"]
-# else
-# 	subdir = _OPTIONS["osd"] .. "/" .. _OPTIONS["target"] .. _OPTIONS["subtarget"]
-# end
-# 
-# if not toolchain(MAME_BUILD_DIR, subdir) then
-# 	return -- no action specified
-# end
-# 
 # configuration { "asmjs" }
 # 	buildoptions {
 # 		"-std=gnu89",
@@ -990,19 +815,6 @@ endif()
 # 			"userenv",
 # 		}
 # 
-# configuration { "vsllvm" }
-# 	defines {
-# 		"XML_STATIC",
-# 		"WIN32",
-# 		"_WIN32",
-# 		"_CRT_NONSTDC_NO_DEPRECATE",
-# 		"_CRT_SECURE_NO_DEPRECATE",
-# 		"_CRT_STDIO_LEGACY_WIDE_SPECIFIERS",
-# 	}
-# 	includedirs {
-# 		MAME_DIR .. "3rdparty/dxsdk/Include"
-# 	}
-# 
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   add_compile_definitions(
@@ -1015,22 +827,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     _CRT_STDIO_LEGACY_WIDE_SPECIFIERS
   )
 
- # -- Windows Store/Phone projects already link against the available libraries.
-# if _OPTIONS["vs"]==nil or not (string.startswith(_OPTIONS["vs"], "winstore8") or string.startswith(_OPTIONS["vs"], "winphone8")) then
-# 		links {
-# 			"user32",
-# 			"winmm",
-# 			"advapi32",
-# 			"shlwapi",
-# 			"wsock32",
-# 			"ws2_32",
-# 			"psapi",
-# 			"iphlpapi",
-# 			"shell32",
-# 			"userenv",
-# 		}
-# end
-# 
   add_compile_options(/WX)     # Treats all compiler warnings as errors.
   add_compile_options(/w45038) # warning C5038: data member 'member1' will be initialized after data member 'member2'
 	add_compile_options(/wd4003) # warning C4003: not enough actual parameters for macro 'xxx'
@@ -1091,9 +887,6 @@ endif()
 # 
 # 		linkoptions {
 # 			"/ignore:4221", -- LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
-# 		}
-# 		includedirs {
-# 			MAME_DIR .. "3rdparty/dxsdk/Include"
 # 		}
 
 
