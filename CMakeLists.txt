@@ -201,10 +201,15 @@ set(CMAKE_C_EXTENSIONS ON)
 # configuration { "vs20*" }
 # 	buildoptions {
 if (MSVC)
-  # enable multi-core compilation with MSVC
-  add_compile_options(/MP)
-  
+  if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug") # NoMultiProcessorCompilation
+    add_compile_options(/MP)     # enable multi-core compilation
+  endif()
   add_compile_options(/bigobj)
+  add_compile_options(/W4) # ExtraWarnings
+  if(NOT NOWERROR)
+    add_compile_options(/WX) # FatalWarnings
+  endif()
+  add_link_options($<$<CONFIG:Release>:/INCREMENTAL:NO>) # NoIncrementalLink
 endif()
 # 		"/bigobj",
 # 	}
@@ -235,34 +240,6 @@ endif()
 # 			"Symbols",
 # 		}
 # 	end
-# 
-# configuration { "vsllvm" }
-# 	buildoptions {
-# 		"/bigobj",
-# 	}
-# 	flags {
-# 		"NoPCH",
-# 		"ExtraWarnings",
-# 	}
-# 	if not _OPTIONS["NOWERROR"] then
-# 		flags{
-# 			"FatalWarnings",
-# 		}
-# 	end
-# 
-# 
-# configuration { "Debug", "vsllvm" }
-# 	flags {
-# 		"Symbols",
-# 		"NoMultiProcessorCompilation",
-# 	}
-# 
-# configuration { "Release", "vsllvm" }
-# 	flags {
-# 		"Optimize",
-# 		"NoEditAndContinue",
-# 		"NoIncrementalLink",
-# 	}
 # 
 # -- Force VS2015/17 targets to use bundled SDL2
 # if string.sub(_ACTION,1,4) == "vs20" and _OPTIONS["osd"]=="sdl" then
@@ -506,9 +483,6 @@ if(OPENMP)
 else()
   add_compile_options(-Wno-unknown-pragmas)
 endif()
-
-
-
 
 # add a basic set of warnings
 add_compile_options(-Wall)
