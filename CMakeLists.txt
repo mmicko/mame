@@ -422,13 +422,6 @@ if(NOT FORCE_DRC_C_BACKEND AND NOT BIGENDIAN)
     add_compile_definitions(NATIVE_DRC=drcbe_x86)
   endif()
 endif()
-# 
-# 	defines {
-# 		"LUA_COMPAT_ALL",
-# 		"LUA_COMPAT_5_1",
-# 		"LUA_COMPAT_5_2",
-# 	}
-# 
 
 # GCC
 if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
