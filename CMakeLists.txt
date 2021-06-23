@@ -177,8 +177,6 @@ if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-message(STATUS "Build configuration: " ${CMAKE_BUILD_TYPE})
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -262,12 +260,7 @@ endif()
 
 # define PTR64 if we are a 64-bit target
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-    # 64 bits
-    message(STATUS "64-bit compiler detected")
-    add_compile_definitions(PTR64=1)
-elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
-    # 32 bits
-    message(STATUS "32-bit compiler detected")
+  add_compile_definitions(PTR64=1)
 endif()
 
 # define MAME_DEBUG if we are a debugging build
@@ -571,8 +564,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   endif()
 endif()
 
-message(STATUS "Platform: ${CMAKE_SYSTEM_PROCESSOR}")
-
 if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "arm")
   add_compile_options(-Wno-cast-align)
 endif()
@@ -603,7 +594,7 @@ endif()
 # 			"rt",
 # 		}
 if(${DISTRO} STREQUAL "debian-stable")
-  add_compile_definitionsNO_AFFINITY_NP)
+  add_compile_definitions(NO_AFFINITY_NP)
 endif()
 
 # configuration { "osx* or xcode4" }
@@ -796,106 +787,7 @@ generate_has_header(FORMATS)
 
 dump_mame_options()
 
-#ifndef MAKETYPE
-#MAKETYPE := gmake
-#endif
-#
-#MAKEPARAMS := -R
-#
-##
-## Determine running OS
-##
-#
-#ifeq ($(OS),Windows_NT)
-#OS := windows
-#GENIEOS := windows
-#PLATFORM := x86
-#else
-#UNAME := $(shell uname -mps)
-#UNAME_M := $(shell uname -m)
-#UNAME_P := $(shell uname -p)
-#GENIEOS := linux
-#PLATFORM := unknown
-#ifneq ($(filter x86_64,$(UNAME_P)),)
-#PLATFORM := x86
-#endif
-#ifneq ($(filter %86,$(UNAME_P)),)
-#PLATFORM := x86
-#endif
-#ifneq ($(filter alpha,$(UNAME_M)),)
-#PLATFORM := alpha
-#endif
-#ifneq ($(filter alpha,$(UNAME_P)),)
-#PLATFORM := alpha
-#endif
-#ifneq ($(filter arm%,$(UNAME_M)),)
-#PLATFORM := arm
-#endif
-#ifneq ($(filter arm%,$(UNAME_P)),)
-#PLATFORM := arm
-#endif
-#ifneq ($(filter aarch64%,$(UNAME_M)),)
-#PLATFORM := arm64
-#endif
-#ifneq ($(filter arm64%,$(UNAME_M)),)
-#PLATFORM := arm64
-#endif
-#ifneq ($(filter aarch64%,$(UNAME_P)),)
-#PLATFORM := arm64
-#endif
-#ifneq ($(filter powerpc,$(UNAME_P)),)
-#PLATFORM := powerpc
-#endif
-#ifneq ($(filter riscv64%,$(UNAME_M)),)
-#PLATFORM := riscv64
-#endif
-#ifneq ($(filter riscv64%,$(UNAME_P)),)
-#PLATFORM := riscv64
-#endif
-#ifneq ($(filter mips64%,$(UNAME_M)),)
-#ifeq ($(shell getconf LONG_BIT),64)
-#PLATFORM := mips64
-#endif
-#endif
-#ifeq ($(firstword $(filter Linux,$(UNAME))),Linux)
-#OS := linux
-#endif
-#ifeq ($(firstword $(filter Solaris,$(UNAME))),Solaris)
-#OS := solaris
-#GENIEOS := solaris
-#endif
-#ifeq ($(firstword $(filter SunOS,$(UNAME))),SunOS)
-#OS := solaris
-#GENIEOS := solaris
-#endif
-#ifeq ($(firstword $(filter FreeBSD,$(UNAME))),FreeBSD)
-#OS := freebsd
-#GENIEOS := bsd
-#endif
-#ifeq ($(firstword $(filter GNU/kFreeBSD,$(UNAME))),GNU/kFreeBSD)
-#OS := freebsd
-#GENIEOS := freebsd
-#endif
-#ifeq ($(firstword $(filter NetBSD,$(UNAME))),NetBSD)
-#OS := netbsd
-#GENIEOS := freebsd
-#endif
-#ifeq ($(firstword $(filter OpenBSD,$(UNAME))),OpenBSD)
-#OS := openbsd
-#GENIEOS := freebsd
-#endif
-#ifeq ($(firstword $(filter Darwin,$(UNAME))),Darwin)
-#OS := macosx
-#GENIEOS := darwin
-#endif
-#ifeq ($(firstword $(filter Haiku,$(UNAME))),Haiku)
-#OS := haiku
-#endif
-#ifndef OS
-#$(error Unable to detect OS from uname -a: $(UNAME))
-#endif
-#endif
-#
+
 
 ## Emscripten
 #ifeq ($(findstring emcc,$(CC)),emcc)
