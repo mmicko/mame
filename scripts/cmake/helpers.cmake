@@ -112,5 +112,5 @@ function(dump_mame_options)
 endfunction()
 
 macro(set_option option value)
-  set(${option} ${value} CACHE "" INTERNAL FORCE)
+  set(${option} ${value} CACHE BOOL INTERNAL FORCE)
 endmacro()
