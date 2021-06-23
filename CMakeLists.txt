@@ -773,44 +773,10 @@ dump_mame_options()
 ## Clean/bootstrap
 ##-------------------------------------------------
 
-#GEN_FOLDERS := $(GENDIR)/$(TARGET)/layout/ $(GENDIR)/$(TARGET)/$(SUBTARGET_FULL)/ $(GENDIR)/mame/drivers/ $(GENDIR)/mame/machine/
-#
-#rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
-#LAYOUTS=$(wildcard $(SRC)/$(TARGET)/layout/*.lay)
-#
 
-#
-#$(GEN_FOLDERS):
-#	-$(call MKDIR,$@)
-#
-#genie: $(GENIE)
-#
-#generate: \
-#		genie \
-#		$(GEN_FOLDERS) \
-#		$(GENDIR)/version.cpp \
-#		$(patsubst %.po,%.mo,$(call rwildcard, language/, *.po)) \
-#		$(patsubst $(SRC)/%.lay,$(GENDIR)/%.lh,$(LAYOUTS)) \
-#		$(GENDIR)/includes/SDL2
-#
 #$(GENDIR)/includes/SDL2:
 #	-$(call MKDIR,$@)
 #	-$(call COPY,3rdparty/SDL2/include,$(GENDIR)/includes/SDL2)
-#
-
-#
-#$(GENDIR)/%.lh: $(SRC)/%.lay scripts/build/complay.py | $(GEN_FOLDERS)
-#	@echo Compressing $<...
-#	$(SILENT)$(PYTHON) scripts/build/complay.py $< $@ layout_$(basename $(notdir $<))
-#
-#%.mo: %.po
-#	@echo Converting translation $<...
-#ifdef IGNORE_BAD_LOCALISATION
-#	$(SILENT)$(PYTHON) scripts/build/msgfmt.py --output-file $@ $< || exit 0
-#else
-#	$(SILENT)$(PYTHON) scripts/build/msgfmt.py --output-file $@ $<
-#endif
-#
 ##-------------------------------------------------
 ## Regression tests
 ##-------------------------------------------------
@@ -904,3 +870,22 @@ dump_mame_options()
 #translation: $(GENDIR)/mame.pot
 #	$(SILENT) find language -name "*.po" -print0 | xargs -0 -n 1 -I %% msgmerge -U -N %% $<
 #	$(SILENT) find language -name "*.po" -print0 | xargs -0 -n 1 -I %% msgattrib --clear-fuzzy --empty %% -o %%
+
+# Converting translation
+subdir_list(LANGUAGE_DIRS ${CMAKE_SOURCE_DIR}/language)
+set(LANGUAGE_FILES "")
+foreach(subdir ${LANGUAGE_DIRS})
+  list(APPEND LANGUAGE_FILES ${CMAKE_SOURCE_DIR}/language/${subdir}/strings.mo)
+  translationbuildtask(${subdir})
+endforeach()
+add_custom_target(languages ALL DEPENDS ${LANGUAGE_FILES})
+
+# Compressing layouts
+file(GLOB LAYOUT_FILES ${MAME_DIR}/src/${TARGET}/layout/*.lay)
+set(GEN_LAYOUT_FILES "")
+foreach(lay ${LAYOUT_FILES})
+  get_filename_component(lay_name ${lay} NAME_WLE)
+  layoutbuildtask("${TARGET}/layout" ${lay_name})
+  list(APPEND GEN_LAYOUT_FILES ${GEN_DIR}/${TARGET}/layout/${lay_name}.lh)
+endforeach()
+add_custom_target(layouts DEPENDS ${GEN_LAYOUT_FILES})

@@ -72,6 +72,15 @@ function(layoutbuildtask _folder _name)
 	)
 endfunction()
 
+function(translationbuildtask _language)
+    add_custom_command(
+		COMMAND ${PYTHON_EXECUTABLE} ${MAME_DIR}/scripts/build/msgfmt.py --output-file ${CMAKE_SOURCE_DIR}/language/${_language}/strings.mo ${CMAKE_SOURCE_DIR}/language/${_language}/strings.po
+		DEPENDS ${MAME_DIR}/scripts/build/msgfmt.py ${CMAKE_SOURCE_DIR}/language/${_language}/strings.po
+		OUTPUT ${CMAKE_SOURCE_DIR}/language/${_language}/strings.mo
+		COMMENT "Converting translation language/${_language}/strings.po..."
+	)
+endfunction()
+
 macro(addprojectflags _project)
 	if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		target_compile_options(${_project} PRIVATE -Wsuggest-override)
@@ -113,4 +122,15 @@ endfunction()
 
 macro(set_option option value)
   set(${option} ${value} CACHE BOOL INTERNAL FORCE)
+endmacro()
+
+macro(subdir_list _result _curdir)
+  file(GLOB children RELATIVE ${_curdir} ${_curdir}/*)
+  set(dirlist "")
+  foreach(child ${children})
+    if(IS_DIRECTORY ${_curdir}/${child})
+      list(APPEND dirlist ${child})
+    endif()
+	endforeach()
+  set(${_result} ${dirlist})
 endmacro()

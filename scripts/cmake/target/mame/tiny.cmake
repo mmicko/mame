@@ -164,19 +164,10 @@ macro(createProjects_mame_tiny _target  _subtarget)
 		${MAME_DIR}/src/mame/drivers/looping.cpp
 		${MAME_DIR}/src/mame/drivers/supertnk.cpp
 		${MAME_DIR}/src/mame/drivers/goldnpkr.cpp
-
-		${GEN_DIR}/mame/layout/circus.lh
-		${GEN_DIR}/mame/layout/crash.lh
-		${GEN_DIR}/mame/layout/gorf.lh
-		${GEN_DIR}/mame/layout/seawolf2.lh
-		${GEN_DIR}/mame/layout/spacezap.lh
-		${GEN_DIR}/mame/layout/tenpindx.lh
-		${GEN_DIR}/mame/layout/pmpoker.lh
-		${GEN_DIR}/mame/layout/goldnpkr.lh
-		${GEN_DIR}/mame/layout/upndown.lh
 	)
 
 	add_library(mame_tiny ${LIBTYPE} ${MAME_TINY_SRCS})
+	add_dependencies(mame_tiny layouts)
 
 	target_include_directories(mame_tiny PRIVATE
 		${MAME_DIR}/src/osd
@@ -188,16 +179,6 @@ macro(createProjects_mame_tiny _target  _subtarget)
 		${MAME_DIR}/3rdparty
 		${GEN_DIR}/mame/layout
 	)
-
-	layoutbuildtask("mame/layout" "circus")
-	layoutbuildtask("mame/layout" "crash")
-	layoutbuildtask("mame/layout" "gorf")
-	layoutbuildtask("mame/layout" "seawolf2")
-	layoutbuildtask("mame/layout" "spacezap")
-	layoutbuildtask("mame/layout" "tenpindx")
-	layoutbuildtask("mame/layout" "pmpoker")
-	layoutbuildtask("mame/layout" "goldnpkr")
-	layoutbuildtask("mame/layout" "upndown")
 endmacro()
 
 macro(linkProjects_mame_tiny _target _subtarget _projectname)
