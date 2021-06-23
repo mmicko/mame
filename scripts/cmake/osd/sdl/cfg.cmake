@@ -1,8 +1,8 @@
-#-- license:BSD-3-Clause
-#-- copyright-holders:MAMEdev Team
+### license:BSD-3-Clause
+### copyright-holders:MAMEdev Team
 macro(osd_cfg _project)
 add_project_to_group(libs ${_project})
-#
+
 if(MSVC)
     target_compile_options(${_project} PRIVATE "/FI\"${MAME_DIR}/src/osd/sdl/sdlprefix.h\"")
 else()
@@ -10,10 +10,6 @@ else()
     target_compile_options(${_project} PRIVATE "-include${MAME_DIR}/src/osd/sdl/sdlprefix.h")
 endif()
 
-#forcedincludes {
-#	MAME_DIR .. "src/osd/sdl/sdlprefix.h"
-#}
-#
 #if _OPTIONS["USE_TAPTUN"]=="1" or _OPTIONS["USE_PCAP"]=="1" then
 #	defines {
 #		"USE_NETWORK",

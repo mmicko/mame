@@ -8,47 +8,9 @@
 ###   Rules for the building of modules
 ###
 ############################################################################
-#
-#function string.starts(String,Start)
-#	return string.sub(String,1,string.len(Start))==Start
-#end
-#
-#function addlibfromstring(str)
-#	if (str==nil) then return  end
-#	for w in str:gmatch("%S+") do
-#		if string.starts(w,"-l")==true then
-#			links {
-#				string.sub(w,3)
-#			}
-#		end
-#	end
-#end
-#
-#function addoptionsfromstring(str)
-#	if (str==nil) then return  end
-#	for w in str:gmatch("%S+") do
-#		if string.starts(w,"-l")==false then
-#			linkoptions {
-#				w
-#			}
-#		end
-#	end
-#end
-#
-#function pkgconfigcmd()
-#	local pkgconfig = os.getenv("PKG_CONFIG")
-#	if pkgconfig == nil then
-#		return "pkg-config"
-#	end
-#	return pkgconfig
-#end
-#
+
 macro(osdmodulesbuild _project _sources)
-#
-#	removeflags {
-#		"SingleOutputDir
-#	}
-#
+
 set(MODULES_SRCS
 	${MAME_DIR}/src/osd/osdnet.cpp
 	${MAME_DIR}/src/osd/osdnet.h
@@ -221,7 +183,7 @@ endif()
 add_library(${_project} ${LIBTYPE} ${_sources} ${MODULES_SRCS})
 
 target_include_directories(${_project} PRIVATE ${MAME_DIR}/3rdparty/asio/include)
-#
+
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	target_include_directories(${_project} PRIVATE 
 		${MAME_DIR}/3rdparty/winpcap/Include
@@ -236,13 +198,10 @@ if (NO_OPENGL)
 else()
 	target_compile_definitions(${_project} PRIVATE USE_OPENGL=1)
 endif()
-#		if _OPTIONS["USE_DISPATCH_GL"]=="1" then
-#			defines {
-#				"USE_DISPATCH_GL=1
-#			}
-#		end
-#	end
-#
+if (USE_DISPATCH_GL)
+	target_compile_definitions(${_project} PRIVATE USE_DISPATCH_GL=1)
+endif()
+
 target_compile_definitions(${_project} PRIVATE 
 	__STDC_LIMIT_MACROS
 	__STDC_FORMAT_MACROS
@@ -250,8 +209,6 @@ target_compile_definitions(${_project} PRIVATE
 	IMGUI_DISABLE_OBSOLETE_FUNCTIONS
 )
 
-
-#	}
 target_include_directories(${_project} PRIVATE 
 	${MAME_DIR}/3rdparty/bgfx/examples/common
 	${MAME_DIR}/3rdparty/bgfx/include
@@ -272,147 +229,81 @@ endif()
 if(NO_USE_PULSEAUDIO)
 	target_compile_definitions(${_project} PRIVATE NO_USE_PULSEAUDIO)
 endif()
-#
+
 if(NO_USE_MIDI)
 	target_compile_definitions(${_project} PRIVATE NO_USE_MIDI)
 else()
 #	ext_includedir("portmidi"),
 	target_include_directories(${_project} PRIVATE ${MAME_DIR}/3rdparty/portmidi/pm_common)
 endif()
-#
-#	if _OPTIONS["USE_QTDEBUG"]=="1" then
-#		defines {
-#			"USE_QTDEBUG=1
-#		}
-#	else
-#		defines {
-#			"USE_QTDEBUG=0
-#		}
-#	end
-target_compile_definitions(${_project} PRIVATE USE_QTDEBUG=0)
-#
+
+if(USE_QTDEBUG)
+	target_compile_definitions(${_project} PRIVATE USE_QTDEBUG=1)
+else()
+	target_compile_definitions(${_project} PRIVATE USE_QTDEBUG=0)
+endif()
+
 endmacro()
-#
-#
-#function qtdebuggerbuild()
-#
-#	removeflags {
-#		"SingleOutputDir
-#	}
-#	local version = str_to_version(_OPTIONS["gcc_version"])
-#	if _OPTIONS["gcc"]~=nil and (string.find(_OPTIONS["gcc"], "clang") or string.find(_OPTIONS["gcc"], "asmjs")) then
-#		configuration { "gmake or ninja" }
-#			if (version >= 30600) then
-#				buildoptions {
-#					"-Wno-inconsistent-missing-override
-#				}
-#			end
-#		configuration { }
-#	end
-#
-set(QTDEBUGGER_SRCS
-	${MAME_DIR}/src/osd/modules/debugger/debugqt.cpp
-)
-#
-#	if _OPTIONS["USE_QTDEBUG"]=="1" then
-#		files {
-#			${MAME_DIR}/src/osd/modules/debugger/qt/debuggerview.cpp
-#			${MAME_DIR}/src/osd/modules/debugger/qt/debuggerview.h
-#			${MAME_DIR}/src/osd/modules/debugger/qt/windowqt.cpp
-#			${MAME_DIR}/src/osd/modules/debugger/qt/windowqt.h
-#			${MAME_DIR}/src/osd/modules/debugger/qt/logwindow.cpp
-#			${MAME_DIR}/src/osd/modules/debugger/qt/logwindow.h
-#			${MAME_DIR}/src/osd/modules/debugger/qt/dasmwindow.cpp
-#			${MAME_DIR}/src/osd/modules/debugger/qt/dasmwindow.h
-#			${MAME_DIR}/src/osd/modules/debugger/qt/mainwindow.cpp
-#			${MAME_DIR}/src/osd/modules/debugger/qt/mainwindow.h
-#			${MAME_DIR}/src/osd/modules/debugger/qt/memorywindow.cpp
-#			${MAME_DIR}/src/osd/modules/debugger/qt/memorywindow.h
-#			${MAME_DIR}/src/osd/modules/debugger/qt/breakpointswindow.cpp
-#			${MAME_DIR}/src/osd/modules/debugger/qt/breakpointswindow.h
-#			${MAME_DIR}/src/osd/modules/debugger/qt/deviceswindow.cpp
-#			${MAME_DIR}/src/osd/modules/debugger/qt/deviceinformationwindow.cpp
-#			${MAME_DIR}/src/osd/modules/debugger/qt/deviceinformationwindow.h
-#			${MAME_DIR}/src/osd/modules/debugger/qt/deviceswindow.h
-#			${GEN_DIR}/osd/modules/debugger/qt/debuggerview.moc.cpp
-#			${GEN_DIR}/osd/modules/debugger/qt/windowqt.moc.cpp
-#			${GEN_DIR}/osd/modules/debugger/qt/logwindow.moc.cpp
-#			${GEN_DIR}/osd/modules/debugger/qt/dasmwindow.moc.cpp
-#			${GEN_DIR}/osd/modules/debugger/qt/mainwindow.moc.cpp
-#			${GEN_DIR}/osd/modules/debugger/qt/memorywindow.moc.cpp
-#			${GEN_DIR}/osd/modules/debugger/qt/breakpointswindow.moc.cpp
-#			${GEN_DIR}/osd/modules/debugger/qt/deviceswindow.moc.cpp
-#			${GEN_DIR}/osd/modules/debugger/qt/deviceinformationwindow.moc.cpp
-#		}
+
+
+# -Wno-inconsistent-missing-override for Clang
+
+set(QTDEBUGGER_SRCS ${MAME_DIR}/src/osd/modules/debugger/debugqt.cpp)
+
+if(USE_QTDEBUG)
+	list(APPEND QTDEBUGGER_SRCS
+		${MAME_DIR}/src/osd/modules/debugger/qt/debuggerview.cpp
+		${MAME_DIR}/src/osd/modules/debugger/qt/debuggerview.h
+		${MAME_DIR}/src/osd/modules/debugger/qt/windowqt.cpp
+		${MAME_DIR}/src/osd/modules/debugger/qt/windowqt.h
+		${MAME_DIR}/src/osd/modules/debugger/qt/logwindow.cpp
+		${MAME_DIR}/src/osd/modules/debugger/qt/logwindow.h
+		${MAME_DIR}/src/osd/modules/debugger/qt/dasmwindow.cpp
+		${MAME_DIR}/src/osd/modules/debugger/qt/dasmwindow.h
+		${MAME_DIR}/src/osd/modules/debugger/qt/mainwindow.cpp
+		${MAME_DIR}/src/osd/modules/debugger/qt/mainwindow.h
+		${MAME_DIR}/src/osd/modules/debugger/qt/memorywindow.cpp
+		${MAME_DIR}/src/osd/modules/debugger/qt/memorywindow.h
+		${MAME_DIR}/src/osd/modules/debugger/qt/breakpointswindow.cpp
+		${MAME_DIR}/src/osd/modules/debugger/qt/breakpointswindow.h
+		${MAME_DIR}/src/osd/modules/debugger/qt/deviceswindow.cpp
+		${MAME_DIR}/src/osd/modules/debugger/qt/deviceinformationwindow.cpp
+		${MAME_DIR}/src/osd/modules/debugger/qt/deviceinformationwindow.h
+		${MAME_DIR}/src/osd/modules/debugger/qt/deviceswindow.h
+		${GEN_DIR}/osd/modules/debugger/qt/debuggerview.moc.cpp
+		${GEN_DIR}/osd/modules/debugger/qt/windowqt.moc.cpp
+		${GEN_DIR}/osd/modules/debugger/qt/logwindow.moc.cpp
+		${GEN_DIR}/osd/modules/debugger/qt/dasmwindow.moc.cpp
+		${GEN_DIR}/osd/modules/debugger/qt/mainwindow.moc.cpp
+		${GEN_DIR}/osd/modules/debugger/qt/memorywindow.moc.cpp
+		${GEN_DIR}/osd/modules/debugger/qt/breakpointswindow.moc.cpp
+		${GEN_DIR}/osd/modules/debugger/qt/deviceswindow.moc.cpp
+		${GEN_DIR}/osd/modules/debugger/qt/deviceinformationwindow.moc.cpp
+	)
+endif()
+
 add_library(qtdbg ${LIBTYPE} ${QTDEBUGGER_SRCS})
 add_project_to_group(libs qtdbg)
-#		defines {
-#			"USE_QTDEBUG=1
-#		}
-#
-#		local MOC = ""
-#		if (os.is("windows")) then
-#			MOC = "moc"
-#		else
-#			if _OPTIONS["QT_HOME"]~=nil then
-#				QMAKETST = backtick(_OPTIONS["QT_HOME"] .. "/bin/qmake ##version 2>/dev/null")
-#				if (QMAKETST=='') then
-#					print("Qt's Meta Object Compiler (moc) wasn't found!")
-#					os.exit(1)
-#				end
-#				MOC = _OPTIONS["QT_HOME"] .. "/bin/moc"
-#			else
-#				MOCTST = backtick("which moc-qt5 2>/dev/null")
-#				if (MOCTST=='') then
-#					MOCTST = backtick("which moc 2>/dev/null")
-#				end
-#				if (MOCTST=='') then
-#					print("Qt's Meta Object Compiler (moc) wasn't found!")
-#					os.exit(1)
-#				end
-#				MOC = MOCTST
-#			end
-#		end
-#
-#
-#		custombuildtask {
-#			{ ${MAME_DIR}/src/osd/modules/debugger/qt/debuggerview.h             ${GEN_DIR}/osd/modules/debugger/qt/debuggerview.moc.cpp { },         { MOC .. "$(MOCINCPATH) -b emu.h $(<) -o $(@)" }},
-#			{ ${MAME_DIR}/src/osd/modules/debugger/qt/windowqt.h                 ${GEN_DIR}/osd/modules/debugger/qt/windowqt.moc.cpp { },                 { MOC .. "$(MOCINCPATH) -b emu.h $(<) -o $(@)" }},
-#			{ ${MAME_DIR}/src/osd/modules/debugger/qt/logwindow.h                ${GEN_DIR}/osd/modules/debugger/qt/logwindow.moc.cpp { },                { MOC .. "$(MOCINCPATH) -b emu.h $(<) -o $(@)" }},
-#			{ ${MAME_DIR}/src/osd/modules/debugger/qt/dasmwindow.h               ${GEN_DIR}/osd/modules/debugger/qt/dasmwindow.moc.cpp { },           { MOC .. "$(MOCINCPATH) -b emu.h $(<) -o $(@)" }},
-#			{ ${MAME_DIR}/src/osd/modules/debugger/qt/mainwindow.h               ${GEN_DIR}/osd/modules/debugger/qt/mainwindow.moc.cpp { },           { MOC .. "$(MOCINCPATH) -b emu.h $(<) -o $(@)" }},
-#			{ ${MAME_DIR}/src/osd/modules/debugger/qt/memorywindow.h             ${GEN_DIR}/osd/modules/debugger/qt/memorywindow.moc.cpp { },             { MOC .. "$(MOCINCPATH) -b emu.h $(<) -o $(@)" }},
-#			{ ${MAME_DIR}/src/osd/modules/debugger/qt/breakpointswindow.h        ${GEN_DIR}/osd/modules/debugger/qt/breakpointswindow.moc.cpp { },        { MOC .. "$(MOCINCPATH) -b emu.h $(<) -o $(@)" }},
-#			{ ${MAME_DIR}/src/osd/modules/debugger/qt/deviceswindow.h            ${GEN_DIR}/osd/modules/debugger/qt/deviceswindow.moc.cpp { },            { MOC .. "$(MOCINCPATH) -b emu.h $(<) -o $(@)" }},
-#			{ ${MAME_DIR}/src/osd/modules/debugger/qt/deviceinformationwindow.h  ${GEN_DIR}/osd/modules/debugger/qt/deviceinformationwindow.moc.cpp { },{ MOC .. "$(MOCINCPATH) -b emu.h $(<) -o $(@)" }},
-#
-#		}
-#
-#		if _OPTIONS["targetos"]=="windows" then
-#			configuration { "mingw*" }
-#				buildoptions {
-#					"-I$(shell qmake -query QT_INSTALL_HEADERS)
-#				}
-#			configuration { }
-#		elseif _OPTIONS["targetos"]=="macosx" then
-#			buildoptions {
-#				"-F" .. backtick("qmake -query QT_INSTALL_LIBS"),
-#			}
-#		else
-#			if _OPTIONS["QT_HOME"]~=nil then
-#				buildoptions {
-#					"-I" .. backtick(_OPTIONS["QT_HOME"] .. "/bin/qmake -query QT_INSTALL_HEADERS"),
-#				}
-#			else
-#				buildoptions {
-#					backtick(pkgconfigcmd() .. " ##cflags Qt5Widgets"),
-#				}
-#			end
-#		end
-#	else
-#		defines {
-#			"USE_QTDEBUG=0
-target_compile_definitions(qtdbg PRIVATE USE_QTDEBUG=0)
+
+if(USE_QTDEBUG)
+	target_compile_definitions(qtdbg PRIVATE USE_QTDEBUG=1)
+
+	find_package(Qt5 COMPONENTS Core Widgets Gui REQUIRED)
+	target_link_libraries(qtdbg PUBLIC Qt5::Core Qt5::Widgets Qt5::Gui)
+
+	qt5_generate_moc(${MAME_DIR}/src/osd/modules/debugger/qt/debuggerview.h ${GEN_DIR}/osd/modules/debugger/qt/debuggerview.moc.cpp)
+	qt5_generate_moc(${MAME_DIR}/src/osd/modules/debugger/qt/windowqt.h ${GEN_DIR}/osd/modules/debugger/qt/windowqt.moc.cpp)
+	qt5_generate_moc(${MAME_DIR}/src/osd/modules/debugger/qt/logwindow.h ${GEN_DIR}/osd/modules/debugger/qt/logwindow.moc.cpp)
+	qt5_generate_moc(${MAME_DIR}/src/osd/modules/debugger/qt/dasmwindow.h ${GEN_DIR}/osd/modules/debugger/qt/dasmwindow.moc.cpp)
+	qt5_generate_moc(${MAME_DIR}/src/osd/modules/debugger/qt/mainwindow.h ${GEN_DIR}/osd/modules/debugger/qt/mainwindow.moc.cpp)
+	qt5_generate_moc(${MAME_DIR}/src/osd/modules/debugger/qt/memorywindow.h ${GEN_DIR}/osd/modules/debugger/qt/memorywindow.moc.cpp)
+	qt5_generate_moc(${MAME_DIR}/src/osd/modules/debugger/qt/breakpointswindow.h ${GEN_DIR}/osd/modules/debugger/qt/breakpointswindow.moc.cpp)
+	qt5_generate_moc(${MAME_DIR}/src/osd/modules/debugger/qt/deviceswindow.h ${GEN_DIR}/osd/modules/debugger/qt/deviceswindow.moc.cpp)
+	qt5_generate_moc(${MAME_DIR}/src/osd/modules/debugger/qt/deviceinformationwindow.h ${GEN_DIR}/osd/modules/debugger/qt/deviceinformationwindow.moc.cpp)
+else()
+	target_compile_definitions(qtdbg PRIVATE USE_QTDEBUG=0)
+endif()
+
 target_include_directories(qtdbg PRIVATE 
 		${MAME_DIR}/src/emu
 		${MAME_DIR}/src/devices # accessing imagedev from debugger
@@ -423,263 +314,98 @@ target_include_directories(qtdbg PRIVATE
 		${MAME_DIR}/3rdparty
 )
 
-#		}
-#	end
-#
-#end
-#
-#
-#function osdmodulestargetconf()
 macro(osdmodulestargetconf _projectname)
 	
-#
 if(NOT NO_OPENGL)
-#		if _OPTIONS["targetos"]=="macosx" then
-#			links {
-#				"OpenGL.framework
-#			}
-#		elseif _OPTIONS["USE_DISPATCH_GL"]~="1" then
-#			if _OPTIONS["targetos"]=="windows" then
-#				links {
-#					"opengl32
-	if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-		target_link_libraries(${_projectname} PRIVATE opengl32)
-	else()
-		target_link_libraries(${_projectname} PRIVATE GL)
+	if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+		target_link_libraries(${_projectname} PRIVATE OpenGL.framework)
+	elseif(NOT USE_DISPATCH_GL)
+		if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+			target_link_libraries(${_projectname} PRIVATE opengl32)
+		else()
+			target_link_libraries(${_projectname} PRIVATE GL)
+		endif()
 	endif()
 endif()
-#
-#	if _OPTIONS["NO_USE_MIDI"]~="1" then
-#		if _OPTIONS["targetos"]=="linux" then
-#			local str = backtick(pkgconfigcmd() .. " ##libs alsa")
-if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-	target_link_libraries(${_projectname} PRIVATE asound)
+
+if(NOT NO_USE_MIDI)
+	if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+		target_link_libraries(${_projectname} PRIVATE asound) #pkgconfig alsa
+	elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+		target_link_libraries(${_projectname} PRIVATE CoreMIDI.framework)
+	endif()
 endif()
-#			addlibfromstring(str)
-#			addoptionsfromstring(str)
-#		elseif _OPTIONS["targetos"]=="macosx" then
-#			links {
-#				"CoreMIDI.framework
-#			}
-#		end
-#	end
-#
-#	if _OPTIONS["USE_QTDEBUG"]=="1" then
-#		if _OPTIONS["targetos"]=="windows" then
-#			linkoptions {
-#				"-L$(shell qmake -query QT_INSTALL_LIBS)
-#			}
-#			links {
-#				"Qt5Core.dll
-#				"Qt5Gui.dll
-#				"Qt5Widgets.dll
-#			}
-#		elseif _OPTIONS["targetos"]=="macosx" then
-#			linkoptions {
-#				"-F" .. backtick("qmake -query QT_INSTALL_LIBS"),
-#			}
-#			links {
-#				"Qt5Core.framework
-#				"Qt5Gui.framework
-#				"Qt5Widgets.framework
-#			}
-#		else
-#			if _OPTIONS["QT_HOME"]~=nil then
-#				linkoptions {
-#					"-L" .. backtick(_OPTIONS["QT_HOME"] .. "/bin/qmake -query QT_INSTALL_LIBS"),
-#				}
-#				links {
-#					"Qt5Core
-#					"Qt5Gui
-#					"Qt5Widgets
-#				}
-#			else
-#				local str = backtick(pkgconfigcmd() .. " ##libs Qt5Widgets")
-#				addlibfromstring(str)
-#				addoptionsfromstring(str)
-#			end
-#		end
-#	end
-#
-#	if _OPTIONS["targetos"]=="windows" then
-#		links {
-#			"gdi32
-#			"dsound
-#			"dxguid
-#			"oleaut32
-#			"winmm
-#		}
-#	elseif _OPTIONS["targetos"]=="macosx" then
-#		links {
-#			"AudioUnit.framework
-#			"AudioToolbox.framework
-#			"CoreAudio.framework
-#			"CoreServices.framework
-#		}
-#	end
-#
+
+
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+	target_link_libraries(${_projectname} PRIVATE 
+		gdi32
+		dsound
+		dxguid
+		oleaut32
+		winmm
+	)
+elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+	target_link_libraries(${_projectname} PRIVATE 
+		AudioUnit.framework
+		AudioToolbox.framework
+		CoreAudio.framework
+		CoreServices.framework
+	)
+endif()
+
 if (NOT NO_USE_PULSEAUDIO)
 	target_link_libraries(${_projectname} PRIVATE pulse)
 endif()
-#
+
 endmacro()
 
-#
-#newoption {
-#	trigger = "USE_TAPTUN
-#	description = "
-#	allowed = {
-#		{ "0  "Don't include tap/tun network module" },
-#		{ "1  "Include tap/tun network module" },
-#	},
-#}
-option(USE_TAPTUN "Include tap/tun network module." ON)
-#
-#newoption {
-#	trigger = "USE_PCAP
-#	description = "Include pcap network module
-#	allowed = {
-#		{ "0  "Don't include pcap network module" },
-#		{ "1  "Include pcap network module" },
-#	},
-#}
+if((${CMAKE_SYSTEM_NAME} STREQUAL "Linux") OR (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
+	set(USE_TAPTUN_DEFAULT ON)
+else()
+	set(USE_TAPTUN_DEFAULT OFF)
+endif()
+option(USE_TAPTUN "Include tap/tun network module." ${USE_TAPTUN_DEFAULT})
 
-option(USE_PCAP "Include pcap network module." ON)
-#
-#newoption {
-#	trigger = "NO_OPENGL
-#	description = "Disable use of OpenGL
-#	allowed = {
-#		{ "0  "Enable OpenGL"  },
-#		{ "1  "Disable OpenGL" },
-#	},
-#}
+if((${CMAKE_SYSTEM_NAME} STREQUAL "Darwin") OR (${CMAKE_SYSTEM_NAME} STREQUAL "NetBSD"))
+	set(USE_PCAP_DEFAULT ON)
+else()
+	set(USE_PCAP_DEFAULT OFF)
+endif()
+option(USE_PCAP "Include pcap network module." ${USE_PCAP_DEFAULT})
 
 option(NO_OPENGL "Disable use of OpenGL." OFF)
-#
-#newoption {
-#	trigger = "USE_DISPATCH_GL
-#	description = "Use GL-dispatching
-#	allowed = {
-#		{ "0  "Link to OpenGL library"  },
-#		{ "1  "Use GL-dispatching"      },
-#	},
-#}
 
 option(USE_DISPATCH_GL "Use GL-dispatching." OFF)
-#
-#if not _OPTIONS["USE_DISPATCH_GL"] then
-#	_OPTIONS["USE_DISPATCH_GL"] = "0"
-#end
-#
-#newoption {
-#	trigger = "NO_USE_MIDI
-#	description = "Disable MIDI I/O
-#	allowed = {
-#		{ "0  "Enable MIDI"  },
-#		{ "1  "Disable MIDI" },
-#	},
-#}
 
-option(NO_USE_MIDI "Disable MIDI I/O." OFF)
-#
-#if not _OPTIONS["NO_USE_MIDI"] then
-#	if _OPTIONS["targetos"]=="freebsd" or _OPTIONS["targetos"]=="openbsd" or _OPTIONS["targetos"]=="netbsd" or _OPTIONS["targetos"]=="solaris" or _OPTIONS["targetos"]=="haiku" or _OPTIONS["targetos"] == "asmjs" then
-#		_OPTIONS["NO_USE_MIDI"] = "1"
-#	else
-#		_OPTIONS["NO_USE_MIDI"] = "0"
-#	end
-#end
-#
-#newoption {
-#	trigger = "NO_USE_PORTAUDIO
-#	description = "Disable PortAudio interface
-#	allowed = {
-#		{ "0  "Enable PortAudio"  },
-#		{ "1  "Disable PortAudio" },
-#	},
-#}
-#
-#if not _OPTIONS["NO_USE_PORTAUDIO"] then
-#	if _OPTIONS["targetos"]=="windows" or _OPTIONS["targetos"]=="linux" or _OPTIONS["targetos"]=="macosx" then
-#		_OPTIONS["NO_USE_PORTAUDIO"] = "0"
-#	else
-#		_OPTIONS["NO_USE_PORTAUDIO"] = "1"
-#	end
-#end
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten") # also for BSD variants, Solaris and Haiku
+	set(NO_USE_MIDI_DEFAULT ON)
+else()
+	set(NO_USE_MIDI_DEFAULT OFF)
+endif()
+option(NO_USE_MIDI "Disable MIDI I/O." ${NO_USE_MIDI_DEFAULT})
 
-option(NO_USE_PORTAUDIO "Disable PortAudio interface." OFF)
+if((${CMAKE_SYSTEM_NAME} STREQUAL "Linux") OR (${CMAKE_SYSTEM_NAME} STREQUAL "Windows") OR (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin"))
+	set(NO_USE_PORTAUDIO_DEFAULT OFF)
+else()
+	set(NO_USE_PORTAUDIO_DEFAULT ON)
+endif()
+option(NO_USE_PORTAUDIO "Disable PortAudio interface." ${NO_USE_PORTAUDIO_DEFAULT})
 
-#newoption {
-#	trigger = "NO_USE_PULSEAUDIO
-#	description = "Disable PulseAudio interface
-#	allowed = {
-#		{ "0  "Enable PulseAudio"  },
-#		{ "1  "Disable PulseAudio" },
-#	},
-#}
-#
-#if not _OPTIONS["NO_USE_PULSEAUDIO"] then
-#	if _OPTIONS["targetos"]=="linux" then
-#		_OPTIONS["NO_USE_PULSEAUDIO"] = "0"
-#	else
-#		_OPTIONS["NO_USE_PULSEAUDIO"] = "1"
-#	end
-#end
-#
 set(NO_USE_PULSEAUDIO_DEFAULT OFF)
 if (NOT(${CMAKE_SYSTEM_NAME} STREQUAL "Linux"))
 	set(NO_USE_PULSEAUDIO_DEFAULT ON)
 endif()
 option(NO_USE_PULSEAUDIO "Disable PulseAudio interface." ${NO_USE_PULSEAUDIO_DEFAULT})
 
-#newoption {
-#	trigger = "MODERN_WIN_API
-#	description = "Use Modern Windows APIs
-#	allowed = {
-#		{ "0  "Use classic Windows APIs - allows support for XP and later"   },
-#		{ "1  "Use Modern Windows APIs - support for Windows 8.1 and later"  },
-#	},
-#}
-#
+# OFF - Use classic Windows APIs - allows support for XP and later
+# ON  - Use Modern Windows APIs - support for Windows 8.1 and later
+
 option(MODERN_WIN_API "Use Modern Windows APIs." OFF)
 
-#newoption {
-#	trigger = "USE_QTDEBUG
-#	description = "Use QT debugger
-#	allowed = {
-#		{ "0  "Don't use Qt debugger" },
-#		{ "1  "Use Qt debugger" },
-#	},
-#}
-option(USE_QTDEBUG "Use QT debugger." ON)
-#
-#newoption {
-#	trigger = "QT_HOME
-#	description = "QT lib location
-#}
-#
-#
-#if not _OPTIONS["USE_TAPTUN"] then
-#	if _OPTIONS["targetos"]=="linux" or _OPTIONS["targetos"]=="windows" then
-#		_OPTIONS["USE_TAPTUN"] = "1"
-#	else
-#		_OPTIONS["USE_TAPTUN"] = "0"
-#	end
-#end
-#
-#if not _OPTIONS["USE_PCAP"] then
-#	if _OPTIONS["targetos"]=="macosx" or _OPTIONS["targetos"]=="netbsd" then
-#		_OPTIONS["USE_PCAP"] = "1"
-#	else
-#		_OPTIONS["USE_PCAP"] = "0"
-#	end
-#end
-#
-#if not _OPTIONS["USE_QTDEBUG"] then
-#	if _OPTIONS["targetos"]=="windows" or _OPTIONS["targetos"]=="macosx" or _OPTIONS["targetos"]=="solaris" or _OPTIONS["targetos"]=="haiku" or _OPTIONS["targetos"]=="asmjs" then
-#		_OPTIONS["USE_QTDEBUG"] = "0"
-#	else
-#		_OPTIONS["USE_QTDEBUG"] = "1"
-#	end
-#end
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+	set(USE_QTDEBUG_DEFAULT ON)
+else()
+	set(USE_QTDEBUG_DEFAULT OFF)
+endif()
+option(USE_QTDEBUG "Use QT debugger." ${USE_QTDEBUG_DEFAULT})

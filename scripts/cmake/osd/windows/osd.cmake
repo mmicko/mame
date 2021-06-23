@@ -40,30 +40,7 @@
 #	_OPTIONS["USE_SDL"] = "0"
 #end
 #
-#newoption {
-#	trigger = "CYGWIN_BUILD
-#	description = "Build with Cygwin tools
-#	allowed = {
-#		{ "0  "Build with MinGW tools"   },
-#		{ "1  "Build with Cygwin tools"  },
-#	},
-#}
-#
-#if not _OPTIONS["CYGWIN_BUILD"] then
-#	_OPTIONS["CYGWIN_BUILD"] = "0"
-#end
-#
-#
-#if _OPTIONS["CYGWIN_BUILD"] == "1" then
-#	buildoptions {
-#		"-mmo-cygwin
-#	}
-#	linkoptions {
-#		"-mno-cygwin
-#	}
-#end
-#
-#
+
 #project ("qtdbg_" .. _OPTIONS["osd"])
 #	uuid (os.uuid("qtdbg_" .. _OPTIONS["osd"]))
 #	kind (LIBTYPE)
@@ -80,16 +57,7 @@
 #	}
 #	qtdebuggerbuild()
 #
-#project ("osd_" .. _OPTIONS["osd"])
-#	uuid (os.uuid("osd_" .. _OPTIONS["osd"]))
-#	kind (LIBTYPE)
-#
-#	dofile("windows_cfg.lua")
-#	osdmodulesbuild()
-#
 
-
-#
 set(OSD_SRCS
     ${MAME_DIR}/src/osd/modules/render/d3d/d3dhlsl.cpp
     ${MAME_DIR}/src/osd/modules/render/d3d/d3dcomm.h
@@ -142,20 +110,6 @@ set(OSD_SRCS
 )
 osdmodulesbuild("osd" "${OSD_SRCS}")
 osd_cfg(osd)
-#	includedirs {
-#		${MAME_DIR}/src/emu
-#		${MAME_DIR}/src/devices -- accessing imagedev from debugger
-#		${MAME_DIR}/src/osd
-#		${MAME_DIR}/src/lib
-#		${MAME_DIR}/src/lib/util
-#		${MAME_DIR}/src/osd/modules/file
-#		${MAME_DIR}/src/osd/modules/render
-#		${MAME_DIR}/3rdparty
-#	}
-#
-#	includedirs {
-#		${MAME_DIR}/src/osd/windows
-#	}
 
 target_include_directories(osd PRIVATE 
 		${MAME_DIR}/src/emu
@@ -172,9 +126,6 @@ if(MSVC)
 	target_include_directories(osd PRIVATE ${MAME_DIR}/3rdparty/dxsdk/Include)
 endif()
 
-#	defines {
-#		"DIRECT3D_VERSION=0x0900
-#	}
 target_compile_definitions(osd PRIVATE DIRECT3D_VERSION=0x0900)
 
 #	if _OPTIONS["DIRECTINPUT"] == "8" then
@@ -187,35 +138,7 @@ target_compile_definitions(osd PRIVATE DIRECTINPUT_VERSION=0x0800)
 #			"DIRECTINPUT_VERSION=0x0700
 #		}
 #	end
-#
-#
-#
-#project ("ocore_" .. _OPTIONS["osd"])
-#	uuid (os.uuid("ocore_" .. _OPTIONS["osd"]))
-#	kind (LIBTYPE)
-#
-#	removeflags {
-#		"SingleOutputDir
-#	}
-#
-#	dofile("windows_cfg.lua")
-#
-#	includedirs {
-#		${MAME_DIR}/3rdparty
-#		${MAME_DIR}/src/emu
-#		${MAME_DIR}/src/osd
-#		${MAME_DIR}/src/osd/modules/file
-#		${MAME_DIR}/src/lib
-#		${MAME_DIR}/src/lib/util
-#	}
-#
-#	BASE_TARGETOS = "win32"
-#	SDLOS_TARGETOS = "win32"
-#
-#	includedirs {
-#		${MAME_DIR}/src/osd/windows
-#	}
-#
+
 set(OCORE_SRCS
     ${MAME_DIR}/src/osd/eigccppc.h
     ${MAME_DIR}/src/osd/eigccx86.h
@@ -270,22 +193,14 @@ target_link_libraries(ocore PUBLIC
 	wsock32
 	ws2_32
 )
-#function maintargetosdoptions(_target,_subtarget)
-#	osdmodulestargetconf()
+
 macro(maintargetosdoptions _projectname)
 	osdmodulestargetconf(${_projectname})
 
-#
-#	configuration { "mingw*" }
-#		links {
-#			"mingw32
-#		}
 if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	target_link_libraries(${_projectname} PUBLIC mingw32)
 endif()
 
-#	configuration { }
-#
 #	if _OPTIONS["DIRECTINPUT"] == "8" then
 #		links {
 #			"dinput8
@@ -337,8 +252,8 @@ target_link_libraries(${_projectname} PUBLIC dinput8)
 #)
 #
 endmacro()
-#
-#
+
+
 #--------------------------------------------------
 #-- ledutil
 #--------------------------------------------------
