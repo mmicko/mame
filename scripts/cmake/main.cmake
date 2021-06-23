@@ -56,37 +56,6 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Cla
         target_link_options(${projectname} PRIVATE "-Wl,-Map,${projectname}.map")
     endif()
 endif()
-#	uuid (os.uuid(_target .."_" .. _subtarget))
-#	kind "ConsoleApp"
-#
-#	configuration { "android*" }
-#		targetprefix "lib"
-#		targetname "main"
-#		targetextension ".so"
-#		linkoptions {
-#			"-shared",
-#			"-Wl,-soname,libmain.so"
-#		}
-#		links {
-#			"EGL",
-#			"GLESv1_CM",
-#			"GLESv2",
-#			"SDL2",
-#		}
-#	configuration { "pnacl" }
-#		kind "ConsoleApp"
-#		targetextension ".pexe"
-#		links {
-#			"ppapi",
-#			"ppapi_gles2",
-#			"pthread",
-#		}
-#
-#	configuration { "winstore*" }
-#		kind "WindowedApp"
-#
-#	configuration {  }
-#
 #	addprojectflags()
 #	flags {
 #		"NoManifest",
@@ -100,37 +69,6 @@ endif()
 #				"$(SILENT) objdump --section=.text --line-numbers --syms --demangle $(TARGET) >$(subst .exe,.sym,$(TARGET))"
 #			}
 #	end
-#
-#	configuration { "winstore*" }
-#		-- Windows Required Files
-#		files {
-#			-- Manifest file
-#			MAME_DIR .. "scripts/resources/uwp/Package.appxmanifest",
-#		}
-#
-#	configuration { "winstore*" }
-#		files {
-#			MAME_DIR .. "scripts/resources/uwp/assets/*.png"
-#		}
-#		configuration "**/scripts/resources/uwp/assets/*.png"
-#			flags { "DeploymentContent" }
-#
-#	-- Effects and Shaders
-#	configuration { "winstore*" }
-#		files {
-#			MAME_DIR .. "artwork/*",
-#			MAME_DIR .. "artwork/**/*",
-#			MAME_DIR .. "bgfx/*",
-#			MAME_DIR .. "bgfx/**/*",
-#			MAME_DIR .. "hash/*",
-#			MAME_DIR .. "language/*",
-#			MAME_DIR .. "language/**/*",
-#			MAME_DIR .. "plugins/*",
-#			MAME_DIR .. "plugins/**/*",
-#		}
-#		configuration "**/*"
-#			flags { "DeploymentContent" }
-#
 #	configuration { "Release" }
 #		targetsuffix ""
 #		if _OPTIONS["PROFILE"] then
@@ -143,12 +81,7 @@ endif()
 #			targetsuffix "dp"
 #		end
 #
-#	configuration { "mingw*" or "vs20*" }
-#		targetextension ".exe"
-#
-#	configuration { "rpi" }
-#		targetextension ""
-#
+
 #	configuration { "asmjs" }
 #		targetextension ".bc"
 #		if os.getenv("EMSCRIPTEN") then
@@ -206,44 +139,7 @@ endif()
 #				os.getenv("EMSCRIPTEN") .. "/emcc " .. emccopts .. " $(TARGET) -o " .. _MAKE.esc(MAME_DIR) .. _OPTIONS["target"] .. _OPTIONS["subtarget"] .. ".html",
 #			}
 #		end
-#
-#	configuration { }
-#
-#	if _OPTIONS["targetos"]=="android" then
-#		includedirs {
-#			MAME_DIR .. "3rdparty/SDL2/include",
-#		}
-#
-#		files {
-#			MAME_DIR .. "3rdparty/SDL2/src/main/android/SDL_android_main.c",
-#		}
-#		targetsuffix ""
-#		if _OPTIONS["SEPARATE_BIN"]~="1" then
-#			if _OPTIONS["PLATFORM"]=="arm" then
-#				targetdir(MAME_DIR .. "android-project/app/src/main/libs/armeabi-v7a")
-#			end
-#			if _OPTIONS["PLATFORM"]=="arm64" then
-#				targetdir(MAME_DIR .. "android-project/app/src/main/libs/arm64-v8a")
-#			end
-#			if _OPTIONS["PLATFORM"]=="mips" then
-#				targetdir(MAME_DIR .. "android-project/app/src/main/libs/mips")
-#			end
-#			if _OPTIONS["PLATFORM"]=="mips64" then
-#				targetdir(MAME_DIR .. "android-project/app/src/main/libs/mips64")
-#			end
-#			if _OPTIONS["PLATFORM"]=="x86" then
-#				targetdir(MAME_DIR .. "android-project/app/src/main/libs/x86")
-#			end
-#			if _OPTIONS["PLATFORM"]=="x64" then
-#				targetdir(MAME_DIR .. "android-project/app/src/main/libs/x86_64")
-#			end
-#		end
-#	else
-#		if _OPTIONS["SEPARATE_BIN"]~="1" then
-#			targetdir(MAME_DIR)
-#		end
-#	end
-#
+
 
 if(NOT STANDALONE)
     cmake_language(CALL linkProjects_${TARGET}_${SUBTARGET} ${TARGET} ${SUBTARGET} ${projectname})
