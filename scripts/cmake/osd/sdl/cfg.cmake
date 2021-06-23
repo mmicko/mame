@@ -10,21 +10,15 @@ else()
     target_compile_options(${_project} PRIVATE "-include${MAME_DIR}/src/osd/sdl/sdlprefix.h")
 endif()
 
-#if _OPTIONS["USE_TAPTUN"]=="1" or _OPTIONS["USE_PCAP"]=="1" then
-#	defines {
-#		"USE_NETWORK",
-#	}
-#	if _OPTIONS["USE_TAPTUN"]=="1" then
-#		defines {
-#			"OSD_NET_USE_TAPTUN",
-#		}
-#	end
-#	if _OPTIONS["USE_PCAP"]=="1" then
-#		defines {
-#			"OSD_NET_USE_PCAP",
-#		}
-#	end
-#end
+if(USE_TAPTUN OR USE_PCAP)
+    target_compile_definitions(${_project} PRIVATE USE_NETWORK)
+	if (USE_TAPTUN)
+        target_compile_definitions(${_project} PRIVATE OSD_NET_USE_TAPTUN)
+	endif()
+	if (USE_PCAP)
+        target_compile_definitions(${_project} PRIVATE OSD_NET_USE_PCAP)
+	endif()
+endif()
 #
 #if _OPTIONS["NO_OPENGL"]~="1" and _OPTIONS["USE_DISPATCH_GL"]~="1" and _OPTIONS["MESA_INSTALL_ROOT"] then
 #	includedirs {
@@ -38,74 +32,48 @@ endif()
 #	}
 #end
 #
-#if _OPTIONS["NO_X11"]=="1" then
-#	defines {
-#		"SDLMAME_NO_X11",
-#	}
-#else
-#	defines {
-#		"SDLMAME_X11",
-#	}
-target_compile_definitions(${_project} PRIVATE SDLMAME_X11)
+if(NO_X11)
+    target_compile_definitions(${_project} PRIVATE SDLMAME_NO_X11)
+else()
+    target_compile_definitions(${_project} PRIVATE SDLMAME_X11)
 #	includedirs {
 #		"/usr/X11/include",
 #		"/usr/X11R6/include",
 #		"/usr/openwin/include",
 #	}
-#end
+endif()
 #
-#if _OPTIONS["NO_USE_XINPUT"]=="1" then
-#	defines {
-#		"USE_XINPUT=0",
-#	}
-#else
-#	defines {
-#		"USE_XINPUT=1",
-#		"USE_XINPUT_DEBUG=0",
-#	}
-target_compile_definitions(${_project} PRIVATE 
-    USE_XINPUT=1
-    USE_XINPUT_DEBUG=0
-)
-#end
-#
-#if _OPTIONS["NO_USE_XINPUT_WII_LIGHTGUN_HACK"]=="1" then
-#	defines {
-#		"USE_XINPUT_WII_LIGHTGUN_HACK=0",
-#	}
-#else
-#	defines {
-#		"USE_XINPUT_WII_LIGHTGUN_HACK=1",
-target_compile_definitions(${_project} PRIVATE USE_XINPUT_WII_LIGHTGUN_HACK=1)
-#	}
-#end
-#
+if(NO_USE_XINPUT)
+    target_compile_definitions(${_project} PRIVATE USE_XINPUT=0)
+else()
+    target_compile_definitions(${_project} PRIVATE 
+        USE_XINPUT=1
+        USE_XINPUT_DEBUG=0
+    )
+endif()
+
+if(NO_USE_XINPUT_WII_LIGHTGUN_HACK)
+    target_compile_definitions(${_project} PRIVATE USE_XINPUT_WII_LIGHTGUN_HACK=0)
+else()
+    target_compile_definitions(${_project} PRIVATE USE_XINPUT_WII_LIGHTGUN_HACK=1)
+endif()
+
+
 #if _OPTIONS["NO_USE_MIDI"]~="1" and _OPTIONS["targetos"]=="linux" then
 #	buildoptions {
 #		backtick(pkgconfigcmd() .. " --cflags alsa"),
 #	}
 #end
 #
-#defines {
-#	"SDLMAME_SDL2=1",
-#}
 target_compile_definitions(${_project} PRIVATE SDLMAME_SDL2=1)
 
-#if _OPTIONS["SDL2_MULTIAPI"]=="1" then
-#	defines {
-#		"SDL2_MULTIAPI",
-#	}
-#end
-#
-#defines {
-#	"OSD_SDL",
-#}
+if(SDL2_MULTIAPI)
+    target_compile_definitions(${_project} PRIVATE SDL2_MULTIAPI)
+endif()
+
 target_compile_definitions(${_project} PRIVATE OSD_SDL)
-#
-#if BASE_TARGETOS=="unix" then
-#	defines {
-#		"SDLMAME_UNIX",
-#	}
+
+if(${BASE_TARGETOS} STREQUAL "unix")
     target_compile_definitions(${_project} PRIVATE SDLMAME_UNIX)
 #	if _OPTIONS["targetos"]=="macosx" then
 #		if _OPTIONS["with-bundled-sdl2"]==nil then
@@ -132,8 +100,8 @@ target_compile_definitions(${_project} PRIVATE OSD_SDL)
 #			}
 #		end
 #	end
-#end
-#
+endif()
+
 #if _OPTIONS["targetos"]=="windows" then
 #	configuration { "mingw* or vs*" }
 #		defines {
