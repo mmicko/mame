@@ -96,14 +96,23 @@ option(BENCHMARKS "Enable building benchmarks." ON)
 set(DISTRO "generic" CACHE STRING "Choose distribution.")
 set_property(CACHE DISTRO PROPERTY STRINGS "generic" "debian-stable")
 
+set(SOURCES "" CACHE STRING "List of sources to compile.")
+
 option(PROFILE "Enable profiling." OFF)
 option(PROFILER "Include the internal profiler." OFF)
 
 option(SYMBOLS "Enable symbols." OFF)
-set(SYMLEVEL "1" CACHE STRING "Symbols level.")
+## set the symbols level
+if(NOT SOURCES STREQUAL "")
+  set(SYMLEVEL_DEFAULT "2")
+else()
+  set(SYMLEVEL_DEFAULT "1")
+endif()
+
+set(SYMLEVEL ${SYMLEVEL_DEFAULT} CACHE STRING "Symbols level.")
 set_property(CACHE SYMLEVEL PROPERTY STRINGS "0" "1" "2")
 
-set(OPTIMIZE "3" CACHE STRING "Symbols level.")
+set(OPTIMIZE "3" CACHE STRING "Optimization level.")
 set_property(CACHE OPTIMIZE PROPERTY STRINGS "0" "1" "2" "3")
 
 option(MAP "Generate a link map." OFF)
@@ -121,29 +130,13 @@ option(SHADOW_CHECK "Shadow checks." OFF)
 option(STRIP_SYMBOLS "Symbols stripping." OFF)
 option(SHLIB "Generate shared libs." OFF)
 
-# newoption {
-# 	trigger = "SOURCES",
-# 	description = "List of sources to compile.",
-# }
-# 
-# newoption {
-# 	trigger = "DEBUG_DIR",
-# 	description = "Default directory for debugger.",
-# }
-# 
-# newoption {
-# 	trigger = "DEBUG_ARGS",
-# 	description = "Arguments for running debug build.",
-# }
-# 
-# newoption {
-# 	trigger = "WEBASSEMBLY",
-# 	description = "Produce WebAssembly output when building with Emscripten.",
-# }
-# 
+set(DEBUG_DIR "" CACHE STRING "Default directory for debugger.")
+set(DEBUG_ARGS "" CACHE STRING "Arguments for running debug build.")
+
+option(WEBASSEMBLY "Produce WebAssembly output when building with Emscripten." OFF)
+
 set(SANITIZE "" CACHE STRING "Specifies the santizer(s) to use.")
 set_property(CACHE SANITIZE PROPERTY STRINGS "address" "memory" "undefined")
-
 
 ## enable symbols as it is useless without them
 if(NOT ${SANITIZE} STREQUAL "")
@@ -162,21 +155,6 @@ if(PROFILE)
   set_option(SYMBOLS ON)
 endif()
 
-#
-## set the symbols level
-#ifdef SYMBOLS
-#PARAMS += --SYMBOLS='$(SYMBOLS)'
-#ifneq '$(SYMBOLS)' '0'
-#ifndef SYMLEVEL
-#ifdef SOURCES
-#SYMLEVEL = 2
-#else
-#SYMLEVEL = 1
-#endif
-#endif
-#endif
-#endif
-#
 # dofile ("extlib.lua")
 # 
 if(SHLIB)
@@ -188,9 +166,7 @@ endif()
 find_package(PythonInterp 3.6 REQUIRED)
 
 if(NOT ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
-  if (NOT FORCE_DRC_C_BACKEND)
-    set_option(FORCE_DRC_C_BACKEND ON)
-  endif()
+  set_option(FORCE_DRC_C_BACKEND ON)
 endif()
 
 if(NOASM AND (NOT FORCE_DRC_C_BACKEND))
@@ -315,72 +291,42 @@ if(WIN32)
 else()
   add_compile_definitions(CRLF=2)
 endif()
-# 
-# 
-# if _OPTIONS["BIGENDIAN"]=="1" then
-# 	if _OPTIONS["targetos"]=="macosx" then
-# 		defines {
-# 			"OSX_PPC",
-# 		}
-# 		buildoptions {
-# 			"-Wno-unused-label",
-# 			"-flax-vector-conversions",
-# 		}
-# 		if _OPTIONS["SYMBOLS"] then
-# 			buildoptions {
-# 				"-mlong-branch",
-# 			}
-# 		end
-# 		configuration { "x64" }
-# 			buildoptions {
-# 				"-arch ppc64",
-# 			}
-# 			linkoptions {
-# 				"-arch ppc64",
-# 			}
-# 		configuration { "x32" }
-# 			buildoptions {
-# 				"-arch ppc",
-# 			}
-# 			linkoptions {
-# 				"-arch ppc",
-# 			}
-# 		configuration { }
-# 	end
-# else
-# 	defines {
-# 		"LSB_FIRST",
-# 	}
-# 	if _OPTIONS["targetos"]=="macosx" then
-# 		configuration { "arm64" }
-# 			buildoptions {
-# 				"-arch arm64",
-# 			}
-# 			linkoptions {
-# 				"-arch arm64",
-# 			}
-# 		configuration { "x64", "not arm64" }
-# 			buildoptions {
-# 				"-arch x86_64",
-# 			}
-# 			linkoptions {
-# 				"-arch x86_64",
-# 			}
-# 		configuration { "x32", "not arm64" }
-# 			buildoptions {
-# 				"-arch i386",
-# 			}
-# 			linkoptions {
-# 				"-arch i386",
-# 			}
-# 		configuration { }
-# 	end
-# end
+
 include (TestBigEndian)
 TEST_BIG_ENDIAN(BIG_ENDIAN)
 
-if (NOT BIG_ENDIAN)
+if (BIG_ENDIAN)
+  if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+    add_compile_definitions(OSX_PPC)
+    add_compile_options(-Wno-unused-label)
+    add_compile_options(-flax-vector-conversions)
+ 		if(SYMBOLS)
+	    add_compile_options(-mlong-branch)
+		endif()
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+      add_compile_options(-arch ppc64)
+      add_link_options(-arch ppc64)
+    else()
+      add_compile_options(-arch ppc)
+      add_link_options(-arch ppc)
+    endif()
+  endif()
+else()
 	add_compile_definitions(LSB_FIRST)
+  if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+    if (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "arm64")
+      add_compile_options(-arch arm64)
+      add_link_options(-arch arm64)
+    else()
+      if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        add_compile_options(-arch x86_64)
+        add_link_options(-arch x86_64)
+      else()
+        add_compile_options(-arch i386)
+        add_link_options(-arch i386)
+      endif()
+    endif()
+  endif()
 endif()
 # 
 # if _OPTIONS["with-system-jpeg"]~=nil then
