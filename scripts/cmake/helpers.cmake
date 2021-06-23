@@ -110,3 +110,7 @@ function(dump_mame_options)
     endforeach()
     message(STATUS "===========================================================")
 endfunction()
+
+macro(set_option option value)
+  set(${option} ${value} CACHE "" INTERNAL FORCE)
+endmacro()

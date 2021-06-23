@@ -87,7 +87,6 @@ option(TOOLS "Enable building tools." ON)
 option(TESTS "Enable building tests." ON)
 option(BENCHMARKS "Enable building benchmarks." ON)
 
-
 # 
 # newoption {
 # 	trigger = 'with-bundled-sdl2',
@@ -142,11 +141,42 @@ option(SHLIB "Generate shared libs." OFF)
 # 	description = "Produce WebAssembly output when building with Emscripten.",
 # }
 # 
-# newoption {
-# 	trigger = "SANITIZE",
-# 	description = "Specifies the santizer(s) to use."
-# }
-# 
+set(SANITIZE "" CACHE STRING "Specifies the santizer(s) to use.")
+set_property(CACHE SANITIZE PROPERTY STRINGS "address" "memory" "undefined")
+
+
+## enable symbols as it is useless without them
+if(NOT ${SANITIZE} STREQUAL "")
+  set_option(SYMBOLS ON)
+endif()
+
+## profiler defaults to on for DEBUG builds
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  set_option(PROFILER ON)
+endif()
+
+## allow gprof profiling as well, which overrides the internal PROFILER
+## also enable symbols as it is useless without them
+if(PROFILE)
+  set_option(PROFILER OFF)
+  set_option(SYMBOLS ON)
+endif()
+
+#
+## set the symbols level
+#ifdef SYMBOLS
+#PARAMS += --SYMBOLS='$(SYMBOLS)'
+#ifneq '$(SYMBOLS)' '0'
+#ifndef SYMLEVEL
+#ifdef SOURCES
+#SYMLEVEL = 2
+#else
+#SYMLEVEL = 1
+#endif
+#endif
+#endif
+#endif
+#
 # dofile ("extlib.lua")
 # 
 if(SHLIB)
@@ -158,7 +188,7 @@ endif()
 find_package(PythonInterp 3.6 REQUIRED)
 
 if(NOASM AND (NOT FORCE_DRC_C_BACKEND))
- 	set(FORCE_DRC_C_BACKEND ON)
+ 	set_option(FORCE_DRC_C_BACKEND ON)
 endif()
 
 set(GEN_DIR "${CMAKE_SOURCE_DIR}/build/generated")
@@ -477,35 +507,23 @@ add_compile_options($<$<COMPILE_LANGUAGE:OBJCXX>:-Wpointer-arith>)
 # warnings only applicable to C++ compiles
 add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual>)
 
-# if _OPTIONS["SANITIZE"] then
-# 	buildoptions {
-# 		"-fsanitize=".. _OPTIONS["SANITIZE"]
-# 	}
-# 	linkoptions {
-# 		"-fsanitize=".. _OPTIONS["SANITIZE"]
-# 	}
-# 	if string.find(_OPTIONS["SANITIZE"], "address") then
-# 		buildoptions {
-# 			"-fsanitize-address-use-after-scope"
-# 		}
-# 		linkoptions {
-# 			"-fsanitize-address-use-after-scope"
-# 		}
-# 	end
-# 	if string.find(_OPTIONS["SANITIZE"], "undefined") then
-# 		-- 'function' produces errors without delegates by design
-# 		-- 'alignment' produces a lot of errors which we are not interested in
-# 		buildoptions {
-# 			"-fno-sanitize=function",
-# 			"-fno-sanitize=alignment"
-# 		}
-# 		linkoptions {
-# 			"-fno-sanitize=function",
-# 			"-fno-sanitize=alignment"
-# 		}
-# 	end
-# end
- 
+if(NOT ${SANITIZE} STREQUAL "")
+  add_compile_options(-fsanitize=${SANITIZE})
+  add_link_options(-fsanitize=${SANITIZE})
+
+  if(${SANITIZE} STREQUAL "address")
+    add_compile_options(-fsanitize-address-use-after-scope)
+    add_link_options(-fsanitize-address-use-after-scope)
+  endif()
+  if(${SANITIZE} STREQUAL "undefined")
+    # 'function' produces errors without delegates by design
+    # 'alignment' produces a lot of errors which we are not interested in
+    add_compile_options(-fno-sanitize=function)
+    add_compile_options(-fno-sanitize=alignment)
+    add_link_options(-fno-sanitize=function)
+    add_link_options(-fno-sanitize=alignment)
+  endif()
+endif()
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 6)
@@ -837,51 +855,7 @@ dump_mame_options()
 #endif
 #
 
-##-------------------------------------------------
-## sanity check the configuration
-##-------------------------------------------------
-#
-## enable symbols as it is useless without them
-#ifdef SANITIZE
-#SYMBOLS = 1
-#endif
-#
-## profiler defaults to on for DEBUG builds
-#ifdef DEBUG
-#ifneq '$(DEBUG)' '0'
-#ifndef PROFILER
-#PROFILER = 1
-#endif
-#endif
-#endif
-#
-## allow gprof profiling as well, which overrides the internal PROFILER
-## also enable symbols as it is useless without them
-#ifdef PROFILE
-#PROFILER =
-#SYMBOLS = 1
-#endif
-#
-## specify a default optimization level if none explicitly stated
-#ifndef OPTIMIZE
-#OPTIMIZE = 3
-#endif
-#
-## set the symbols level
-#ifdef SYMBOLS
-#PARAMS += --SYMBOLS='$(SYMBOLS)'
-#ifneq '$(SYMBOLS)' '0'
-#ifndef SYMLEVEL
-#ifdef SOURCES
-#SYMLEVEL = 2
-#else
-#SYMLEVEL = 1
-#endif
-#endif
-#endif
-#endif
-#
-#
+
 ##-------------------------------------------------
 ## Clean/bootstrap
 ##-------------------------------------------------
