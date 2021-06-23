@@ -136,21 +136,10 @@ endif()
 #	}
 #end
 #
-#configuration { "osx*" }
-#	includedirs {
-#		MAME_DIR .. "3rdparty/bx/include/compat/osx",
-#	}
-#
-#configuration { "freebsd" }
-#	includedirs {
-#		MAME_DIR .. "3rdparty/bx/include/compat/freebsd",
-#	}
-#
-#configuration { "netbsd" }
-#	includedirs {
-#		MAME_DIR .. "3rdparty/bx/include/compat/freebsd",
-#	}
-#
-#configuration { }
-#
+    if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+        target_include_directories(${_project} PRIVATE ${MAME_DIR}/3rdparty/bx/include/compat/osx)
+    endif()
+    if((${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD") OR (${CMAKE_SYSTEM_NAME} STREQUAL "NetBSD"))
+        target_include_directories(${_project} PRIVATE ${MAME_DIR}/3rdparty/bx/include/compat/freebsd)
+    endif()
 endmacro()
