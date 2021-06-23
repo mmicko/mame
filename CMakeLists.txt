@@ -187,6 +187,12 @@ endif()
 
 find_package(PythonInterp 3.6 REQUIRED)
 
+if(NOT ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
+  if (NOT FORCE_DRC_C_BACKEND)
+    set_option(FORCE_DRC_C_BACKEND ON)
+  endif()
+endif()
+
 if(NOASM AND (NOT FORCE_DRC_C_BACKEND))
  	set_option(FORCE_DRC_C_BACKEND ON)
 endif()
@@ -816,45 +822,6 @@ dump_mame_options()
 #endif
 #endif
 #
-#ifeq ($(findstring ppc,$(UNAME)),ppc)
-#ifndef FORCE_DRC_C_BACKEND
-#	FORCE_DRC_C_BACKEND := 1
-#endif
-#endif
-#
-#ifeq ($(findstring powerpc,$(UNAME)),powerpc)
-#ifndef FORCE_DRC_C_BACKEND
-#	FORCE_DRC_C_BACKEND := 1
-#endif
-#endif
-#
-#ifeq ($(findstring arm,$(UNAME)),arm)
-#ARCHITECTURE :=
-#ifndef FORCE_DRC_C_BACKEND
-#	FORCE_DRC_C_BACKEND := 1
-#endif
-#endif
-#
-#ifeq ($(findstring aarch64,$(UNAME)),aarch64)
-#ARCHITECTURE :=
-#ifndef FORCE_DRC_C_BACKEND
-#	FORCE_DRC_C_BACKEND := 1
-#endif
-#endif
-#
-#ifeq ($(findstring s390x,$(UNAME)),s390x)
-#ifndef FORCE_DRC_C_BACKEND
-#	FORCE_DRC_C_BACKEND := 1
-#endif
-#endif
-#
-#ifeq ($(findstring riscv64,$(UNAME)),riscv64)
-#ifndef FORCE_DRC_C_BACKEND
-#	FORCE_DRC_C_BACKEND := 1
-#endif
-#endif
-#
-
 
 ##-------------------------------------------------
 ## Clean/bootstrap
