@@ -128,10 +128,14 @@ option(SHADOW_CHECK "Shadow checks." OFF)
 option(STRIP_SYMBOLS "Symbols stripping." OFF)
 option(SHLIB "Generate shared libs." OFF)
 
-set(DEBUG_DIR "" CACHE STRING "Default directory for debugger.")
-set(DEBUG_ARGS "" CACHE STRING "Arguments for running debug build.")
+if(MSVC)
+  set(DEBUG_DIR "" CACHE STRING "Default directory for debugger.")
+  set(DEBUG_ARGS "" CACHE STRING "Arguments for running debug build.")
+endif()
 
-option(WEBASSEMBLY "Produce WebAssembly output when building with Emscripten." OFF)
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
+  option(WEBASSEMBLY "Produce WebAssembly output when building with Emscripten." OFF)
+endif()
 
 set(SANITIZE "" CACHE STRING "Specifies the santizer(s) to use.")
 set_property(CACHE SANITIZE PROPERTY STRINGS "address" "memory" "undefined")

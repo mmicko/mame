@@ -500,19 +500,17 @@ if(NOT STANDALONE)
 #			PYTHON .. " \"" .. path.translate(MAME_DIR .. "scripts/build/verinfo.py","\\") .. "\" -r -b " .. rctarget .. " \"" .. path.translate(GEN_DIR .. "version.cpp","\\") .. "\" > \"" .. path.translate(GEN_DIR  .. "resource/" .. rctarget .. "vers.rc", "\\") .. "\"" ,
 #		}
 endif() # (NOT STANDALONE)
-#
-#	configuration { }
-#
-#	if _OPTIONS["DEBUG_DIR"]~=nil then
-#		debugdir(_OPTIONS["DEBUG_DIR"])
-#	else
-#		debugdir (MAME_DIR)
-#	end
-#	if _OPTIONS["DEBUG_ARGS"]~=nil then
-#		debugargs (_OPTIONS["DEBUG_ARGS"])
-#	else
-#		debugargs ("-window")
-#	end
-#
-#end
+
+    if(MSVC)
+        if(NOT DEBUG_DIR STREQUAL "")
+            set(VS_DEBUGGER_WORKING_DIRECTORY ${DEBUG_DIR})
+        else()
+            set(VS_DEBUGGER_WORKING_DIRECTORY ${MAME_DIR})
+        endif()
+        if(NOT DEBUG_ARGS STREQUAL "")
+            set(VS_DEBUGGER_COMMAND_ARGUMENTS ${DEBUG_ARGS})
+        else()
+            set(VS_DEBUGGER_COMMAND_ARGUMENTS "-window")
+        endif()
+    endif()
 endmacro()
