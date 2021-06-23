@@ -74,9 +74,9 @@ endfunction()
 
 function(translationbuildtask _language)
     add_custom_command(
-		COMMAND ${PYTHON_EXECUTABLE} ${MAME_DIR}/scripts/build/msgfmt.py --output-file ${CMAKE_SOURCE_DIR}/language/${_language}/strings.mo ${CMAKE_SOURCE_DIR}/language/${_language}/strings.po
-		DEPENDS ${MAME_DIR}/scripts/build/msgfmt.py ${CMAKE_SOURCE_DIR}/language/${_language}/strings.po
-		OUTPUT ${CMAKE_SOURCE_DIR}/language/${_language}/strings.mo
+		COMMAND ${PYTHON_EXECUTABLE} ${MAME_DIR}/scripts/build/msgfmt.py --output-file ${MAME_DIR}/language/${_language}/strings.mo ${MAME_DIR}/language/${_language}/strings.po
+		DEPENDS ${MAME_DIR}/scripts/build/msgfmt.py ${MAME_DIR}/language/${_language}/strings.po
+		OUTPUT ${MAME_DIR}/language/${_language}/strings.mo
 		COMMENT "Converting translation language/${_language}/strings.po..."
 	)
 endfunction()

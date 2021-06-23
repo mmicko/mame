@@ -872,10 +872,10 @@ dump_mame_options()
 #	$(SILENT) find language -name "*.po" -print0 | xargs -0 -n 1 -I %% msgattrib --clear-fuzzy --empty %% -o %%
 
 # Converting translation
-subdir_list(LANGUAGE_DIRS ${CMAKE_SOURCE_DIR}/language)
+subdir_list(LANGUAGE_DIRS ${MAME_DIR}/language)
 set(LANGUAGE_FILES "")
 foreach(subdir ${LANGUAGE_DIRS})
-  list(APPEND LANGUAGE_FILES ${CMAKE_SOURCE_DIR}/language/${subdir}/strings.mo)
+  list(APPEND LANGUAGE_FILES ${MAME_DIR}/language/${subdir}/strings.mo)
   translationbuildtask(${subdir})
 endforeach()
 add_custom_target(languages ALL DEPENDS ${LANGUAGE_FILES})
