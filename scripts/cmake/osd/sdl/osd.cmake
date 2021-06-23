@@ -1,21 +1,17 @@
-#-- license:BSD-3-Clause
-#-- copyright-holders:MAMEdev Team
+### license:BSD-3-Clause
+### copyright-holders:MAMEdev Team
 #
-#---------------------------------------------------------------------------
-#--
-#--   sdl.lua
-#--
-#--   Rules for the building with SDL
-#--
-#---------------------------------------------------------------------------
-#
-#dofile("modules.lua")
-#
-#
-#function maintargetosdoptions(_target,_subtarget)
+############################################################################
+###
+###   sdl.lua
+###
+###   Rules for the building with SDL
+###
+############################################################################
+
 macro(maintargetosdoptions _projectname)
 	osdmodulestargetconf(${_projectname})
-#
+
 #	if _OPTIONS["USE_DISPATCH_GL"]~="1" and _OPTIONS["MESA_INSTALL_ROOT"] then
 #		libdirs {
 #			path.join(_OPTIONS["MESA_INSTALL_ROOT"],"lib"),
@@ -25,45 +21,29 @@ macro(maintargetosdoptions _projectname)
 #		}
 #	end
 #
-#	if _OPTIONS["NO_X11"]~="1" then
-#		links {
-#			"X11
-#			"Xinerama
-#		}
-target_link_libraries(${_projectname} PRIVATE
-    X11
-    Xinerama
-)
-#	else
-#		if _OPTIONS["targetos"]=="linux" or _OPTIONS["targetos"]=="netbsd" or _OPTIONS["targetos"]=="openbsd" then
-#			links {
-#				"EGL
-#			}
-#		end
-#	end
-#
-#	if _OPTIONS["NO_USE_XINPUT"]~="1" then
-#		links {
-#			"Xext
-#			"Xi
-#		}
-target_link_libraries(${_projectname} PRIVATE
-    Xext
-    Xi
-)
-#	end
-#
-#	if BASE_TARGETOS=="unix" and _OPTIONS["targetos"]~="macosx" and _OPTIONS["targetos"]~="android" and _OPTIONS["targetos"]~="asmjs" then
-#		links {
-#			"SDL2_ttf
-#		}
+if(NOT NO_X11)
+    target_link_libraries(${_projectname} PRIVATE
+        X11
+        Xinerama
+    )
+else()
+    if((${CMAKE_SYSTEM_NAME} STREQUAL "Linux") OR (${CMAKE_SYSTEM_NAME} STREQUAL "NetBSD") OR (${CMAKE_SYSTEM_NAME} STREQUAL "OpenBSD"))
+        target_link_libraries(${_projectname} PRIVATE EGL)
+    endif()
+endif()
+if(NOT NO_USE_XINPUT)
+    target_link_libraries(${_projectname} PRIVATE
+        Xext
+        Xi
+    )
+endif()
+
+if((${BASE_TARGETOS} STREQUAL "unix") AND (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Darwin") AND (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Android") AND (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten"))
         target_link_libraries(${_projectname} PRIVATE SDL2_ttf)
-#		local str = backtick(pkgconfigcmd() .. " --libs fontconfig")
-        target_link_libraries(${_projectname} PRIVATE fontconfig freetype)
-#		addlibfromstring(str)
-#		addoptionsfromstring(str)
-#	end
-#
+        target_link_libraries(${_projectname} PRIVATE fontconfig freetype) # pkgconfig --libs fontconfig
+endif()
+
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 #	if _OPTIONS["targetos"]=="windows" then
 #		if _OPTIONS["with-bundled-sdl2"]~=nil then
 #			configuration { "mingw*"}
@@ -113,12 +93,13 @@ target_link_libraries(${_projectname} PRIVATE
 #		links {
 #			"psapi
 #		}
-#	elseif _OPTIONS["targetos"]=="haiku" then
+endif()
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Haiku")
 #		links {
 #			"network
 #			"bsd
 #		}
-#	end
+endif()
 #
 #	configuration { "mingw*" or "vs*" }
 #		targetprefix "sdl"
@@ -132,7 +113,7 @@ target_link_libraries(${_projectname} PRIVATE
 #		if _OPTIONS["with-bundled-sdl2"]~=nil then
 #			links {
 #				"SDL2
-target_link_libraries(${_projectname} PRIVATE SDL2)
+#target_link_libraries(${_projectname} PRIVATE SDL2)
 #			}
 #		end
 #	end
@@ -161,14 +142,7 @@ endmacro()
 #	description = "Default search path for .ini files
 #}
 #
-#newoption {
-#	trigger = "NO_X11
-#	description = "Disable use of X11
-#	allowed = {
-#		{ "0  "Enable X11"  },
-#		{ "1  "Disable X11" },
-#	},
-#}
+option(NO_X11 "Disable use of X11" OFF)
 #
 #if not _OPTIONS["NO_X11"] then
 #	if _OPTIONS["targetos"]=="windows" or _OPTIONS["targetos"]=="macosx" or _OPTIONS["targetos"]=="haiku" or _OPTIONS["targetos"]=="asmjs" then
@@ -177,15 +151,7 @@ endmacro()
 #		_OPTIONS["NO_X11"] = "0"
 #	end
 #end
-#
-#newoption {
-#	trigger = "NO_USE_XINPUT
-#	description = "Disable use of Xinput
-#	allowed = {
-#		{ "0  "Enable Xinput"  },
-#		{ "1  "Disable Xinput" },
-#	},
-#}
+
 #
 #if not _OPTIONS["NO_USE_XINPUT"] then
 #	if _OPTIONS["targetos"]=="windows" or _OPTIONS["targetos"]=="macosx" or _OPTIONS["targetos"]=="haiku" or _OPTIONS["targetos"]=="asmjs" then
@@ -194,33 +160,14 @@ endmacro()
 #		_OPTIONS["NO_USE_XINPUT"] = "0"
 #	end
 #end
-#
-#newoption {
-#	trigger = "NO_USE_XINPUT_WII_LIGHTGUN_HACK
-#	description = "Disable use of Xinput Wii Lightgun Hack
-#	allowed = {
-#		{ "0  "Enable Xinput Wii Lightgun Hack"  },
-#		{ "1  "Disable Xinput Wii Lightgun Hack" },
-#	},
-#}
-#
-#if not _OPTIONS["NO_USE_XINPUT_WII_LIGHTGUN_HACK"] then
-#	_OPTIONS["NO_USE_XINPUT_WII_LIGHTGUN_HACK"] = "1"
-#end
-#
-#newoption {
-#	trigger = "SDL2_MULTIAPI
-#	description = "Use couriersud's multi-keyboard patch for SDL 2.1? (this API was removed prior to the 2.0 release)
-#	allowed = {
-#		{ "0  "Use single-keyboard API"  },
-#		{ "1  "Use multi-keyboard API"   },
-#	},
-#}
-#
-#if not _OPTIONS["SDL2_MULTIAPI"] then
-#	_OPTIONS["SDL2_MULTIAPI"] = "0"
-#end
-#
+option(NO_USE_XINPUT "Disable use of Xinput" OFF)
+
+option(NO_USE_XINPUT_WII_LIGHTGUN_HACK "Disable use of Xinput Wii Lightgun Hack" ON)
+
+
+option(SDL2_MULTIAPI "Use couriersud's multi-keyboard patch for SDL 2.1? (this API was removed prior to the 2.0 release)" OFF)
+
+
 #newoption {
 #	trigger = "SDL_INSTALL_ROOT
 #	description = "Equivalent to the ./configure --prefix=<path>
@@ -234,44 +181,27 @@ endmacro()
 #if not _OPTIONS["SDL_FRAMEWORK_PATH"] then
 #	_OPTIONS["SDL_FRAMEWORK_PATH"] = "/Library/Frameworks/"
 #end
-#
-#newoption {
-#	trigger = "USE_LIBSDL
-#	description = "Use SDL library on OS (rather than framework/dll)
-#	allowed = {
-#		{ "0  "Use framework/dll"  },
-#		{ "1  "Use library" },
-#	},
-#}
-#
-#if not _OPTIONS["USE_LIBSDL"] then
-#	_OPTIONS["USE_LIBSDL"] = "0"
-#end
-#
-#
-#BASE_TARGETOS       = "unix"
-#SDLOS_TARGETOS      = "unix"
+
+option(USE_LIBSDL "Use SDL library on OS (rather than framework/dll)" OFF)
+
 set(BASE_TARGETOS "unix")
 set(SDLOS_TARGETOS "unix")
-#if _OPTIONS["targetos"]=="linux" then
-#elseif _OPTIONS["targetos"]=="openbsd" then
-#elseif _OPTIONS["targetos"]=="netbsd" then
-#elseif _OPTIONS["targetos"]=="haiku" then
-#elseif _OPTIONS["targetos"]=="asmjs" then
-#elseif _OPTIONS["targetos"]=="windows" then
-#	BASE_TARGETOS       = "win32"
-#	SDLOS_TARGETOS      = "win32"
-#elseif _OPTIONS["targetos"]=="macosx" then
-#	SDLOS_TARGETOS      = "macosx"
-#end
-#
+
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    set(BASE_TARGETOS "win32")
+    set(SDLOS_TARGETOS "win32")
+elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+    set(SDLOS_TARGETOS "macosx")
+endif()
+
 #if _OPTIONS["with-bundled-sdl2"]~=nil then
 #	includedirs {
 #		GEN_DIR .. "includes
 #	}
 #end
-#if BASE_TARGETOS=="unix" then
-#	if _OPTIONS["targetos"]=="macosx" then
+
+if (${BASE_TARGETOS} STREQUAL "unix")
+    if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
 #		local os_version = str_to_version(backtick("sw_vers -productVersion"))
 #
 #		links {
@@ -312,16 +242,16 @@ set(SDLOS_TARGETOS "unix")
 #				addoptionsfromstring(str)
 #			end
 #		end
-#	else
-#		if _OPTIONS["NO_X11"]=="1" then
-#			_OPTIONS["USE_QTDEBUG"] = "0"
-#		else
+    else()
+        if (NO_X11)
+            set_option(USE_QTDEBUG OFF)
+        else()
 #			libdirs {
 #				"/usr/X11/lib
 #				"/usr/X11R6/lib
 #				"/usr/openwin/lib
 #			}
-#		end
+		endif()
 #		if _OPTIONS["with-bundled-sdl2"]~=nil then
 #			if _OPTIONS["targetos"]~="android" then
 #				links {
@@ -350,122 +280,83 @@ set(SDLOS_TARGETOS "unix")
 #				}
 #			end
 #		end
-#	end
-#end
-#
-#project ("qtdbg_" .. _OPTIONS["osd"])
-#	uuid (os.uuid("qtdbg_" .. _OPTIONS["osd"]))
-#	kind (LIBTYPE)
-#
-#	dofile("sdl_cfg.lua")
-#	includedirs {
-#		${MAME_DIR}/src/emu
-#		${MAME_DIR}/src/devices -- accessing imagedev from debugger
-#		${MAME_DIR}/src/osd
-#		${MAME_DIR}/src/lib
-#		${MAME_DIR}/src/lib/util
-#		${MAME_DIR}/src/osd/modules/render
-#		${MAME_DIR}/3rdparty
-#	}
-#	configuration { "linux-* or freebsd" }
-#		buildoptions {
-#			"-fPIC
-#		}
-#	configuration { }
-#
-#	qtdebuggerbuild()
-#
-#project ("osd_" .. _OPTIONS["osd"])
-#	targetsubdir(_OPTIONS["target"] .."_" .._OPTIONS["subtarget"])
-#	uuid (os.uuid("osd_" .. _OPTIONS["osd"]))
-#	kind (LIBTYPE)
-#
-#	dofile("sdl_cfg.lua")
-#
+    endif()
+endif()
 
-#	if _OPTIONS["targetos"]=="windows" then
-#		files {
-#			${MAME_DIR}/src/osd/windows/main.cpp
-#		}
-#	end
-#
-#	if _OPTIONS["targetos"]=="macosx" then
-#		files {
-#			${MAME_DIR}/src/osd/modules/debugger/debugosx.mm
-#			${MAME_DIR}/src/osd/modules/debugger/osx/breakpointsview.mm
-#			${MAME_DIR}/src/osd/modules/debugger/osx/breakpointsview.h
-#			${MAME_DIR}/src/osd/modules/debugger/osx/consoleview.mm
-#			${MAME_DIR}/src/osd/modules/debugger/osx/consoleview.h
-#			${MAME_DIR}/src/osd/modules/debugger/osx/debugcommandhistory.mm
-#			${MAME_DIR}/src/osd/modules/debugger/osx/debugcommandhistory.h
-#			${MAME_DIR}/src/osd/modules/debugger/osx/debugconsole.mm
-#			${MAME_DIR}/src/osd/modules/debugger/osx/debugconsole.h
-#			${MAME_DIR}/src/osd/modules/debugger/osx/debugview.mm
-#			${MAME_DIR}/src/osd/modules/debugger/osx/debugview.h
-#			${MAME_DIR}/src/osd/modules/debugger/osx/debugwindowhandler.mm
-#			${MAME_DIR}/src/osd/modules/debugger/osx/debugwindowhandler.h
-#			${MAME_DIR}/src/osd/modules/debugger/osx/deviceinfoviewer.mm
-#			${MAME_DIR}/src/osd/modules/debugger/osx/deviceinfoviewer.h
-#			${MAME_DIR}/src/osd/modules/debugger/osx/devicesviewer.mm
-#			${MAME_DIR}/src/osd/modules/debugger/osx/devicesviewer.h
-#			${MAME_DIR}/src/osd/modules/debugger/osx/disassemblyview.mm
-#			${MAME_DIR}/src/osd/modules/debugger/osx/disassemblyviewer.mm
-#			${MAME_DIR}/src/osd/modules/debugger/osx/disassemblyviewer.h
-#			${MAME_DIR}/src/osd/modules/debugger/osx/errorlogview.mm
-#			${MAME_DIR}/src/osd/modules/debugger/osx/errorlogview.h
-#			${MAME_DIR}/src/osd/modules/debugger/osx/disassemblyview.h
-#			${MAME_DIR}/src/osd/modules/debugger/osx/errorlogviewer.mm
-#			${MAME_DIR}/src/osd/modules/debugger/osx/errorlogviewer.h
-#			${MAME_DIR}/src/osd/modules/debugger/osx/memoryview.mm
-#			${MAME_DIR}/src/osd/modules/debugger/osx/memoryview.h
-#			${MAME_DIR}/src/osd/modules/debugger/osx/memoryviewer.mm
-#			${MAME_DIR}/src/osd/modules/debugger/osx/memoryviewer.h
-#			${MAME_DIR}/src/osd/modules/debugger/osx/pointsviewer.mm
-#			${MAME_DIR}/src/osd/modules/debugger/osx/pointsviewer.h
-#			${MAME_DIR}/src/osd/modules/debugger/osx/registersview.mm
-#			${MAME_DIR}/src/osd/modules/debugger/osx/registersview.h
-#			${MAME_DIR}/src/osd/modules/debugger/osx/watchpointsview.mm
-#			${MAME_DIR}/src/osd/modules/debugger/osx/watchpointsview.h
-#			${MAME_DIR}/src/osd/modules/debugger/osx/debugosx.h
-#		}
-#	end
-#
-    set(OSD_SRCS
-        ${MAME_DIR}/src/osd/sdl/osdsdl.h
-        ${MAME_DIR}/src/osd/sdl/sdlprefix.h
-        ${MAME_DIR}/src/osd/sdl/sdlmain.cpp
-        ${MAME_DIR}/src/osd/osdepend.h
-        ${MAME_DIR}/src/osd/sdl/video.cpp
-        ${MAME_DIR}/src/osd/sdl/window.cpp
-        ${MAME_DIR}/src/osd/sdl/window.h
-        ${MAME_DIR}/src/osd/modules/osdwindow.cpp
-        ${MAME_DIR}/src/osd/modules/osdwindow.h
-        ${MAME_DIR}/src/osd/modules/render/drawsdl.cpp
-		${MAME_DIR}/src/osd/modules/render/draw13.cpp
-		${MAME_DIR}/src/osd/modules/render/blit13.h
-    )
-    
-    osdmodulesbuild("osd" "${OSD_SRCS}")
+set(OSD_SRCS
+    ${MAME_DIR}/src/osd/sdl/osdsdl.h
+    ${MAME_DIR}/src/osd/sdl/sdlprefix.h
+    ${MAME_DIR}/src/osd/sdl/sdlmain.cpp
+    ${MAME_DIR}/src/osd/osdepend.h
+    ${MAME_DIR}/src/osd/sdl/video.cpp
+    ${MAME_DIR}/src/osd/sdl/window.cpp
+    ${MAME_DIR}/src/osd/sdl/window.h
+    ${MAME_DIR}/src/osd/modules/osdwindow.cpp
+    ${MAME_DIR}/src/osd/modules/osdwindow.h
+    ${MAME_DIR}/src/osd/modules/render/drawsdl.cpp
+    ${MAME_DIR}/src/osd/modules/render/draw13.cpp
+    ${MAME_DIR}/src/osd/modules/render/blit13.h
+)
 
-    target_include_directories(osd PRIVATE 
-		${MAME_DIR}/src/emu
-		${MAME_DIR}/src/devices # accessing imagedev from debugger
-		${MAME_DIR}/src/osd
-		${MAME_DIR}/src/lib
-		${MAME_DIR}/src/lib/util
-		${MAME_DIR}/src/osd/modules/file
-		${MAME_DIR}/src/osd/modules/render
-		${MAME_DIR}/3rdparty
-		${MAME_DIR}/src/osd/sdl
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    list(APPEND OSD_SRCS ${MAME_DIR}/src/osd/windows/main.cpp)
+endif()
+
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+    list(APPEND OSD_SRCS 
+        ${MAME_DIR}/src/osd/modules/debugger/debugosx.mm
+        ${MAME_DIR}/src/osd/modules/debugger/osx/breakpointsview.mm
+        ${MAME_DIR}/src/osd/modules/debugger/osx/breakpointsview.h
+        ${MAME_DIR}/src/osd/modules/debugger/osx/consoleview.mm
+        ${MAME_DIR}/src/osd/modules/debugger/osx/consoleview.h
+        ${MAME_DIR}/src/osd/modules/debugger/osx/debugcommandhistory.mm
+        ${MAME_DIR}/src/osd/modules/debugger/osx/debugcommandhistory.h
+        ${MAME_DIR}/src/osd/modules/debugger/osx/debugconsole.mm
+        ${MAME_DIR}/src/osd/modules/debugger/osx/debugconsole.h
+        ${MAME_DIR}/src/osd/modules/debugger/osx/debugview.mm
+        ${MAME_DIR}/src/osd/modules/debugger/osx/debugview.h
+        ${MAME_DIR}/src/osd/modules/debugger/osx/debugwindowhandler.mm
+        ${MAME_DIR}/src/osd/modules/debugger/osx/debugwindowhandler.h
+        ${MAME_DIR}/src/osd/modules/debugger/osx/deviceinfoviewer.mm
+        ${MAME_DIR}/src/osd/modules/debugger/osx/deviceinfoviewer.h
+        ${MAME_DIR}/src/osd/modules/debugger/osx/devicesviewer.mm
+        ${MAME_DIR}/src/osd/modules/debugger/osx/devicesviewer.h
+        ${MAME_DIR}/src/osd/modules/debugger/osx/disassemblyview.mm
+        ${MAME_DIR}/src/osd/modules/debugger/osx/disassemblyviewer.mm
+        ${MAME_DIR}/src/osd/modules/debugger/osx/disassemblyviewer.h
+        ${MAME_DIR}/src/osd/modules/debugger/osx/errorlogview.mm
+        ${MAME_DIR}/src/osd/modules/debugger/osx/errorlogview.h
+        ${MAME_DIR}/src/osd/modules/debugger/osx/disassemblyview.h
+        ${MAME_DIR}/src/osd/modules/debugger/osx/errorlogviewer.mm
+        ${MAME_DIR}/src/osd/modules/debugger/osx/errorlogviewer.h
+        ${MAME_DIR}/src/osd/modules/debugger/osx/memoryview.mm
+        ${MAME_DIR}/src/osd/modules/debugger/osx/memoryview.h
+        ${MAME_DIR}/src/osd/modules/debugger/osx/memoryviewer.mm
+        ${MAME_DIR}/src/osd/modules/debugger/osx/memoryviewer.h
+        ${MAME_DIR}/src/osd/modules/debugger/osx/pointsviewer.mm
+        ${MAME_DIR}/src/osd/modules/debugger/osx/pointsviewer.h
+        ${MAME_DIR}/src/osd/modules/debugger/osx/registersview.mm
+        ${MAME_DIR}/src/osd/modules/debugger/osx/registersview.h
+        ${MAME_DIR}/src/osd/modules/debugger/osx/watchpointsview.mm
+        ${MAME_DIR}/src/osd/modules/debugger/osx/watchpointsview.h
+        ${MAME_DIR}/src/osd/modules/debugger/osx/debugosx.h
     )
-    osd_cfg(osd)
-#
-#
-#project ("ocore_" .. _OPTIONS["osd"])
-#	targetsubdir(_OPTIONS["target"] .."_" .. _OPTIONS["subtarget"])
-#	uuid (os.uuid("ocore_" .. _OPTIONS["osd"]))
-#	kind (LIBTYPE)
-#
+endif()
+osdmodulesbuild("osd" "${OSD_SRCS}")
+
+target_include_directories(osd PRIVATE 
+    ${MAME_DIR}/src/emu
+    ${MAME_DIR}/src/devices # accessing imagedev from debugger
+    ${MAME_DIR}/src/osd
+    ${MAME_DIR}/src/lib
+    ${MAME_DIR}/src/lib/util
+    ${MAME_DIR}/src/osd/modules/file
+    ${MAME_DIR}/src/osd/modules/render
+    ${MAME_DIR}/3rdparty
+    ${MAME_DIR}/src/osd/sdl
+)
+osd_cfg(osd)
+
 
 set(OCORE_SRCS
     ${MAME_DIR}/src/osd/osdcore.cpp
