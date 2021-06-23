@@ -2,9 +2,13 @@ set(LUALIBS_SRCS
     ${MAME_DIR}/3rdparty/lsqlite3/lsqlite3.c
     ${MAME_DIR}/3rdparty/lua-zlib/lua_zlib.c
     ${MAME_DIR}/3rdparty/luafilesystem/src/lfs.c
-    #${MAME_DIR}/3rdparty/lua-linenoise/linenoise_none.c
-    ${MAME_DIR}/3rdparty/lua-linenoise/linenoise.c
 )
+
+if (${OSD} STREQUAL "uwp")
+    list(APPEND LUALIBS_SRCS ${MAME_DIR}/3rdparty/lua-linenoise/linenoise_none.c)
+else()
+    list(APPEND LUALIBS_SRCS ${MAME_DIR}/3rdparty/lua-linenoise/linenoise.c)
+endif()
 
 add_library(lualibs ${LIBTYPE} ${LUALIBS_SRCS})
 

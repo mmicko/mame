@@ -8,7 +8,6 @@
 ###   Rules for building emu cores
 ###
 ############################################################################
-#
 
 set(EMU_SRCS
 	${MAME_DIR}/src/emu/emu.h
@@ -250,13 +249,9 @@ set(EMU_SRCS
 	${GEN_DIR}/emu/layout/noscreens.lh
 )
 
-#kind (LIBTYPE)
 add_library(emu ${LIBTYPE} ${EMU_SRCS})
 addprojectflags(emu)
-#precompiledheaders()
-#options {
-#	"ArchiveSplit
-#}
+
 target_include_directories(emu PRIVATE
 	${MAME_DIR}/src/osd
 	${MAME_DIR}/src/emu
@@ -306,8 +301,7 @@ layoutbuildtask("emu/layout" "dualhuov")
 layoutbuildtask("emu/layout" "triphsxs")
 layoutbuildtask("emu/layout" "quadhsxs")
 layoutbuildtask("emu/layout" "noscreens")
-#}
-#
+
 #project ("precompile")
 #uuid ("a6fb15d4-b123-4445-acef-13c8e80fcacf")
 #kind (LIBTYPE)

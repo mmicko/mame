@@ -1,14 +1,14 @@
-### license:BSD-3-Clause
-### copyright-holders:MAMEdev Team
-#
-############################################################################
-###
-###   frontend.lua
-###
-###   Rules for building frontend
-###
-############################################################################
-#
+# license:BSD-3-Clause
+# copyright-holders:MAMEdev Team
+
+###########################################################################
+##
+##   frontend.lua
+##
+##   Rules for building frontend
+##
+###########################################################################
+
 set(FRONTEND_SRCS
 	${MAME_DIR}/src/frontend/mame/audit.cpp
 	${MAME_DIR}/src/frontend/mame/audit.h
@@ -138,57 +138,15 @@ set(FRONTEND_SRCS
 
 add_library(frontend ${LIBTYPE} ${FRONTEND_SRCS})
 
-#project ("frontend")
-#uuid ("e98e14c4-82a4-4988-ba29-01c90c817ab8")
-#kind (LIBTYPE)
-#
 addprojectflags(frontend)
-#precompiledheaders()
-#
-#if (_OPTIONS["targetos"] ~= "asmjs") then
-#	options {
-#		"ArchiveSplit
-#	}
-#end
-#
 
-#includedirs {
-#	${MAME_DIR}/src/osd
-#	${MAME_DIR}/src/emu
-#	${MAME_DIR}/src/frontend/mame
-#	${MAME_DIR}/src/devices ## till deps are fixed
-#	${MAME_DIR}/src/lib
-#	${MAME_DIR}/src/lib/util
-#	${MAME_DIR}/3rdparty
-#	${MAME_DIR}/3rdparty/sol2
-#	${GEN_DIR}/emu
-#	${GEN_DIR}/emu/layout
-#}
-#
-#includedirs {
-#	ext_includedir("asio"),
-#	ext_includedir("expat"),
-#	ext_includedir("lua"),
-#	ext_includedir("zlib"),
-#	ext_includedir("flac"),
-#	ext_includedir("rapidjson")
-#}
-#
-#configuration { }
-#if (_OPTIONS["targetos"] == "windows") then
-#	defines {
-#		"UI_WINDOWS
-#	}
-#end
-#target_compile_definitions(frontend PRIVATE UI_WINDOWS)
-#
-#if (_OPTIONS["osd"] == "sdl") then
-#	defines {
-#		"UI_SDL
-#	}
-#end
-#
-target_compile_definitions(frontend PRIVATE UI_SDL)
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+	target_compile_definitions(frontend PRIVATE UI_WINDOWS)
+endif()
+
+if (${OSD} STREQUAL "sdl")
+	target_compile_definitions(frontend PRIVATE UI_SDL)
+endif()
 
 target_include_directories(frontend PRIVATE
 	${MAME_DIR}/src/osd
@@ -202,6 +160,12 @@ target_include_directories(frontend PRIVATE
 	${GEN_DIR}/emu
 	${GEN_DIR}/emu/layout
 
+#	ext_includedir("asio"),
+#	ext_includedir("expat"),
+#	ext_includedir("lua"),
+#	ext_includedir("zlib"),
+#	ext_includedir("flac"),
+#	ext_includedir("rapidjson")
 	${MAME_DIR}/3rdparty/asio/include
 	${MAME_DIR}/3rdparty/expat/lib
 	${MAME_DIR}/3rdparty/lua/src
@@ -213,7 +177,7 @@ target_include_directories(frontend PRIVATE
 target_link_libraries(frontend PUBLIC lua)
 
 #pchsource(${MAME_DIR}/src/frontend/mame/audit.cpp")
-#
+
 add_custom_command(
 	COMMAND ${CMAKE_COMMAND} -E make_directory ${GEN_DIR}/emu
 	COMMAND ${PYTHON_EXECUTABLE} ${MAME_DIR}/scripts/build/file2lines.py ${MAME_DIR}/COPYING ${GEN_DIR}/emu/copying.ipp copying_text
