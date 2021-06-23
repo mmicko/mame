@@ -2,21 +2,14 @@
 # copyright-holders:MAMEdev Team
 
 cmake_minimum_required(VERSION 3.12)
+include(scripts/cmake/helpers.cmake)
 
 set(TARGET "mame" CACHE STRING "Building target")
-
 set(SUBTARGET "mame" CACHE STRING "Building subtarget")
 
-if(WIN32)
-  set(OSD_DEFAULT "windows")
-else()
-  set(OSD_DEFAULT "sdl")
-endif()
-set(OSD ${OSD_DEFAULT} CACHE STRING "Choose OSD layer implementation")
-
-if(${TARGET} MATCHES ${SUBTARGET})
+if(${TARGET} STREQUAL ${SUBTARGET})
     set(projectname ${TARGET})
-elseif(${SUBTARGET} MATCHES "mess")
+elseif(${SUBTARGET} STREQUAL "mess")
     set(projectname ${SUBTARGET})
 else()
     set(projectname ${TARGET}${SUBTARGET})
@@ -27,7 +20,12 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
   enable_language(OBJCXX)
 endif()
 
-include(scripts/cmake/helpers.cmake)
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+  set(OSD_DEFAULT "windows")
+else()
+  set(OSD_DEFAULT "sdl")
+endif()
+set(OSD ${OSD_DEFAULT} CACHE STRING "Choose OSD layer implementation")
 
 # silence "no symbols" warnings on apple clang 
 if(APPLE)

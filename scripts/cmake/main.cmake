@@ -23,9 +23,9 @@ macro(mainProject _target _subtarget)
 #else
 #	project (_subtarget)
 #end
-    if(${_target} MATCHES ${_subtarget})
+    if(${_target} STREQUAL ${_subtarget})
         set(projectname ${_target})
-    elseif(${_subtarget} MATCHES "mess")
+    elseif(${_subtarget} STREQUAL "mess")
         set(projectname ${_subtarget})
     else()
         set(projectname ${_target}${_subtarget})
@@ -51,7 +51,7 @@ endif()
 
 add_project_to_group(emulator ${projectname})
 
-if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
+if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
     if(MAP)
         target_link_options(${projectname} PRIVATE "-Wl,-Map,${projectname}.map")
     endif()

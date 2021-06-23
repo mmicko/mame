@@ -42,7 +42,7 @@ target_compile_definitions(lua PUBLIC
 	LUA_COMPAT_5_2
 )
 
-if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+if (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	target_compile_definitions(lua PRIVATE LUA_USE_POSIX)
 endif()
 

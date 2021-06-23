@@ -30,7 +30,7 @@ target_compile_definitions(bx PUBLIC
 	__STDC_CONSTANT_MACROS
 )
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 		target_include_directories(bx PUBLIC ${MAME_DIR}/3rdparty/bx/include/compat/msvc)
 	else() 
@@ -38,11 +38,11 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	endif()
 endif()
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
 	target_include_directories(bx PUBLIC ${MAME_DIR}/3rdparty/bx/include/compat/osx)
 endif()
 
-if ((${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD") OR (${CMAKE_SYSTEM_NAME} MATCHES "NetBSD"))
+if ((${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD") OR (${CMAKE_SYSTEM_NAME} STREQUAL "NetBSD"))
 	target_include_directories(bx PUBLIC ${MAME_DIR}/3rdparty/bx/include/compat/freebsd)
 endif()
 

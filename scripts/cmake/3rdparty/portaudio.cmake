@@ -11,14 +11,14 @@ set(PORTAUDIO_SRCS
 	${MAME_DIR}/3rdparty/portaudio/src/hostapi/skeleton/pa_hostapi_skeleton.c
 )
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 set(PORTAUDIO_SRCS_ADDITIONAL
 	${MAME_DIR}/3rdparty/portaudio/src/os/unix/pa_unix_hostapis.c
 	${MAME_DIR}/3rdparty/portaudio/src/os/unix/pa_unix_util.c
 	${MAME_DIR}/3rdparty/portaudio/src/hostapi/alsa/pa_linux_alsa.c
 	${MAME_DIR}/3rdparty/portaudio/src/hostapi/oss/pa_unix_oss.c
 )
-elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 set(PORTAUDIO_SRCS_ADDITIONAL
 	${MAME_DIR}/3rdparty/portaudio/src/os/win/pa_win_util.c
 	${MAME_DIR}/3rdparty/portaudio/src/os/win/pa_win_waveformat.c
@@ -42,7 +42,7 @@ target_include_directories(portaudio PRIVATE
 	${MAME_DIR}/3rdparty/portaudio/src/common
 )
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 	target_compile_definitions(portaudio PRIVATE
 		PA_USE_ALSA=1
 		PA_USE_OSS=1
@@ -51,7 +51,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 	target_include_directories(portaudio PRIVATE
 		${MAME_DIR}/3rdparty/portaudio/src/os/unix
 	)
-elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	target_compile_definitions(portaudio PRIVATE
 		PA_USE_DS=1
 		PA_USE_WASAPI=1

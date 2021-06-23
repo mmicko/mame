@@ -199,7 +199,7 @@ target_compile_definitions(netlist PRIVATE
 	NL_USE_ACADEMIC_SOLVERS=0
 )
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	target_compile_definitions(netlist PRIVATE 
 		UNICODE
 		_UNICODE

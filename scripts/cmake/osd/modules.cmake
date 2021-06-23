@@ -630,7 +630,6 @@ option(NO_USE_PORTAUDIO "Disable PortAudio interface." OFF)
 set(NO_USE_PULSEAUDIO_DEFAULT OFF)
 if (NOT(${CMAKE_SYSTEM_NAME} STREQUAL "Linux"))
 	set(NO_USE_PULSEAUDIO_DEFAULT ON)
-	message(STATUS ${NO_USE_PULSEAUDIO_DEFAULT})
 endif()
 option(NO_USE_PULSEAUDIO "Disable PulseAudio interface." ${NO_USE_PULSEAUDIO_DEFAULT})
 

@@ -29,7 +29,7 @@ set(BGFX_SRCS
 	${MAME_DIR}/3rdparty/bgfx/3rdparty/dear-imgui/imgui_widgets.cpp
 )
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
 	set(BGFX_MACOSX_SRCS
 		${MAME_DIR}/3rdparty/bgfx/src/glcontext_eagl.mm
 		${MAME_DIR}/3rdparty/bgfx/src/glcontext_nsgl.mm
