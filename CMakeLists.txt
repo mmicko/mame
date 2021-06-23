@@ -94,16 +94,8 @@ option(BENCHMARKS "Enable building benchmarks." ON)
 # 	description = 'Build bundled SDL2 library',
 # }
 # 
-# newoption {
-# 	trigger = "distro",
-# 	description = "Choose distribution",
-# 	allowed = {
-# 		{ "generic",           "generic"            },
-# 		{ "debian-stable",     "debian-stable"      },
-# 		{ "ubuntu-intrepid",   "ubuntu-intrepid"    },
-# 	},
-# }
-
+set(DISTRO "generic" CACHE STRING "Choose distribution.")
+set_property(CACHE DISTRO PROPERTY STRINGS "generic" "debian-stable")
 
 option(PROFILE "Enable profiling." OFF)
 option(PROFILER "Include the internal profiler." OFF)
@@ -610,13 +602,9 @@ endif()
 # 			"dl",
 # 			"rt",
 # 		}
-# 		if _OPTIONS["distro"]=="debian-stable" then
-# 			defines
-# 			{
-# 				"NO_AFFINITY_NP",
-# 			}
-# 		end
-# 
+if(${DISTRO} STREQUAL "debian-stable")
+  add_compile_definitionsNO_AFFINITY_NP)
+endif()
 
 # configuration { "osx* or xcode4" }
 # 		links {
@@ -1176,22 +1164,6 @@ dump_mame_options()
 #endif
 
 ##-------------------------------------------------
-## distribution may change things
-##-------------------------------------------------
-#
-#ifeq ($(DISTRO),)
-#DISTRO := generic
-#else
-#ifeq ($(DISTRO),debian-stable)
-#else
-#$(error DISTRO $(DISTRO) unknown)
-#endif
-#endif
-#
-#PARAMS+= --distro=$(DISTRO)
-#
-#
-##-------------------------------------------------
 ## sanity check the configuration
 ##-------------------------------------------------
 #
@@ -1237,185 +1209,9 @@ dump_mame_options()
 #
 #
 ##-------------------------------------------------
-## Dependent stuff
-##-------------------------------------------------
-#
-## extension for executables
-#EXE :=
-#
-#ifeq ($(OS),windows)
-#EXE := .exe
-#endif
-#
-#SHELLTYPE := msdos
-#ifeq (,$(ComSpec)$(COMSPEC))
-#  SHELLTYPE := posix
-#endif
-#ifeq (/bin,$(findstring /bin,$(SHELL)))
-#  SHELLTYPE := posix
-#endif
-#ifeq (/bin,$(findstring /bin,$(MAKESHELL)))
-#  SHELLTYPE := posix
-#endif
-#
-#ifeq (posix,$(SHELLTYPE))
-#  MKDIR = $(SILENT) mkdir -p "$(1)"
-#  COPY  = $(SILENT) cp -fR "$(1)"/* "$(2)"
-#else
-#  MKDIR = $(SILENT) mkdir "$(subst /,\\,$(1))" 2> nul || exit 0
-#  COPY  = $(SILENT) copy /Y "$(subst /,\\,$(1))" "$(subst /,\\,$(2))" > nul || exit 0
-#endif
-#
-#GENDIR = $(BUILDDIR)/generated
-#
-## all sources are under the src/ directory
-#SRC = src
-#
-## all 3rd party sources are under the 3rdparty/ directory
-#3RDPARTY = 3rdparty
-#ifeq ($(SUBTARGET_FULL),mame)
-#PROJECT_NAME := $(SUBTARGET_FULL)
-#else ifeq ($(SUBTARGET_FULL),mess)
-#PROJECT_NAME := $(SUBTARGET_FULL)
-#else
-#PROJECT_NAME := $(TARGET)$(SUBTARGET_FULL)
-#endif
-#
-#
-#ifeq ($(OS),windows)
-#ifeq (posix,$(SHELLTYPE))
-#GCC_VERSION      := $(shell $(TOOLCHAIN)$(subst @,,$(CC)) -dumpversion 2> /dev/null)
-#CLANG_VERSION    := $(shell $(TOOLCHAIN)$(subst @,,$(CC)) --version 2> /dev/null| head -n 1 | grep clang | sed "s/^.*[^0-9]\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*$$/\1/" | head -n 1)
-#PYTHON_AVAILABLE := $(shell $(PYTHON) --version > /dev/null 2>&1 && echo python)
-#GIT_AVAILABLE    := $(shell git --version > /dev/null 2>&1 && echo git)
-#else
-#GCC_VERSION      := $(shell $(TOOLCHAIN)$(subst @,,$(CC)) -dumpversion 2> NUL)
-#CLANG_VERSION    := $(shell $(TOOLCHAIN)$(subst @,,$(CC)) --version 2> NUL| head -n 1 | grep clang | sed "s/^.*[^0-9]\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*$$/\1/" | head -n 1)
-#PYTHON_AVAILABLE := $(shell $(PYTHON) --version > NUL 2>&1 && echo python)
-#GIT_AVAILABLE    := $(shell git --version > NUL 2>&1 && echo git)
-#endif
-#ifdef MSBUILD
-#MSBUILD_PARAMS   := /v:minimal /m:$(NUMBER_OF_PROCESSORS)
-#ifeq ($(CONFIG),debug)
-#MSBUILD_PARAMS += /p:Configuration=Debug
-#else
-#MSBUILD_PARAMS += /p:Configuration=Release
-#endif
-#ifeq ($(ARCHITECTURE),_x64)
-#MSBUILD_PARAMS += /p:Platform=x64
-#else
-#MSBUILD_PARAMS += /p:Platform=win32
-#endif
-#ifeq (posix,$(SHELLTYPE))
-#MSBUILD_PARAMS := $(subst /,-,$(MSBUILD_PARAMS))
-#endif
-#endif
-#ifdef FASTBUILD
-#FASTBUILD_PARAMS := -j$(NUMBER_OF_PROCESSORS)
-#ifeq ($(CONFIG),debug)
-#FASTBUILD_TARGET := all-Debug
-#else
-#FASTBUILD_TARGET := all-Release
-#endif
-#ifeq ($(ARCHITECTURE),_x64)
-#FASTBUILD_PARAMS += $(FASTBUILD_TARGET)-x64
-#else
-#FASTBUILD_PARAMS += $(FASTBUILD_TARGET)-x32
-#endif
-#endif
-#else
-#ifdef OVERRIDE_CC
-#GCC_VERSION      := $(shell $(TOOLCHAIN)$(subst @,,$(OVERRIDE_CC)) -dumpversion 2> /dev/null)
-#else
-#GCC_VERSION      := $(shell $(TOOLCHAIN)$(subst @,,$(CC)) -dumpversion 2> /dev/null)
-#endif
-#ifeq ($(findstring emcc,$(CC)),emcc)
-#CLANG_VERSION    := $(shell $(TOOLCHAIN)$(subst @,,$(CC))  -v  2>&1 >/dev/null | grep 'clang version' | head -n 1 | grep -e 'version [0-9]\+\.[0-9]\+\(\.[0-9]\+\)\?' -o | grep -e '[0-9]\+\.[0-9]\+\(\.[0-9]\+\)\?' -o | tail -n 1)
-#else
-#CLANG_VERSION    := $(shell $(TOOLCHAIN)$(subst @,,$(CC))  --version  2> /dev/null | head -n 1 | grep -e 'version [0-9]\+\.[0-9]\+\(\.[0-9]\+\)\?' -o | grep -e '[0-9]\+\.[0-9]\+\(\.[0-9]\+\)\?' -o | tail -n 1)
-#endif
-#PYTHON_AVAILABLE := $(shell $(PYTHON) --version > /dev/null 2>&1 && echo python)
-#GIT_AVAILABLE := $(shell git --version > /dev/null 2>&1 && echo git)
-#endif
-#
-#ifeq ($(CLANG_VERSION),)
-#$(info GCC $(GCC_VERSION) detected)
-#else
-#$(info Clang $(CLANG_VERSION) detected)
-#ifneq ($(TARGETOS),asmjs)
-#ifeq ($(ARCHITECTURE),_x64)
-#ARCHITECTURE := _x64_clang
-#else
-#ifneq ($(filter arm64%,$(UNAME_M)),)
-#ARCHITECTURE := _arm64_clang
-#else
-#ARCHITECTURE := _x86_clang
-#endif
-#endif
-#endif
-#endif
-#
-#ifneq ($(PYTHON_AVAILABLE),python)
-#$(error Python is not available in path)
-#endif
-#
-#ifneq ($(GIT_AVAILABLE),git)
-#	IGNORE_GIT := 1
-#endif
-#ifeq ($(wildcard .git/*),)
-#	IGNORE_GIT := 1
-#endif
-#
-#ifeq (posix,$(SHELLTYPE))
-#OLD_GIT_VERSION := $(shell cat $(GENDIR)/git_desc 2> /dev/null)
-#else
-#OLD_GIT_VERSION := $(shell cat $(GENDIR)/git_desc 2> NUL)
-#endif
-#ifneq ($(IGNORE_GIT),1)
-#NEW_GIT_VERSION := $(shell git describe --dirty)
-#else
-#NEW_GIT_VERSION := unknown
-#endif
-#ifeq ($(NEW_GIT_VERSION),)
-#NEW_GIT_VERSION := unknown
-#endif
-#
-#GENIE := 3rdparty/genie/bin/$(GENIEOS)/genie$(EXE)
-#
-#ifeq ($(TARGET),$(SUBTARGET_FULL))
-#FULLTARGET := $(TARGET)
-#else
-#FULLTARGET := $(TARGET)$(SUBTARGET_FULL)
-#endif
-#PROJECTDIR := $(BUILDDIR)/projects/$(OSD)/$(FULLTARGET)
-#PROJECTDIR_SDL := $(BUILDDIR)/projects/sdl/$(FULLTARGET)
-#PROJECTDIR_WIN := $(BUILDDIR)/projects/windows/$(FULLTARGET)
-#
-#.PHONY: all clean regenie generate FORCE
-#all: $(GENIE) $(TARGETOS)$(ARCHITECTURE)
-#regenie:
-#FORCE:
-#
-##-------------------------------------------------
 ## Clean/bootstrap
 ##-------------------------------------------------
-#
-#GENIE_SRC=$(wildcard 3rdparty/genie/src/host/*.c)
-#
-#$(GENIE): $(GENIE_SRC)
-#	$(SILENT) $(MAKE) $(MAKEPARAMS) -C 3rdparty/genie/build/gmake.$(GENIEOS) -f genie.make MPARAM=$(MPARAM)
-#
-#3rdparty/genie/src/hosts/%.c:
-#
-#.PHONY: genieclean
-#genieclean:
-#	$(SILENT) $(MAKE) $(MAKEPARAMS) -C 3rdparty/genie/build/gmake.$(GENIEOS) -f genie.make MPARAM=$(MPARAM) clean
-#
-#clean: genieclean
-#	@echo Cleaning...
-#	-@rm -rf $(BUILDDIR)
-#	-@rm -rf 3rdparty/bgfx/.build
-#
+
 #GEN_FOLDERS := $(GENDIR)/$(TARGET)/layout/ $(GENDIR)/$(TARGET)/$(SUBTARGET_FULL)/ $(GENDIR)/mame/drivers/ $(GENDIR)/mame/machine/
 #
 #rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
@@ -1446,31 +1242,7 @@ dump_mame_options()
 #	-$(call MKDIR,$@)
 #	-$(call COPY,3rdparty/SDL2/include,$(GENDIR)/includes/SDL2)
 #
-#ifneq ($(NEW_GIT_VERSION),$(OLD_GIT_VERSION))
-#stale:
-#
-#.PHONY: stale
-#
-#$(GENDIR)/git_desc: stale | $(GEN_FOLDERS)
-#	@echo $(NEW_GIT_VERSION) > $@
-#endif
-#
-#ifeq (posix,$(SHELLTYPE))
-#$(GENDIR)/version.cpp: makefile $(GENDIR)/git_desc | $(GEN_FOLDERS)
-#	@echo '#define BARE_BUILD_VERSION "0.232"' > $@
-#	@echo 'extern const char bare_build_version[];' >> $@
-#	@echo 'extern const char build_version[];' >> $@
-#	@echo 'const char bare_build_version[] = BARE_BUILD_VERSION;' >> $@
-#	@echo 'const char build_version[] = BARE_BUILD_VERSION " ($(NEW_GIT_VERSION))";' >> $@
-#else
-#$(GENDIR)/version.cpp: makefile $(GENDIR)/git_desc | $(GEN_FOLDERS)
-#	@echo #define BARE_BUILD_VERSION "0.232" > $@
-#	@echo extern const char bare_build_version[]; >> $@
-#	@echo extern const char build_version[]; >> $@
-#	@echo const char bare_build_version[] = BARE_BUILD_VERSION; >> $@
-#	@echo const char build_version[] = BARE_BUILD_VERSION " ($(NEW_GIT_VERSION))"; >> $@
-#endif
-#
+
 #
 #$(GENDIR)/%.lh: $(SRC)/%.lay scripts/build/complay.py | $(GEN_FOLDERS)
 #	@echo Compressing $<...
