@@ -33,6 +33,15 @@ set(PORTAUDIO_SRCS_ADDITIONAL
 	${MAME_DIR}/3rdparty/portaudio/src/common/pa_ringbuffer.c
 
 )
+elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+set(PORTAUDIO_SRCS_ADDITIONAL
+	${MAME_DIR}/3rdparty/portaudio/src/os/unix/pa_unix_hostapis.c
+	${MAME_DIR}/3rdparty/portaudio/src/os/unix/pa_unix_util.c
+	${MAME_DIR}/3rdparty/portaudio/src/hostapi/coreaudio/pa_mac_core.c
+	${MAME_DIR}/3rdparty/portaudio/src/hostapi/coreaudio/pa_mac_core_utilities.c
+	${MAME_DIR}/3rdparty/portaudio/src/hostapi/coreaudio/pa_mac_core_blocking.c
+	${MAME_DIR}/3rdparty/portaudio/src/common/pa_ringbuffer.c
+)
 endif()
 
 add_library(portaudio ${LIBTYPE} ${PORTAUDIO_SRCS} ${PORTAUDIO_SRCS_ADDITIONAL})
@@ -67,6 +76,13 @@ elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 		)
 	endif()
    	target_link_libraries(portaudio PUBLIC setupapi) # required for WDMKS
+elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+	target_compile_definitions(portaudio PRIVATE
+		PA_USE_COREAUDIO=1
+	)
+	target_include_directories(portaudio PRIVATE
+		${MAME_DIR}/3rdparty/portaudio/src/os/unix
+	)
 endif()
 
 if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
