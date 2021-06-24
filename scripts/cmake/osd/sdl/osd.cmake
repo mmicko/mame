@@ -9,6 +9,7 @@
 ###
 ############################################################################
 
+find_package(SDL2 REQUIRED)
 macro(maintargetosdoptions _projectname)
 	osdmodulestargetconf(${_projectname})
 
@@ -356,7 +357,7 @@ target_include_directories(osd PRIVATE
     ${MAME_DIR}/src/osd/sdl
 )
 osd_cfg(osd)
-
+target_link_libraries(osd PRIVATE SDL2::SDL2)
 
 set(OCORE_SRCS
     ${MAME_DIR}/src/osd/osdcore.cpp
@@ -414,6 +415,6 @@ target_include_directories(ocore PRIVATE
 target_link_libraries(ocore PUBLIC 
 	dl
 	pthread
-    SDL2
+    SDL2::SDL2
 )
 

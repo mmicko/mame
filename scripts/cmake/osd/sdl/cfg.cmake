@@ -124,11 +124,6 @@ endif()
 #			backtick(pkgconfigcmd() .. " --cflags Qt5Widgets"),
 #		}
 #	end
-#elseif _OPTIONS["targetos"]=="macosx" then
-#	defines {
-#		"SDLMAME_MACOSX",
-#		"SDLMAME_DARWIN",
-#	}
 #elseif _OPTIONS["targetos"]=="freebsd" then
 #	buildoptions {
 #		-- /usr/local/include is not considered a system include director on FreeBSD.  GL.h resides there and throws warnings
@@ -138,6 +133,7 @@ endif()
 #
     if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
         target_include_directories(${_project} PRIVATE ${MAME_DIR}/3rdparty/bx/include/compat/osx)
+        target_compile_definitions(${_project} PRIVATE SDLMAME_MACOSX SDLMAME_DARWIN)
     endif()
     if((${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD") OR (${CMAKE_SYSTEM_NAME} STREQUAL "NetBSD"))
         target_include_directories(${_project} PRIVATE ${MAME_DIR}/3rdparty/bx/include/compat/freebsd)
