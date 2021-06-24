@@ -186,7 +186,6 @@ target_include_directories(${_project} PRIVATE ${MAME_DIR}/3rdparty/asio/include
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	target_include_directories(${_project} PRIVATE 
-		${MAME_DIR}/3rdparty/winpcap/Include
 		${MAME_DIR}/3rdparty/compat/mingw
 		${MAME_DIR}/3rdparty/portaudio/include
 		${MAME_DIR}/3rdparty/compat/winsdk-override

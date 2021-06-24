@@ -66,6 +66,7 @@ elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 			${MAME_DIR}/3rdparty/portaudio/src/hostapi/wasapi/mingw-include
 		)
 	endif()
+   	target_link_libraries(portaudio PUBLIC setupapi) # required for WDMKS
 endif()
 
 if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))

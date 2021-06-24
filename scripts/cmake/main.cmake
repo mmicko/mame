@@ -219,12 +219,6 @@ if(NOT NO_USE_PORTAUDIO)
 #			ext_lib("portaudio"),
     target_link_libraries(${projectname} PRIVATE portaudio)
 endif()
-#		if _OPTIONS["targetos"]=="windows" then
-#			links {
-#				"setupapi",
-#			}
-#		end
-#	end
 
 if(NOT NO_USE_MIDI)
 #			ext_lib("portmidi"),
