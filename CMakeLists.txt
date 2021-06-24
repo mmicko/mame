@@ -367,7 +367,7 @@ if(NOT FORCE_DRC_C_BACKEND AND NOT BIGENDIAN)
 endif()
 
 # GCC
-if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
+if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
 # this speeds it up a bit by piping between the preprocessor/compiler/assembler
 add_compile_options(-pipe)
 
@@ -479,7 +479,7 @@ if(NOT ${SANITIZE} STREQUAL "")
   endif()
 endif()
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 6)
     message(FATAL_ERROR "Clang version 6.0 or later needed. Found ${CMAKE_CXX_COMPILER_VERSION}.")
   endif()
