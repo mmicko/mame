@@ -143,7 +143,12 @@ endmacro()
 #	description = "Default search path for .ini files
 #}
 #
-option(NO_X11 "Disable use of X11" OFF)
+if((${CMAKE_SYSTEM_NAME} STREQUAL "Windows") OR (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin") OR (${CMAKE_SYSTEM_NAME} STREQUAL "Haiku") OR (${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten"))
+    set(NO_X11_DEFAULT ON)
+else()
+    set(NO_X11_DEFAULT OFF)
+endif()
+option(NO_X11 "Disable use of X11" ${NO_X11_DEFAULT})
 #
 #if not _OPTIONS["NO_X11"] then
 #	if _OPTIONS["targetos"]=="windows" or _OPTIONS["targetos"]=="macosx" or _OPTIONS["targetos"]=="haiku" or _OPTIONS["targetos"]=="asmjs" then
@@ -161,7 +166,12 @@ option(NO_X11 "Disable use of X11" OFF)
 #		_OPTIONS["NO_USE_XINPUT"] = "0"
 #	end
 #end
-option(NO_USE_XINPUT "Disable use of Xinput" OFF)
+if((${CMAKE_SYSTEM_NAME} STREQUAL "Windows") OR (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin") OR (${CMAKE_SYSTEM_NAME} STREQUAL "Haiku") OR (${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten"))
+    set(NO_USE_XINPUT_DEFAULT ON)
+else()
+    set(NO_USE_XINPUT_DEFAULT OFF)
+endif()
+option(NO_USE_XINPUT "Disable use of Xinput" ${NO_USE_XINPUT_DEFAULT})
 
 option(NO_USE_XINPUT_WII_LIGHTGUN_HACK "Disable use of Xinput Wii Lightgun Hack" ON)
 
