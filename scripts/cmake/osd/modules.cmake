@@ -331,7 +331,7 @@ if(NOT NO_USE_MIDI)
 	if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 		target_link_libraries(${_projectname} PRIVATE asound) #pkgconfig alsa
 	elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-		target_link_libraries(${_projectname} PRIVATE CoreMIDI.framework)
+		target_link_libraries(${_projectname} PRIVATE "-framework CoreMIDI")
 	endif()
 endif()
 
@@ -346,10 +346,16 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	)
 elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
 	target_link_libraries(${_projectname} PRIVATE 
-		AudioUnit.framework
-		AudioToolbox.framework
-		CoreAudio.framework
-		CoreServices.framework
+		"-framework AudioUnit"
+		"-framework AudioToolbox"
+		"-framework CoreAudio"
+		"-framework CoreServices"
+	)
+	target_link_libraries(${_projectname} PRIVATE 
+		"-framework Cocoa"
+		"-framework QuartzCore"
+		"-framework OpenGL"
+		"-weak_framework Metal"
 	)
 endif()
 
