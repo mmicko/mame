@@ -18,6 +18,7 @@ include(scripts/cmake/bus.cmake)
 add_library(optional ${LIBTYPE} ${CPU_SRCS} ${SOUND_SRCS} ${VIDEO_SRCS} ${MACHINE_SRCS} ${BUS_SRCS})
 add_project_to_group(devices optional)
 addprojectflags(optional)
+precompiledheaders(optional)
 
 target_include_directories(optional PRIVATE
 	${MAME_DIR}/src/osd
@@ -36,8 +37,8 @@ target_include_directories(optional PRIVATE
 
 add_library(dasm ${LIBTYPE} ${DASM_SRCS})
 add_project_to_group(devices dasm)
-
 addprojectflags(dasm)
+precompiledheaders(dasm)
 
 target_include_directories(dasm PRIVATE
 	${MAME_DIR}/src/osd

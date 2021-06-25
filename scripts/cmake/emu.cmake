@@ -1,13 +1,29 @@
-### license:BSD-3-Clause
-### copyright-holders:MAMEdev Team
-#
-############################################################################
-###
-###   emu.lua
-###
-###   Rules for building emu cores
-###
-############################################################################
+## license:BSD-3-Clause
+# copyright-holders:MAMEdev Team
+
+###########################################################################
+##
+##   emu.lua
+##
+##   Rules for building emu cores
+##
+###########################################################################
+
+if(PRECOMPILE)
+	set(PRECOMPILE_SRCS ${MAME_DIR}/src/emu/drivers/empty.cpp)
+
+	add_library(precompile ${LIBTYPE} ${PRECOMPILE_SRCS})
+
+	addprojectflags(precompile)
+
+	target_include_directories(precompile PRIVATE
+		${MAME_DIR}/src/osd
+		${MAME_DIR}/src/emu
+		${MAME_DIR}/src/lib/util
+	)
+
+	target_precompile_headers(precompile PRIVATE ${MAME_DIR}/src/emu/emu.h)
+endif()
 
 set(EMU_SRCS
 	${MAME_DIR}/src/emu/emu.h
@@ -251,6 +267,7 @@ set(EMU_SRCS
 
 add_library(emu ${LIBTYPE} ${EMU_SRCS})
 addprojectflags(emu)
+precompiledheaders(emu)
 
 target_include_directories(emu PRIVATE
 	${MAME_DIR}/src/osd
@@ -270,13 +287,6 @@ target_include_directories(emu PRIVATE
 	${MAME_DIR}/3rdparty/rapidjson/include
 	${MAME_DIR}/3rdparty/pugixml/src
 )
-
-#pchsource(${MAME_DIR}/src/emu/main.cpp")
-### 3 files do not include emu.h
-#nopch(${MAME_DIR}/src/emu/emualloc.cpp")
-#nopch(${MAME_DIR}/src/emu/attotime.cpp")
-#nopch(${MAME_DIR}/src/emu/debug/textbuf.cpp")
-#
 
 add_custom_command(
 	COMMAND ${CMAKE_COMMAND} -E make_directory ${GEN_DIR}/emu/ui/
@@ -301,27 +311,3 @@ layoutbuildtask("emu/layout" "dualhuov")
 layoutbuildtask("emu/layout" "triphsxs")
 layoutbuildtask("emu/layout" "quadhsxs")
 layoutbuildtask("emu/layout" "noscreens")
-
-#project ("precompile")
-#uuid ("a6fb15d4-b123-4445-acef-13c8e80fcacf")
-#kind (LIBTYPE)
-#
-#addprojectflags()
-#precompiledheaders()
-#
-#includedirs {
-#	${MAME_DIR}/src/osd
-#	${MAME_DIR}/src/emu
-#	${MAME_DIR}/src/lib/util
-#}
-#files {
-#	${MAME_DIR}/src/emu/drivers/empty.cpp
-#}
-#
-#pchsource(${MAME_DIR}/src/emu/drivers/empty.cpp")
-#
-#dependency {
-#	{ "$(OBJDIR)/src/emu/drivers/empty.o "$(GCH) true  },
-#}
-#
-#

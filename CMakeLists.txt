@@ -1,7 +1,8 @@
 # license:BSD-3-Clause
 # copyright-holders:MAMEdev Team
 
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.16)
+# 3.16 introduce precompile headers support
 include(scripts/cmake/helpers.cmake)
 
 set(TARGET "mame" CACHE STRING "Building target")
@@ -45,35 +46,9 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/lib)
 
 set(STANDALONE false)
 set(MAME_DIR "${CMAKE_SOURCE_DIR}")
-# 
-# newoption {
-# 	trigger = "precompile",
-# 	description = "Precompiled headers generation.",
-# 	allowed = {
-# 		{ "0",   "Disabled"     },
-# 		{ "1",   "Enabled"      },
-# 	}
-# }
-# 
-# 
-# function precompiledheaders()
-# 	if _OPTIONS["precompile"]==nil or (_OPTIONS["precompile"]~=nil and _OPTIONS["precompile"]=="1") then
-# 		configuration { "not xcode4" }
-# 			pchheader("emu.h")
-# 		configuration { }
-# 	end
-# end
-# 
-# function precompiledheaders_novs()
-# 	precompiledheaders()
-# 	if string.sub(_ACTION,1,4) == "vs20" then
-# 		--print("Disabling pch for Visual Studio")
-# 		flags {
-# 			"NoPCH"
-# 		}
-# 	end
-# end
-#
+
+option(PRECOMPILE "Precompiled headers generation." ON)
+
 set(CPUS "")
 set(SOUNDS "")
 set(MACHINES "")

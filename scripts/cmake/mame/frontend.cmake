@@ -139,6 +139,7 @@ set(FRONTEND_SRCS
 add_library(frontend ${LIBTYPE} ${FRONTEND_SRCS})
 
 addprojectflags(frontend)
+precompiledheaders(frontend)
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	target_compile_definitions(frontend PRIVATE UI_WINDOWS)
@@ -175,8 +176,6 @@ target_include_directories(frontend PRIVATE
 )
 
 target_link_libraries(frontend PUBLIC lua)
-
-#pchsource(${MAME_DIR}/src/frontend/mame/audit.cpp")
 
 add_custom_command(
 	COMMAND ${CMAKE_COMMAND} -E make_directory ${GEN_DIR}/emu

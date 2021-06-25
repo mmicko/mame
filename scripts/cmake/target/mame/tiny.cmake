@@ -1,21 +1,21 @@
-### license:BSD-3-Clause
-### copyright-holders:MAMEdev Team
-#
-############################################################################
-###
-###   tiny.lua
-###
-###   Small driver-specific example makefile
-###   Use make SUBTARGET=tiny to build
-###
-############################################################################
-#
-#
-###################################################
-### Specify all the CPU cores necessary for the
-### drivers referenced in tiny.lst.
-###################################################
-#
+# license:BSD-3-Clause
+# copyright-holders:MAMEdev Team
+
+###########################################################################
+##
+##   tiny.lua
+##
+##   Small driver-specific example makefile
+##   Use make SUBTARGET=tiny to build
+##
+###########################################################################
+
+
+##################################################
+## Specify all the CPU cores necessary for the
+## drivers referenced in tiny.lst.
+##################################################
+
 list(APPEND CPUS COP400)
 list(APPEND CPUS M6502)
 list(APPEND CPUS M6800)
@@ -26,12 +26,12 @@ list(APPEND CPUS MCS48)
 list(APPEND CPUS MCS51)
 list(APPEND CPUS TMS9900)
 list(APPEND CPUS Z80)
-#
-###################################################
-### Specify all the sound cores necessary for the
-### drivers referenced in tiny.lst.
-###################################################
-#
+
+##################################################
+## Specify all the sound cores necessary for the
+## drivers referenced in tiny.lst.
+##################################################
+
 list(APPEND SOUNDS ASTROCADE)
 list(APPEND SOUNDS AY8910)
 list(APPEND SOUNDS CEM3394)
@@ -44,19 +44,17 @@ list(APPEND SOUNDS TMS5220)
 list(APPEND SOUNDS VOTRAX)
 list(APPEND SOUNDS YM2151)
 list(APPEND SOUNDS YM3812)
-#
-#
-###################################################
-### specify available video cores
-###################################################
-#
+
+##################################################
+## specify available video cores
+##################################################
+
 list(APPEND VIDEOS MC6845)
-#
-#
-###################################################
-### specify available machine cores
-###################################################
-#
+
+##################################################
+## specify available machine cores
+##################################################
+
 list(APPEND MACHINES 6821PIA)
 list(APPEND MACHINES 68681)
 list(APPEND MACHINES ADC0808)
@@ -78,29 +76,19 @@ list(APPEND MACHINES WATCHDOG)
 list(APPEND MACHINES Z80CTC)
 list(APPEND MACHINES Z80DAISY)
 list(APPEND MACHINES Z80PIO)
-#
-#
-###################################################
-### specify available bus cores
-###################################################
-#
+
+
+##################################################
+## specify available bus cores
+##################################################
+
 list(APPEND BUSES CENTRONICS)
-#
-#
-###################################################
-### This is the list of files that are necessary
-### for building all of the drivers referenced
-### in tiny.lst
-###################################################
-#
-#function createProjects_mame_tiny(_target, _subtarget)
-#	project ("mame_tiny")
-#	targetsubdir(_target .."_" .. _subtarget)
-#	kind (LIBTYPE)
-#	uuid (os.uuid("drv-mame-tiny"))
-#	addprojectflags()
-#	precompiledheaders_novs()
-#
+
+##################################################
+## This is the list of files that are necessary
+## for building all of the drivers referenced
+## in tiny.lst
+##################################################
 
 macro(createProjects_mame_tiny _target  _subtarget)
 	set(MAME_TINY_SRCS
@@ -167,6 +155,8 @@ macro(createProjects_mame_tiny _target  _subtarget)
 	)
 
 	add_library(mame_tiny ${LIBTYPE} ${MAME_TINY_SRCS})
+	addprojectflags(mame_tiny)
+	precompiledheaders_novs(mame_tiny)
 	add_dependencies(mame_tiny layouts)
 
 	target_include_directories(mame_tiny PRIVATE
@@ -184,5 +174,3 @@ endmacro()
 macro(linkProjects_mame_tiny _target _subtarget _projectname)
     target_link_libraries(${_projectname} PRIVATE mame_tiny)
 endmacro()
-
-
