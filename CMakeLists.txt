@@ -3,7 +3,6 @@
 
 cmake_minimum_required(VERSION 3.16)
 # 3.16 introduce precompile headers support
-include(scripts/cmake/helpers.cmake)
 
 set(TARGET "mame" CACHE STRING "Building target")
 set(SUBTARGET "mame" CACHE STRING "Building subtarget")
@@ -20,6 +19,8 @@ project(${projectname} CXX C)
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
   enable_language(OBJCXX)
 endif()
+
+include(scripts/cmake/helpers.cmake)
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
   set(OSD_DEFAULT "windows")
