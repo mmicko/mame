@@ -428,3 +428,6 @@ target_link_libraries(ocore PUBLIC
     SDL2::SDL2
 )
 
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+    target_link_libraries(ocore PUBLIC "-framework Carbon")
+endif()
