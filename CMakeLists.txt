@@ -857,6 +857,7 @@ foreach(subdir ${LANGUAGE_DIRS})
   translationbuildtask(${subdir})
 endforeach()
 add_custom_target(languages ALL DEPENDS ${LANGUAGE_FILES})
+set_target_properties(languages PROPERTIES FOLDER generate)
 
 # Compressing layouts
 file(GLOB LAYOUT_FILES ${MAME_DIR}/src/${TARGET}/layout/*.lay)
@@ -867,3 +868,4 @@ foreach(lay ${LAYOUT_FILES})
   list(APPEND GEN_LAYOUT_FILES ${GEN_DIR}/${TARGET}/layout/${lay_name}.lh)
 endforeach()
 add_custom_target(layouts DEPENDS ${GEN_LAYOUT_FILES})
+set_target_properties(layouts PROPERTIES FOLDER generate)

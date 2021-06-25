@@ -22,6 +22,8 @@ if(PRECOMPILE)
 		${MAME_DIR}/src/lib/util
 	)
 
+	add_project_to_group(core precompile)
+
 	target_precompile_headers(precompile PRIVATE ${MAME_DIR}/src/emu/emu.h)
 endif()
 
