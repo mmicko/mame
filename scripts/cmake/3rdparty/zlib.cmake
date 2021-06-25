@@ -18,5 +18,11 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Cla
 	target_compile_options(zlib PRIVATE -Wno-strict-prototypes)
 endif()
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+	target_compile_options(zlib PRIVATE /wd4131) # warning C4131: 'xxx' : uses old-style declarator
+	target_compile_options(zlib PRIVATE /wd4127) # warning C4127: conditional expression is constant
+	target_compile_options(zlib PRIVATE /wd4244) # warning C4244: 'argument' : conversion from 'xxx' to 'xxx', possible loss of data
+endif()
+
 target_compile_definitions(zlib PRIVATE ZLIB_CONST)
 target_compile_definitions(zlib PRIVATE $<$<CONFIG:DEBUG>:verbose=-1>)

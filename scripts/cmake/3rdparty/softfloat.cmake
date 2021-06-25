@@ -13,3 +13,8 @@ target_include_directories(softfloat PRIVATE ${MAME_DIR}/src/osd)
 if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
 	target_compile_options(softfloat PRIVATE -x c++)
 endif()
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+	target_compile_options(softfloat PRIVATE /wd4244) # warning C4244: 'argument' : conversion from 'xxx' to 'xxx', possible loss of data
+	target_compile_options(softfloat PRIVATE /wd4146) # warning C4146: unary minus operator applied to unsigned type, result still unsigned
+	target_compile_options(softfloat PRIVATE /wd4018) # warning C4018: 'x' : signed/unsigned mismatch
+endif()

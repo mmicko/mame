@@ -32,7 +32,7 @@ else()
 	target_compile_definitions(expat PRIVATE BYTEORDER=1234)
 endif()
 
-if((SYSTEM_NAME STREQUAL "Darwin") OR (SYSTEM_NAME STREQUAL "FreeBSD"))
+if((${CMAKE_SYSTEM_NAME} STREQUAL "Darwin") OR (${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD"))
 	target_compile_definitions(expat PRIVATE HAVE_ARC4RANDOM)
 endif()
 
