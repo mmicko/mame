@@ -238,11 +238,32 @@ endif()
 # end
 # 
 
-
-if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake/target/${TARGET}/${SUBTARGET}.cmake)
-  message(FATAL_ERROR "File definition for TARGET=${TARGET} SUBTARGET=${SUBTARGET} does not exist")
+if (SOURCES STREQUAL "")
+  if(NOT EXISTS ${MAME_DIR}/scripts/cmake/target/${TARGET}/${SUBTARGET}.cmake)
+    message(FATAL_ERROR "File definition for TARGET=${TARGET} SUBTARGET=${SUBTARGET} does not exist")
+  endif()
+  include(scripts/cmake/target/${TARGET}/${SUBTARGET}.cmake)
+else()
+  string(REPLACE "," ";" SOURCES_LIST ${SOURCES})
+  foreach(srcfile ${SOURCES_LIST})
+    if(NOT EXISTS "${MAME_DIR}/${srcfile}")
+      message(FATAL_ERROR "file '${srcfile}' does not exist")
+    endif()
+  endforeach()
+  execute_process(
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/build
+    COMMAND ${PYTHON_EXECUTABLE} ${MAME_DIR}/scripts/build/makedep.py sourcesproject -r ${MAME_DIR} -t ${SUBTARGET} ${SOURCES_LIST}
+    OUTPUT_FILE ${CMAKE_BINARY_DIR}/build/${SUBTARGET}.cmake
+    RESULT_VARIABLE sourceproject_result
+  )
+  include(${CMAKE_BINARY_DIR}/build/${SUBTARGET}.cmake)
+  execute_process(
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${GEN_DIR}/${TARGET}
+    COMMAND ${PYTHON_EXECUTABLE} ${MAME_DIR}/scripts/build/makedep.py sourcesfilter ${SOURCES_LIST} 
+    OUTPUT_FILE ${GEN_DIR}/${TARGET}/${SUBTARGET}.flt
+    RESULT_VARIABLE sourcesfilter_result
+  )
 endif()
-include(scripts/cmake/target/${TARGET}/${SUBTARGET}.cmake)
 
 if(WIN32 AND CMAKE_SIZEOF_VOID_P EQUAL 8)
   add_compile_definitions(X64_WINDOWS_ABI)
@@ -661,24 +682,7 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -DGEN_DIR=${GEN_DIR} -P ${MAME_DIR}/scripts/cmake/version.cmake
 )
 
-# if (_OPTIONS["SOURCES"] ~= nil) then
-# 	local str = _OPTIONS["SOURCES"]
-# 	local sourceargs = ""
-# 	for word in string.gmatch(str, '([^,]+)') do
-# 		if (not os.isfile(path.join(MAME_DIR, word))) then
-# 			print("File " .. word.. " does not exist")
-# 			os.exit()
-# 		end
-# 		sourceargs = sourceargs .. " " .. word
-# 	end
-# 	OUT_STR = os.outputof( PYTHON .. " " .. MAME_DIR .. "scripts/build/makedep.py sourcesproject -r " .. MAME_DIR .. " -t " .. _OPTIONS["subtarget"] .. sourceargs )
-# 	load(OUT_STR)()
-# 	os.outputof( PYTHON .. " " .. MAME_DIR .. "scripts/build/makedep.py sourcesfilter" .. sourceargs .. " > ".. GEN_DIR  .. _OPTIONS["target"] .. "/" .. _OPTIONS["subtarget"] .. ".flt" )
-# end
-# 
-
-
-if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake/osd/${OSD}/osd.cmake)
+if(NOT EXISTS ${MAME_DIR}/scripts/cmake/osd/${OSD}/osd.cmake)
   message(FATAL_ERROR "Unsupported value '${OSD}' for OSD")
 endif()
 

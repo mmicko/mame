@@ -10,25 +10,16 @@
 ############################################################################
 
 macro(mainProject _target _subtarget)
-#if (_OPTIONS["SOURCES"] == nil) then
-#	if (_target == _subtarget) then
-#		project (_target)
-#	else
-#		if (_subtarget=="mess") then
-#			project (_subtarget)
-#		else
-#			project (_target .. _subtarget)
-#		end
-#	end
-#else
-#	project (_subtarget)
-#end
-    if(${_target} STREQUAL ${_subtarget})
-        set(projectname ${_target})
-    elseif(${_subtarget} STREQUAL "mess")
-        set(projectname ${_subtarget})
+    if (SOURCES STREQUAL "")
+        if(${_target} STREQUAL ${_subtarget})
+            set(projectname ${_target})
+        elseif(${_subtarget} STREQUAL "mess")
+            set(projectname ${_subtarget})
+        else()
+            set(projectname ${_target}${_subtarget})
+        endif()
     else()
-        set(projectname ${_target}${_subtarget})
+        set(projectname ${_subtarget})
     endif()
 
 if(NOT STANDALONE)
@@ -241,20 +232,6 @@ target_link_libraries(${projectname} PRIVATE
 #	override_resources = false;
 #
 maintargetosdoptions(${projectname})
-#
-#	includedirs {
-#		MAME_DIR .. "src/osd",
-#		MAME_DIR .. "src/emu",
-#		MAME_DIR .. "src/devices",
-#		MAME_DIR .. "src/" .. _target,
-#		MAME_DIR .. "src/lib",
-#		MAME_DIR .. "src/lib/util",
-#		MAME_DIR .. "3rdparty",
-#		GEN_DIR  .. _target .. "/layout",
-#		GEN_DIR  .. "resource",
-#		ext_includedir("zlib"),
-#		ext_includedir("flac"),
-#	}
 
 target_include_directories(${projectname} PRIVATE
         ${MAME_DIR}/src/osd
@@ -307,69 +284,42 @@ if(NOT STANDALONE)
 #	end
 #
 
-#
-#	if (_OPTIONS["SOURCES"] == nil) then
-#
-#		if os.isfile(MAME_DIR .. "src/".._target .."/" .. _subtarget ..".flt") then
-#			dependency {
-#			{
-#				GEN_DIR  .. _target .. "/" .. _subtarget .."/drivlist.cpp",  MAME_DIR .. "src/".._target .."/" .. _target ..".lst", true },
-#			}
-#			custombuildtask {
-#				{ MAME_DIR .. "src/".._target .."/" .. _subtarget ..".flt" ,  GEN_DIR  .. _target .. "/" .. _subtarget .."/drivlist.cpp",    {  MAME_DIR .. "scripts/build/makedep.py", MAME_DIR .. "src/".._target .."/" .. _target ..".lst"  }, {"@echo Building driver list...",    PYTHON .. " $(1) driverlist $(2) -f $(<) > $(@)" }},
-#			}
-#		else
-#			if os.isfile(MAME_DIR .. "src/".._target .."/" .. _subtarget ..".lst") then
-#				custombuildtask {
-#					{ MAME_DIR .. "src/".._target .."/" .. _subtarget ..".lst" ,  GEN_DIR  .. _target .. "/" .. _subtarget .."/drivlist.cpp",    {  MAME_DIR .. "scripts/build/makedep.py" }, {"@echo Building driver list...",    PYTHON .. " $(1) driverlist $(<) > $(@)" }},
-#				}
-#			else
-#				dependency {
-#				{
-#					GEN_DIR  .. _target .. "/" .. _target .."/drivlist.cpp",  MAME_DIR .. "src/".._target .."/" .. _target ..".lst", true },
-#				}
-#				custombuildtask {
-#					{ MAME_DIR .. "src/".._target .."/" .. _target ..".lst" ,  GEN_DIR  .. _target .. "/" .. _target .."/drivlist.cpp",    {  MAME_DIR .. "scripts/build/makedep.py" }, {"@echo Building driver list...",    PYTHON .. " $(1) driverlist $(<) > $(@)" }},
-#				}
-#			end
-#		end
-#	end
-#
-    if(EXISTS ${MAME_DIR}/src/${_target}/${_subtarget}.flt)
-        add_custom_command(
-            COMMAND ${CMAKE_COMMAND} -E make_directory ${GEN_DIR}/${_target}/${_subtarget}/
-            COMMAND ${PYTHON_EXECUTABLE} ${MAME_DIR}/scripts/build/makedep.py driverlist ${MAME_DIR}/src/${_target}/${_target}.lst -f ${MAME_DIR}/src/${_target}/${_subtarget}.flt > ${GEN_DIR}/${_target}/${_subtarget}/drivlist.cpp
-            DEPENDS ${MAME_DIR}/scripts/build/makedep.py ${MAME_DIR}/src/${_target}/${_target}.lst ${MAME_DIR}/src/${_target}/${_subtarget}.flt
-            OUTPUT ${GEN_DIR}/${_target}/${_subtarget}/drivlist.cpp
-            COMMENT "Building driver list..."
-        )
-    elseif(EXISTS ${MAME_DIR}/src/${_target}/${_subtarget}.lst)
-        add_custom_command(
-            COMMAND ${CMAKE_COMMAND} -E make_directory ${GEN_DIR}/${_target}/${_subtarget}/
-            COMMAND ${PYTHON_EXECUTABLE} ${MAME_DIR}/scripts/build/makedep.py driverlist ${MAME_DIR}/src/${_target}/${_subtarget}.lst > ${GEN_DIR}/${_target}/${_subtarget}/drivlist.cpp
-            DEPENDS ${MAME_DIR}/scripts/build/makedep.py ${MAME_DIR}/src/${_target}/${_subtarget}.lst
-            OUTPUT ${GEN_DIR}/${_target}/${_subtarget}/drivlist.cpp
-            COMMENT "Building driver list..."
-        )
+	if(SOURCES STREQUAL "")
+        if(EXISTS ${MAME_DIR}/src/${_target}/${_subtarget}.flt)
+            add_custom_command(
+                COMMAND ${CMAKE_COMMAND} -E make_directory ${GEN_DIR}/${_target}/${_subtarget}/
+                COMMAND ${PYTHON_EXECUTABLE} ${MAME_DIR}/scripts/build/makedep.py driverlist ${MAME_DIR}/src/${_target}/${_target}.lst -f ${MAME_DIR}/src/${_target}/${_subtarget}.flt > ${GEN_DIR}/${_target}/${_subtarget}/drivlist.cpp
+                DEPENDS ${MAME_DIR}/scripts/build/makedep.py ${MAME_DIR}/src/${_target}/${_target}.lst ${MAME_DIR}/src/${_target}/${_subtarget}.flt
+                OUTPUT ${GEN_DIR}/${_target}/${_subtarget}/drivlist.cpp
+                COMMENT "Building driver list..."
+            )
+        elseif(EXISTS ${MAME_DIR}/src/${_target}/${_subtarget}.lst)
+            add_custom_command(
+                COMMAND ${CMAKE_COMMAND} -E make_directory ${GEN_DIR}/${_target}/${_subtarget}/
+                COMMAND ${PYTHON_EXECUTABLE} ${MAME_DIR}/scripts/build/makedep.py driverlist ${MAME_DIR}/src/${_target}/${_subtarget}.lst > ${GEN_DIR}/${_target}/${_subtarget}/drivlist.cpp
+                DEPENDS ${MAME_DIR}/scripts/build/makedep.py ${MAME_DIR}/src/${_target}/${_subtarget}.lst
+                OUTPUT ${GEN_DIR}/${_target}/${_subtarget}/drivlist.cpp
+                COMMENT "Building driver list..."
+            )
+        else()
+            add_custom_command(
+                COMMAND ${CMAKE_COMMAND} -E make_directory ${GEN_DIR}/${_target}/${_target}/
+                COMMAND ${PYTHON_EXECUTABLE} ${MAME_DIR}/scripts/build/makedep.py driverlist ${MAME_DIR}/src/${_target}/${_target}.lst > ${GEN_DIR}/${_target}/${_target}/drivlist.cpp
+                DEPENDS ${MAME_DIR}/scripts/build/makedep.py ${MAME_DIR}/src/${_target}/${_target}.lst
+                OUTPUT ${GEN_DIR}/${_target}/${_target}/drivlist.cpp
+                COMMENT "Building driver list..."
+            )
+        endif()
     else()
         add_custom_command(
-            COMMAND ${CMAKE_COMMAND} -E make_directory ${GEN_DIR}/${_target}/${_target}/
-            COMMAND ${PYTHON_EXECUTABLE} ${MAME_DIR}/scripts/build/makedep.py driverlist ${MAME_DIR}/src/${_target}/${_target}.lst > ${GEN_DIR}/${_target}/${_target}/drivlist.cpp
-            DEPENDS ${MAME_DIR}/scripts/build/makedep.py ${MAME_DIR}/src/${_target}/${_target}.lst
-            OUTPUT ${GEN_DIR}/${_target}/${_target}/drivlist.cpp
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${GEN_DIR}/${_target}/${_subtarget}/
+            COMMAND ${PYTHON_EXECUTABLE} ${MAME_DIR}/scripts/build/makedep.py driverlist ${MAME_DIR}/src/${_target}/${_target}.lst -f ${GEN_DIR}/${_target}/${_subtarget}.flt > ${GEN_DIR}/${_target}/${_subtarget}/drivlist.cpp
+            DEPENDS ${MAME_DIR}/scripts/build/makedep.py ${MAME_DIR}/src/${_target}/${_target}.lst ${GEN_DIR}/${_target}/${_subtarget}.flt
+            OUTPUT ${GEN_DIR}/${_target}/${_subtarget}/drivlist.cpp
             COMMENT "Building driver list..."
         )
     endif()
 
-#	if (_OPTIONS["SOURCES"] ~= nil) then
-#			dependency {
-#			{
-#				GEN_DIR  .. _target .. "/" .. _subtarget .."/drivlist.cpp",  MAME_DIR .. "src/".._target .."/" .. _target ..".lst", true },
-#			}
-#			custombuildtask {
-#				{ GEN_DIR .. _target .."/" .. _subtarget ..".flt" ,  GEN_DIR  .. _target .. "/" .. _subtarget .."/drivlist.cpp",    {  MAME_DIR .. "scripts/build/makedep.py", MAME_DIR .. "src/".._target .."/" .. _target ..".lst"  }, {"@echo Building driver list...",    PYTHON .. " $(1) driverlist $(2) -f $(<) > $(@)" }},
-#			}
-#	end
 #
 #	configuration { "mingw*" }
 #		custombuildtask {
