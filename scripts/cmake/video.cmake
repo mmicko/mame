@@ -19,7 +19,7 @@ set(VIDEO_SRCS
 
 ##################################################
 ##
-##@src/devices/video/315_5124.h,VIDEOS["SEGA315_5124"] = true
+##@src/devices/video/315_5124.h,list(APPEND VIDEOS SEGA315_5124)
 ##################################################
 
 if("SEGA315_5124" IN_LIST VIDEOS)
@@ -31,7 +31,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/315_5313.h,VIDEOS["SEGA315_5313"] = true
+##@src/devices/video/315_5313.h,list(APPEND VIDEOS SEGA315_5313)
 ##################################################
 
 if("SEGA315_5313" IN_LIST VIDEOS)
@@ -43,7 +43,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/am8052.h,VIDEOS["AM8052"] = true
+##@src/devices/video/am8052.h,list(APPEND VIDEOS AM8052)
 ##################################################
 
 if("AM8052" IN_LIST VIDEOS)
@@ -55,7 +55,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/bufsprite.h,VIDEOS["BUFSPRITE"] = true
+##@src/devices/video/bufsprite.h,list(APPEND VIDEOS BUFSPRITE)
 ##################################################
 
 if("BUFSPRITE" IN_LIST VIDEOS)
@@ -67,7 +67,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/cdp1861.h,VIDEOS["CDP1861"] = true
+##@src/devices/video/cdp1861.h,list(APPEND VIDEOS CDP1861)
 ##################################################
 
 if("CDP1861" IN_LIST VIDEOS)
@@ -79,7 +79,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/cdp1862.h,VIDEOS["CDP1862"] = true
+##@src/devices/video/cdp1862.h,list(APPEND VIDEOS CDP1862)
 ##################################################
 
 if("CDP1862" IN_LIST VIDEOS)
@@ -91,7 +91,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/cesblit.h,VIDEOS["CESBLIT"] = true
+##@src/devices/video/cesblit.h,list(APPEND VIDEOS CESBLIT)
 ##################################################
 
 if("CESBLIT" IN_LIST VIDEOS)
@@ -103,7 +103,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/crt9007.h,VIDEOS["CRT9007"] = true
+##@src/devices/video/crt9007.h,list(APPEND VIDEOS CRT9007)
 ##################################################
 
 if("CRT9007" IN_LIST VIDEOS)
@@ -115,7 +115,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/crt9021.h,VIDEOS["CRT9021"] = true
+##@src/devices/video/crt9021.h,list(APPEND VIDEOS CRT9021)
 ##################################################
 
 if("CRT9021" IN_LIST VIDEOS)
@@ -127,7 +127,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/crt9028.h,VIDEOS["CRT9028"] = true
+##@src/devices/video/crt9028.h,list(APPEND VIDEOS CRT9028)
 ##################################################
 
 if("CRT9028" IN_LIST VIDEOS)
@@ -139,7 +139,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/crt9212.h,VIDEOS["CRT9212"] = true
+##@src/devices/video/crt9212.h,list(APPEND VIDEOS CRT9212)
 ##################################################
 
 if("CRT9212" IN_LIST VIDEOS)
@@ -151,7 +151,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/dl1416.h,VIDEOS["DL1416"] = true
+##@src/devices/video/dl1416.h,list(APPEND VIDEOS DL1416)
 ##################################################
 
 if("DL1416" IN_LIST VIDEOS)
@@ -163,7 +163,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/dm9368.h,VIDEOS["DM9368"] = true
+##@src/devices/video/dm9368.h,list(APPEND VIDEOS DM9368)
 ##################################################
 
 if("DM9368" IN_LIST VIDEOS)
@@ -175,7 +175,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/dp8350.h,VIDEOS["DP8350"] = true
+##@src/devices/video/dp8350.h,list(APPEND VIDEOS DP8350)
 ##################################################
 
 if("DP8350" IN_LIST VIDEOS)
@@ -187,7 +187,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/ef9340_1.h,VIDEOS["EF9340_1"] = true
+##@src/devices/video/ef9340_1.h,list(APPEND VIDEOS EF9340_1)
 ##################################################
 
 if("EF9340_1" IN_LIST VIDEOS)
@@ -199,7 +199,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/ef9345.h,VIDEOS["EF9345"] = true
+##@src/devices/video/ef9345.h,list(APPEND VIDEOS EF9345)
 ##################################################
 
 if("EF9345" IN_LIST VIDEOS)
@@ -211,7 +211,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/ef9364.h,VIDEOS["EF9364"] = true
+##@src/devices/video/ef9364.h,list(APPEND VIDEOS EF9364)
 ##################################################
 
 if("EF9364" IN_LIST VIDEOS)
@@ -223,7 +223,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/ef9365.h,VIDEOS["EF9365"] = true
+##@src/devices/video/ef9365.h,list(APPEND VIDEOS EF9365)
 ##################################################
 
 if("EF9365" IN_LIST VIDEOS)
@@ -234,7 +234,7 @@ if("EF9365" IN_LIST VIDEOS)
 endif()
 
 ##################################################
-##@src/devices/video/epic12.h,VIDEOS["EPIC12"] = true
+##@src/devices/video/epic12.h,list(APPEND VIDEOS EPIC12)
 ##################################################
 
 if("EPIC12" IN_LIST VIDEOS)
@@ -257,7 +257,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/fixfreq.h,VIDEOS["FIXFREQ"] = true
+##@src/devices/video/fixfreq.h,list(APPEND VIDEOS FIXFREQ)
 ##################################################
 
 if("FIXFREQ" IN_LIST VIDEOS)
@@ -269,7 +269,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/gf4500.h,VIDEOS["GF4500"] = true
+##@src/devices/video/gf4500.h,list(APPEND VIDEOS GF4500)
 ##################################################
 
 if("GF4500" IN_LIST VIDEOS)
@@ -281,7 +281,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/gf7600gs.h,VIDEOS["GF7600GS"] = true
+##@src/devices/video/gf7600gs.h,list(APPEND VIDEOS GF7600GS)
 ##################################################
 
 if("GF7600GS" IN_LIST VIDEOS)
@@ -293,7 +293,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/mga2064w.h,VIDEOS["MGA2064W"] = true
+##@src/devices/video/mga2064w.h,list(APPEND VIDEOS MGA2064W)
 ##################################################
 
 if("MGA2064W" IN_LIST VIDEOS)
@@ -305,7 +305,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/nt7534.h,VIDEOS["NT7534"] = true
+##@src/devices/video/nt7534.h,list(APPEND VIDEOS NT7534)
 ##################################################
 
 if("NT7534" IN_LIST VIDEOS)
@@ -317,7 +317,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/hd44102.h,VIDEOS["HD44102"] = true
+##@src/devices/video/hd44102.h,list(APPEND VIDEOS HD44102)
 ##################################################
 
 if("HD44102" IN_LIST VIDEOS)
@@ -329,7 +329,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/hd44352.h,VIDEOS["HD44352"] = true
+##@src/devices/video/hd44352.h,list(APPEND VIDEOS HD44352)
 ##################################################
 
 if("HD44352" IN_LIST VIDEOS)
@@ -341,7 +341,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/hd44780.h,VIDEOS["HD44780"] = true
+##@src/devices/video/hd44780.h,list(APPEND VIDEOS HD44780)
 ##################################################
 
 if("HD44780" IN_LIST VIDEOS)
@@ -353,7 +353,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/hd61202.h,VIDEOS["HD61202"] = true
+##@src/devices/video/hd61202.h,list(APPEND VIDEOS HD61202)
 ##################################################
 
 if("HD61202" IN_LIST VIDEOS)
@@ -365,7 +365,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/hd61603.h,VIDEOS["HD61603"] = true
+##@src/devices/video/hd61603.h,list(APPEND VIDEOS HD61603)
 ##################################################
 
 if("HD61603" IN_LIST VIDEOS)
@@ -377,7 +377,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/hd61830.h,VIDEOS["HD61830"] = true
+##@src/devices/video/hd61830.h,list(APPEND VIDEOS HD61830)
 ##################################################
 
 if("HD61830" IN_LIST VIDEOS)
@@ -389,7 +389,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/hd63484.h,VIDEOS["HD63484"] = true
+##@src/devices/video/hd63484.h,list(APPEND VIDEOS HD63484)
 ##################################################
 
 if("HD63484" IN_LIST VIDEOS)
@@ -401,7 +401,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/hd66421.h,VIDEOS["HD66421"] = true
+##@src/devices/video/hd66421.h,list(APPEND VIDEOS HD66421)
 ##################################################
 
 if("HD66421" IN_LIST VIDEOS)
@@ -413,7 +413,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/hlcd0438.h,VIDEOS["HLCD0438"] = true
+##@src/devices/video/hlcd0438.h,list(APPEND VIDEOS HLCD0438)
 ##################################################
 
 if("HLCD0438" IN_LIST VIDEOS)
@@ -425,7 +425,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/hlcd0488.h,VIDEOS["HLCD0488"] = true
+##@src/devices/video/hlcd0488.h,list(APPEND VIDEOS HLCD0488)
 ##################################################
 
 if("HLCD0488" IN_LIST VIDEOS)
@@ -437,7 +437,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/hlcd0515.h,VIDEOS["HLCD0515"] = true
+##@src/devices/video/hlcd0515.h,list(APPEND VIDEOS HLCD0515)
 ##################################################
 
 if("HLCD0515" IN_LIST VIDEOS)
@@ -449,7 +449,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/hlcd0538.h,VIDEOS["HLCD0538"] = true
+##@src/devices/video/hlcd0538.h,list(APPEND VIDEOS HLCD0538)
 ##################################################
 
 if("HLCD0538" IN_LIST VIDEOS)
@@ -461,7 +461,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/hp1ll3.h,VIDEOS["HP1LL3"] = true
+##@src/devices/video/hp1ll3.h,list(APPEND VIDEOS HP1LL3)
 ##################################################
 
 if("HP1LL3" IN_LIST VIDEOS)
@@ -473,7 +473,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/huc6202.h,VIDEOS["HUC6202"] = true
+##@src/devices/video/huc6202.h,list(APPEND VIDEOS HUC6202)
 ##################################################
 
 if("HUC6202" IN_LIST VIDEOS)
@@ -485,7 +485,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/huc6260.h,VIDEOS["HUC6260"] = true
+##@src/devices/video/huc6260.h,list(APPEND VIDEOS HUC6260)
 ##################################################
 
 if("HUC6260" IN_LIST VIDEOS)
@@ -497,7 +497,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/huc6261.h,VIDEOS["HUC6261"] = true
+##@src/devices/video/huc6261.h,list(APPEND VIDEOS HUC6261)
 ##################################################
 
 if("HUC6261" IN_LIST VIDEOS)
@@ -509,7 +509,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/huc6270.h,VIDEOS["HUC6270"] = true
+##@src/devices/video/huc6270.h,list(APPEND VIDEOS HUC6270)
 ##################################################
 
 if("HUC6270" IN_LIST VIDEOS)
@@ -521,7 +521,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/huc6271.h,VIDEOS["HUC6271"] = true
+##@src/devices/video/huc6271.h,list(APPEND VIDEOS HUC6271)
 ##################################################
 
 if("HUC6271" IN_LIST VIDEOS)
@@ -533,7 +533,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/huc6272.h,VIDEOS["HUC6272"] = true
+##@src/devices/video/huc6272.h,list(APPEND VIDEOS HUC6272)
 ##################################################
 
 if("HUC6272" IN_LIST VIDEOS)
@@ -545,7 +545,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/i8244.h,VIDEOS["I8244"] = true
+##@src/devices/video/i8244.h,list(APPEND VIDEOS I8244)
 ##################################################
 
 if("I8244" IN_LIST VIDEOS)
@@ -557,7 +557,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/i82730.h,VIDEOS["I82730"] = true
+##@src/devices/video/i82730.h,list(APPEND VIDEOS I82730)
 ##################################################
 
 if("I82730" IN_LIST VIDEOS)
@@ -569,7 +569,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/i8275.h,VIDEOS["I8275"] = true
+##@src/devices/video/i8275.h,list(APPEND VIDEOS I8275)
 ##################################################
 
 if("I8275" IN_LIST VIDEOS)
@@ -581,7 +581,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/ims_cvc.h,VIDEOS["IMS_CVC"] = true
+##@src/devices/video/ims_cvc.h,list(APPEND VIDEOS IMS_CVC)
 ##################################################
 
 if("IMS_CVC" IN_LIST VIDEOS)
@@ -593,7 +593,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/lc7582.h,VIDEOS["LC7582"] = true
+##@src/devices/video/lc7582.h,list(APPEND VIDEOS LC7582)
 ##################################################
 
 if("LC7582" IN_LIST VIDEOS)
@@ -605,7 +605,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/lc7985.h,VIDEOS["LC7985"] = true
+##@src/devices/video/lc7985.h,list(APPEND VIDEOS LC7985)
 ##################################################
 
 if("LC7985" IN_LIST VIDEOS)
@@ -617,7 +617,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/m50458.h,VIDEOS["M50458"] = true
+##@src/devices/video/m50458.h,list(APPEND VIDEOS M50458)
 ##################################################
 
 if("M50458" IN_LIST VIDEOS)
@@ -629,7 +629,7 @@ endif()
 
 ###################################################
 ##
-##@src/devices/video/mb88303.h,VIDEOS["MB88303"] = true
+##@src/devices/video/mb88303.h,list(APPEND VIDEOS MB88303)
 ###################################################
 
 if("MB88303" IN_LIST VIDEOS)
@@ -641,7 +641,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/mb90082.h,VIDEOS["MB90082"] = true
+##@src/devices/video/mb90082.h,list(APPEND VIDEOS MB90082)
 ##################################################
 
 if("MB90082" IN_LIST VIDEOS)
@@ -653,7 +653,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/mb_vcu.h,VIDEOS["MB_VCU"] = true
+##@src/devices/video/mb_vcu.h,list(APPEND VIDEOS MB_VCU)
 ##################################################
 
 if("MB_VCU" IN_LIST VIDEOS)
@@ -665,7 +665,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/mc6845.h,VIDEOS["MC6845"] = true
+##@src/devices/video/mc6845.h,list(APPEND VIDEOS MC6845)
 ##################################################
 
 if("MC6845" IN_LIST VIDEOS)
@@ -677,7 +677,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/mc6847.h,VIDEOS["MC6847"] = true
+##@src/devices/video/mc6847.h,list(APPEND VIDEOS MC6847)
 ##################################################
 
 if("MC6847" IN_LIST VIDEOS)
@@ -689,7 +689,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/md4330b.h,VIDEOS["MD4330B"] = true
+##@src/devices/video/md4330b.h,list(APPEND VIDEOS MD4330B)
 ##################################################
 
 if("MD4330B" IN_LIST VIDEOS)
@@ -701,7 +701,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/mm5445.h,VIDEOS["MM5445"] = true
+##@src/devices/video/mm5445.h,list(APPEND VIDEOS MM5445)
 ##################################################
 
 if("MM5445" IN_LIST VIDEOS)
@@ -713,7 +713,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/msm6222b.h,VIDEOS["MSM6222B"] = true
+##@src/devices/video/msm6222b.h,list(APPEND VIDEOS MSM6222B)
 ##################################################
 
 if("MSM6222B" IN_LIST VIDEOS)
@@ -725,7 +725,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/msm6255.h,VIDEOS["MSM6255"] = true
+##@src/devices/video/msm6255.h,list(APPEND VIDEOS MSM6255)
 ##################################################
 
 if("MSM6255" IN_LIST VIDEOS)
@@ -737,7 +737,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/mos6566.h,VIDEOS["MOS6566"] = true
+##@src/devices/video/mos6566.h,list(APPEND VIDEOS MOS6566)
 ##################################################
 
 if("MOS6566" IN_LIST VIDEOS)
@@ -755,7 +755,7 @@ list(APPEND VIDEO_SRCS
 
 ##################################################
 ##
-##@src/devices/video/pc_vga.h,VIDEOS["PC_VGA"] = true
+##@src/devices/video/pc_vga.h,list(APPEND VIDEOS PC_VGA)
 ##################################################
 
 if("PC_VGA" IN_LIST VIDEOS)
@@ -771,7 +771,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/virge_pci.h,VIDEOS["VIRGE_PCI"] = true
+##@src/devices/video/virge_pci.h,list(APPEND VIDEOS VIRGE_PCI)
 ##################################################
 
 if("VIRGE_PCI" IN_LIST VIDEOS)
@@ -783,7 +783,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/pcd8544.h,VIDEOS["PCD8544"] = true
+##@src/devices/video/pcd8544.h,list(APPEND VIDEOS PCD8544)
 ##################################################
 
 if("PCD8544" IN_LIST VIDEOS)
@@ -795,7 +795,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/pcf2100.h,VIDEOS["PCF2100"] = true
+##@src/devices/video/pcf2100.h,list(APPEND VIDEOS PCF2100)
 ##################################################
 
 if("PCF2100" IN_LIST VIDEOS)
@@ -807,7 +807,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/polylgcy.h,VIDEOS["POLY"] = true
+##@src/devices/video/polylgcy.h,list(APPEND VIDEOS POLY)
 ##################################################
 
 if("POLY" IN_LIST VIDEOS)
@@ -819,7 +819,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/psx.h,VIDEOS["PSX"] = true
+##@src/devices/video/psx.h,list(APPEND VIDEOS PSX)
 ##################################################
 
 if("PSX" IN_LIST VIDEOS)
@@ -831,7 +831,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/ramdac.h,VIDEOS["RAMDAC"] = true
+##@src/devices/video/ramdac.h,list(APPEND VIDEOS RAMDAC)
 ##################################################
 
 if("RAMDAC" IN_LIST VIDEOS)
@@ -843,7 +843,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/saa5050.h,VIDEOS["SAA5050"] = true
+##@src/devices/video/saa5050.h,list(APPEND VIDEOS SAA5050)
 ##################################################
 
 if("SAA5050" IN_LIST VIDEOS)
@@ -855,7 +855,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/saa5240.h,VIDEOS["SAA5240"] = true
+##@src/devices/video/saa5240.h,list(APPEND VIDEOS SAA5240)
 ##################################################
 
 if("SAA5240" IN_LIST VIDEOS)
@@ -867,7 +867,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/pwm.h,VIDEOS["PWM_DISPLAY"] = true
+##@src/devices/video/pwm.h,list(APPEND VIDEOS PWM_DISPLAY)
 ##################################################
 if("PWM_DISPLAY" IN_LIST VIDEOS)
 	list(APPEND VIDEO_SRCS
@@ -878,7 +878,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/sed1200.h,VIDEOS["SED1200"] = true
+##@src/devices/video/sed1200.h,list(APPEND VIDEOS SED1200)
 ##################################################
 if("SED1200" IN_LIST VIDEOS)
 	list(APPEND VIDEO_SRCS
@@ -889,7 +889,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/sed1330.h,VIDEOS["SED1330"] = true
+##@src/devices/video/sed1330.h,list(APPEND VIDEOS SED1330)
 ##################################################
 if("SED1330" IN_LIST VIDEOS)
 	list(APPEND VIDEO_SRCS
@@ -900,7 +900,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/sed1356.h,VIDEOS["SED1356"] = true
+##@src/devices/video/sed1356.h,list(APPEND VIDEOS SED1356)
 ##################################################
 if("SED1356" IN_LIST VIDEOS)
 	list(APPEND VIDEO_SRCS
@@ -911,7 +911,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/sed1500.h,VIDEOS["SED1500"] = true
+##@src/devices/video/sed1500.h,list(APPEND VIDEOS SED1500)
 ##################################################
 if("SED1500" IN_LIST VIDEOS)
 	list(APPEND VIDEO_SRCS
@@ -922,7 +922,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/sed1520.h,VIDEOS["SED1520"] = true
+##@src/devices/video/sed1520.h,list(APPEND VIDEOS SED1520)
 ##################################################
 if("SED1520" IN_LIST VIDEOS)
 	list(APPEND VIDEO_SRCS
@@ -933,7 +933,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/scn2674.h,VIDEOS["SCN2674"] = true
+##@src/devices/video/scn2674.h,list(APPEND VIDEOS SCN2674)
 ##################################################
 if("SCN2674" IN_LIST VIDEOS)
 	list(APPEND VIDEO_SRCS
@@ -944,7 +944,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/sda5708.h,VIDEOS["SDA5708"] = true
+##@src/devices/video/sda5708.h,list(APPEND VIDEOS SDA5708)
 ##################################################
 if("SDA5708" IN_LIST VIDEOS)
 	list(APPEND VIDEO_SRCS
@@ -955,7 +955,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/snes_ppu.h,VIDEOS["SNES_PPU"] = true
+##@src/devices/video/snes_ppu.h,list(APPEND VIDEOS SNES_PPU)
 ##################################################
 if("SNES_PPU" IN_LIST VIDEOS)
 	list(APPEND VIDEO_SRCS
@@ -966,8 +966,8 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/stvvdp1.h,VIDEOS["STVVDP"] = true
-##@src/devices/video/stvvdp2.h,VIDEOS["STVVDP"] = true
+##@src/devices/video/stvvdp1.h,list(APPEND VIDEOS STVVDP)
+##@src/devices/video/stvvdp2.h,list(APPEND VIDEOS STVVDP)
 ##################################################
 
 if("STVVDP" IN_LIST VIDEOS)
@@ -981,7 +981,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/t6963c.h,VIDEOS["T6963C"] = true
+##@src/devices/video/t6963c.h,list(APPEND VIDEOS T6963C)
 ##################################################
 
 if("T6963C" IN_LIST VIDEOS)
@@ -993,7 +993,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/t6a04.h,VIDEOS["T6A04"] = true
+##@src/devices/video/t6a04.h,list(APPEND VIDEOS T6A04)
 ##################################################
 
 if("T6A04" IN_LIST VIDEOS)
@@ -1005,7 +1005,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/tea1002.h,VIDEOS["TEA1002"] = true
+##@src/devices/video/tea1002.h,list(APPEND VIDEOS TEA1002)
 ##################################################
 
 if("TEA1002" IN_LIST VIDEOS)
@@ -1017,7 +1017,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/tlc34076.h,VIDEOS["TLC34076"] = true
+##@src/devices/video/tlc34076.h,list(APPEND VIDEOS TLC34076)
 ##################################################
 
 if("TLC34076" IN_LIST VIDEOS)
@@ -1029,7 +1029,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/tms34061.h,VIDEOS["TMS34061"] = true
+##@src/devices/video/tms34061.h,list(APPEND VIDEOS TMS34061)
 ##################################################
 
 if("TMS34061" IN_LIST VIDEOS)
@@ -1041,7 +1041,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/tms3556.h,VIDEOS["TMS3556"] = true
+##@src/devices/video/tms3556.h,list(APPEND VIDEOS TMS3556)
 ##################################################
 
 if("TMS3556" IN_LIST VIDEOS)
@@ -1053,7 +1053,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/tms9927.h,VIDEOS["TMS9927"] = true
+##@src/devices/video/tms9927.h,list(APPEND VIDEOS TMS9927)
 ##################################################
 
 if("TMS9927" IN_LIST VIDEOS)
@@ -1065,7 +1065,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/tms9928a.h,VIDEOS["TMS9928A"] = true
+##@src/devices/video/tms9928a.h,list(APPEND VIDEOS TMS9928A)
 ##################################################
 
 if("TMS9928A" IN_LIST VIDEOS)
@@ -1077,7 +1077,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/upd3301.h,VIDEOS["UPD3301"] = true
+##@src/devices/video/upd3301.h,list(APPEND VIDEOS UPD3301)
 ##################################################
 
 if("UPD3301" IN_LIST VIDEOS)
@@ -1089,7 +1089,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/upd7220.h,VIDEOS["UPD7220"] = true
+##@src/devices/video/upd7220.h,list(APPEND VIDEOS UPD7220)
 ##################################################
 
 if("UPD7220" IN_LIST VIDEOS)
@@ -1101,7 +1101,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/upd7227.h,VIDEOS["UPD7227"] = true
+##@src/devices/video/upd7227.h,list(APPEND VIDEOS UPD7227)
 ##################################################
 
 if("UPD7227" IN_LIST VIDEOS)
@@ -1113,7 +1113,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/vic4567.h,VIDEOS["VIC4567"] = true
+##@src/devices/video/vic4567.h,list(APPEND VIDEOS VIC4567)
 ##################################################
 
 if("VIC4567" IN_LIST VIDEOS)
@@ -1125,7 +1125,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/v9938.h,VIDEOS["V9938"] = true
+##@src/devices/video/v9938.h,list(APPEND VIDEOS V9938)
 ##################################################
 
 if("V9938" IN_LIST VIDEOS)
@@ -1137,7 +1137,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/zeus2.h,VIDEOS["ZEUS2"] = true
+##@src/devices/video/zeus2.h,list(APPEND VIDEOS ZEUS2)
 ##################################################
 
 if("ZEUS2" IN_LIST VIDEOS)
@@ -1149,7 +1149,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/voodoo.h,VIDEOS["VOODOO"] = true
+##@src/devices/video/voodoo.h,list(APPEND VIDEOS VOODOO)
 ##################################################
 
 if("VOODOO" IN_LIST VIDEOS)
@@ -1163,7 +1163,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/voodoo_pci.h,VIDEOS["VOODOO_PCI"] = true
+##@src/devices/video/voodoo_pci.h,list(APPEND VIDEOS VOODOO_PCI)
 ##################################################
 
 if("VOODOO_PCI" IN_LIST VIDEOS)
@@ -1175,7 +1175,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/crtc_ega.h,VIDEOS["CRTC_EGA"] = true
+##@src/devices/video/crtc_ega.h,list(APPEND VIDEOS CRTC_EGA)
 ##################################################
 
 if("CRTC_EGA" IN_LIST VIDEOS)
@@ -1187,7 +1187,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/jangou_blitter.h,VIDEOS["JANGOU_BLITTER"] = true
+##@src/devices/video/jangou_blitter.h,list(APPEND VIDEOS JANGOU_BLITTER)
 ##################################################
 
 if("JANGOU_BLITTER" IN_LIST VIDEOS)
@@ -1199,7 +1199,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/gb_lcd.h,VIDEOS["GB_LCD"] = true
+##@src/devices/video/gb_lcd.h,list(APPEND VIDEOS GB_LCD)
 ##################################################
 
 if("GB_LCD" IN_LIST VIDEOS)
@@ -1211,7 +1211,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/gba_lcd.h,VIDEOS["GBA_LCD"] = true
+##@src/devices/video/gba_lcd.h,list(APPEND VIDEOS GBA_LCD)
 ##################################################
 
 if("GBA_LCD" IN_LIST VIDEOS)
@@ -1223,7 +1223,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/ef9369.h,VIDEOS["EF9369"] = true
+##@src/devices/video/ef9369.h,list(APPEND VIDEOS EF9369)
 ##################################################
 
 if("EF9369" IN_LIST VIDEOS)
@@ -1235,7 +1235,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/ppu2c0x.h,VIDEOS["PPU2C0X"] = true
+##@src/devices/video/ppu2c0x.h,list(APPEND VIDEOS PPU2C0X)
 ##################################################
 
 if("PPU2C0X" IN_LIST VIDEOS)
@@ -1251,7 +1251,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/bt459.h,VIDEOS["BT459"] = true
+##@src/devices/video/bt459.h,list(APPEND VIDEOS BT459)
 ##################################################
 
 if("BT459" IN_LIST VIDEOS)
@@ -1263,7 +1263,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/imagetek_i4100.h,VIDEOS["I4100"] = true
+##@src/devices/video/imagetek_i4100.h,list(APPEND VIDEOS I4100)
 ##################################################
 
 if("I4100" IN_LIST VIDEOS)
@@ -1275,7 +1275,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/dp8510.h,VIDEOS["DP8510"] = true
+##@src/devices/video/dp8510.h,list(APPEND VIDEOS DP8510)
 ##################################################
 
 if("DP8510" IN_LIST VIDEOS)
@@ -1287,7 +1287,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/bt45x.h,VIDEOS["BT45X"] = true
+##@src/devices/video/bt45x.h,list(APPEND VIDEOS BT45X)
 ##################################################
 
 if("BT45X" IN_LIST VIDEOS)
@@ -1299,7 +1299,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/topcat.h,VIDEOS["TOPCAT"] = true
+##@src/devices/video/topcat.h,list(APPEND VIDEOS TOPCAT)
 ##################################################
 if("TOPCAT" IN_LIST VIDEOS)
 	list(APPEND VIDEO_SRCS
@@ -1310,7 +1310,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/catseye.h,VIDEOS["CATSEYE"] = true
+##@src/devices/video/catseye.h,list(APPEND VIDEOS CATSEYE)
 ##################################################
 if("CATSEYE" IN_LIST VIDEOS)
 	list(APPEND VIDEO_SRCS
@@ -1322,7 +1322,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/nereid.h,VIDEOS["NEREID"] = true
+##@src/devices/video/nereid.h,list(APPEND VIDEOS NEREID)
 ##################################################
 if("NEREID" IN_LIST VIDEOS)
 	list(APPEND VIDEO_SRCS
@@ -1333,7 +1333,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/ps2gif.h,VIDEOS["PS2GIF"] = true
+##@src/devices/video/ps2gif.h,list(APPEND VIDEOS PS2GIF)
 ##################################################
 if("PS2GIF" IN_LIST VIDEOS)
 	list(APPEND VIDEO_SRCS
@@ -1344,7 +1344,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/ps2gs.h,VIDEOS["PS2GS"] = true
+##@src/devices/video/ps2gs.h,list(APPEND VIDEOS PS2GS)
 ##################################################
 if("PS2GS" IN_LIST VIDEOS)
 	list(APPEND VIDEO_SRCS
@@ -1355,7 +1355,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/decsfb.h,VIDEOS["DECSFB"] = true
+##@src/devices/video/decsfb.h,list(APPEND VIDEOS DECSFB)
 ##################################################
 if("DECSFB" IN_LIST VIDEOS)
 	list(APPEND VIDEO_SRCS
@@ -1366,7 +1366,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/bt47x.h,VIDEOS["BT47X"] = true
+##@src/devices/video/bt47x.h,list(APPEND VIDEOS BT47X)
 ##################################################
 
 if("BT47X" IN_LIST VIDEOS)
@@ -1378,7 +1378,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/bt431.h,VIDEOS["BT431"] = true
+##@src/devices/video/bt431.h,list(APPEND VIDEOS BT431)
 ##################################################
 
 if("BT431" IN_LIST VIDEOS)
@@ -1390,7 +1390,7 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/vrender0.h,VIDEOS["VRENDER0"] = true
+##@src/devices/video/vrender0.h,list(APPEND VIDEOS VRENDER0)
 ##################################################
 
 if("VRENDER0" IN_LIST VIDEOS)

@@ -26,10 +26,10 @@ set(SOUND_SRCS
 
 ###################################################
 ## DACs
-##@src/devices/sound/dac.h,SOUNDS["DAC"] = true
-##@src/devices/sound/dmadac.h,SOUNDS["DMADAC"] = true
-##@src/devices/sound/spkrdev.h,SOUNDS["SPEAKER"] = true
-##@src/devices/sound/beep.h,SOUNDS["BEEP"] = true
+##@src/devices/sound/dac.h,list(APPEND SOUNDS DAC)
+##@src/devices/sound/dmadac.h,list(APPEND SOUNDS DMADAC)
+##@src/devices/sound/spkrdev.h,list(APPEND SOUNDS SPEAKER)
+##@src/devices/sound/beep.h,list(APPEND SOUNDS BEEP)
 ###################################################
 
 if("DAC" IN_LIST SOUNDS)
@@ -64,7 +64,7 @@ endif()
 
 ###################################################
 ## CD audio
-##@src/devices/sound/cdda.h,SOUNDS["CDDA"] = true
+##@src/devices/sound/cdda.h,list(APPEND SOUNDS CDDA)
 ###################################################
 
 if("CDDA" IN_LIST SOUNDS)
@@ -78,7 +78,7 @@ endif()
 
 ###################################################
 ## Discrete component audio
-##@src/devices/sound/discrete.h,SOUNDS["DISCRETE"] = true
+##@src/devices/sound/discrete.h,list(APPEND SOUNDS DISCRETE)
 ###################################################
 
 if("DISCRETE" IN_LIST SOUNDS)
@@ -101,7 +101,7 @@ endif()
 
 ###################################################
 ## AC97
-##@src/devices/sound/pci-ac97.h,SOUNDS["AC97"] = true
+##@src/devices/sound/pci-ac97.h,list(APPEND SOUNDS AC97)
 ###################################################
 
 if("AC97" IN_LIST SOUNDS)
@@ -115,8 +115,8 @@ endif()
 
 ###################################################
 ## Apple custom sound chips
-##@src/devices/sound/asc.h,SOUNDS["ASC"] = true
-##@src/devices/sound/awacs.h,SOUNDS["AWACS"] = true
+##@src/devices/sound/asc.h,list(APPEND SOUNDS ASC)
+##@src/devices/sound/awacs.h,list(APPEND SOUNDS AWACS)
 ###################################################
 
 if("ASC" IN_LIST SOUNDS)
@@ -136,8 +136,8 @@ endif()
 
 ###################################################
 ## Atari custom sound chips
-##@src/devices/sound/pokey.h,SOUNDS["POKEY"] = true
-##@src/devices/sound/tiaintf.h,SOUNDS["TIA"] = true
+##@src/devices/sound/pokey.h,list(APPEND SOUNDS POKEY)
+##@src/devices/sound/tiaintf.h,list(APPEND SOUNDS TIA)
 ###################################################
 
 if("POKEY" IN_LIST SOUNDS)
@@ -160,7 +160,7 @@ endif()
 
 ###################################################
 ## Amiga audio hardware
-##@src/devices/machine/8364_paula.h,SOUNDS["PAULA_8364"] = true
+##@src/devices/machine/8364_paula.h,list(APPEND SOUNDS PAULA_8364)
 ###################################################
 
 if("PAULA_8364" IN_LIST SOUNDS)
@@ -174,7 +174,7 @@ endif()
 
 ###################################################
 ## Bally Astrocade sound system
-##@src/devices/sound/astrocde.h,SOUNDS["ASTROCADE"] = true
+##@src/devices/sound/astrocde.h,list(APPEND SOUNDS ASTROCADE)
 ###################################################
 
 if("ASTROCADE" IN_LIST SOUNDS)
@@ -189,7 +189,7 @@ endif()
 ###################################################
 ###################################################
 ## AC97
-##@src/devices/sound/pic-ac97.h,SOUNDS["AC97"] = true
+##@src/devices/sound/pic-ac97.h,list(APPEND SOUNDS AC97)
 ###################################################
 
 if("AC97" IN_LIST SOUNDS)
@@ -199,7 +199,7 @@ if("AC97" IN_LIST SOUNDS)
 	)
 endif()
 ## CEM 3394 analog synthesizer chip
-##@src/devices/sound/cem3394.h,SOUNDS["CEM3394"] = true
+##@src/devices/sound/cem3394.h,list(APPEND SOUNDS CEM3394)
 ###################################################
 
 if("CEM3394" IN_LIST SOUNDS)
@@ -213,7 +213,7 @@ endif()
 
 ###################################################
 ## Creative Labs SB0400 Audigy2 Value
-##@src/devices/sound/sb0400.h,SOUNDS["SB0400"] = true
+##@src/devices/sound/sb0400.h,list(APPEND SOUNDS SB0400)
 ###################################################
 
 if("SB0400" IN_LIST SOUNDS)
@@ -226,7 +226,7 @@ endif()
 
 ##################################################
 ## Creative Labs Ensonic AudioPCI97 ES1373
-##@src/devices/sound/es1373.h,SOUNDS["ES1373"] = true
+##@src/devices/sound/es1373.h,list(APPEND SOUNDS ES1373)
 ##################################################
 
 if("ES1373" IN_LIST SOUNDS)
@@ -238,7 +238,7 @@ endif()
 
 ###################################################
 ## Data East custom sound chips
-##@src/devices/sound/bsmt2000.h,SOUNDS["BSMT2000"] = true
+##@src/devices/sound/bsmt2000.h,list(APPEND SOUNDS BSMT2000)
 ###################################################
 
 if("BSMT2000" IN_LIST SOUNDS)
@@ -252,7 +252,7 @@ endif()
 
 ###################################################
 ## Ensoniq 5503 (Apple IIgs)
-##@src/devices/sound/es5503.h,SOUNDS["ES5503"] = true
+##@src/devices/sound/es5503.h,list(APPEND SOUNDS ES5503)
 ###################################################
 
 if("ES5503" IN_LIST SOUNDS)
@@ -266,7 +266,7 @@ endif()
 
 ###################################################
 ## Ensoniq 5505/5506
-##@src/devices/sound/es5506.h,SOUNDS["ES5505"] = true
+##@src/devices/sound/es5506.h,list(APPEND SOUNDS ES5505)
 ###################################################
 
 if(("ES5505" IN_LIST SOUNDS) OR ("ES5506" IN_LIST SOUNDS))
@@ -279,7 +279,7 @@ endif()
 
 ###################################################
 ## Ensoniq "pump" device, interfaces 5505/5506 with 5510
-##@src/devices/sound/esqpump.h,SOUNDS["ESQPUMP"] = true
+##@src/devices/sound/esqpump.h,list(APPEND SOUNDS ESQPUMP)
 ###################################################
 
 if("ESQPUMP" IN_LIST SOUNDS)
@@ -292,7 +292,7 @@ endif()
 
 ###################################################
 ## Excellent Systems ADPCM sound chip
-##@src/devices/sound/es8712.h,SOUNDS["ES8712"] = true
+##@src/devices/sound/es8712.h,list(APPEND SOUNDS ES8712)
 ###################################################
 
 if("ES8712" IN_LIST SOUNDS)
@@ -306,7 +306,7 @@ endif()
 
 ###################################################
 ## Gaelco custom sound chips
-##@src/devices/sound/gaelco.h,SOUNDS["GAELCO_CG1V"] = true
+##@src/devices/sound/gaelco.h,list(APPEND SOUNDS GAELCO_CG1V)
 ###################################################
 
 if(("GAELCO_CG1V" IN_LIST SOUNDS) OR ("GAELCO_GAE1" IN_LIST SOUNDS))
@@ -319,7 +319,7 @@ endif()
 
 ###################################################
 ## RCA CDP1863
-##@src/devices/sound/cdp1863.h,SOUNDS["CDP1863"] = true
+##@src/devices/sound/cdp1863.h,list(APPEND SOUNDS CDP1863)
 ###################################################
 
 if("CDP1863" IN_LIST SOUNDS)
@@ -333,7 +333,7 @@ endif()
 
 ###################################################
 ## RCA CDP1864
-##@src/devices/sound/cdp1864.h,SOUNDS["CDP1864"] = true
+##@src/devices/sound/cdp1864.h,list(APPEND SOUNDS CDP1864)
 ###################################################
 
 if("CDP1864" IN_LIST SOUNDS)
@@ -347,7 +347,7 @@ endif()
 
 ###################################################
 ## RCA CDP1869
-##@src/devices/sound/cdp1869.h,SOUNDS["CDP1869"] = true
+##@src/devices/sound/cdp1869.h,list(APPEND SOUNDS CDP1869)
 ###################################################
 
 if("CDP1869" IN_LIST SOUNDS)
@@ -361,7 +361,7 @@ endif()
 
 ###################################################
 ## GI AY-8910
-##@src/devices/sound/ay8910.h,SOUNDS["AY8910"] = true
+##@src/devices/sound/ay8910.h,list(APPEND SOUNDS AY8910)
 ###################################################
 
 if("AY8910" IN_LIST SOUNDS)
@@ -375,7 +375,7 @@ endif()
 
 ###################################################
 ## Harris HC55516 CVSD
-##@src/devices/sound/hc55516.h,SOUNDS["HC55516"] = true
+##@src/devices/sound/hc55516.h,list(APPEND SOUNDS HC55516)
 ###################################################
 
 if("HC55516" IN_LIST SOUNDS)
@@ -389,7 +389,7 @@ endif()
 
 ###################################################
 ## Hudsonsoft HuC6230 SoundBox
-##@src/devices/sound/huc6230.h,SOUNDS["HUC6230"] = true
+##@src/devices/sound/huc6230.h,list(APPEND SOUNDS HUC6230)
 ###################################################
 
 if("HUC6230" IN_LIST SOUNDS)
@@ -403,7 +403,7 @@ endif()
 
 ###################################################
 ## Hudsonsoft C6280 sound chip
-##@src/devices/sound/c6280.h,SOUNDS["C6280"] = true
+##@src/devices/sound/c6280.h,list(APPEND SOUNDS C6280)
 ###################################################
 
 if("C6280" IN_LIST SOUNDS)
@@ -417,7 +417,7 @@ endif()
 
 ###################################################
 ## ICS2115 sound chip
-##@src/devices/sound/ics2115.h,SOUNDS["ICS2115"] = true
+##@src/devices/sound/ics2115.h,list(APPEND SOUNDS ICS2115)
 ###################################################
 
 if("ICS2115" IN_LIST SOUNDS)
@@ -431,7 +431,7 @@ endif()
 
 ###################################################
 ## Imagetek I5000 sound
-##@src/devices/sound/i5000.h,SOUNDS["I5000_SND"] = true
+##@src/devices/sound/i5000.h,list(APPEND SOUNDS I5000_SND)
 ###################################################
 
 if("I5000_SND" IN_LIST SOUNDS)
@@ -445,7 +445,7 @@ endif()
 
 ###################################################
 ## Irem custom sound chips
-##@src/devices/sound/iremga20.h,SOUNDS["IREMGA20"] = true
+##@src/devices/sound/iremga20.h,list(APPEND SOUNDS IREMGA20)
 ###################################################
 
 if("IREMGA20" IN_LIST SOUNDS)
@@ -459,12 +459,12 @@ endif()
 
 ###################################################
 ## Konami custom sound chips
-##@src/devices/sound/k005289.h,SOUNDS["K005289"] = true
-##@src/devices/sound/k007232.h,SOUNDS["K007232"] = true
-##@src/devices/sound/k051649.h,SOUNDS["K051649"] = true
-##@src/devices/sound/k053260.h,SOUNDS["K053260"] = true
-##@src/devices/sound/k054539.h,SOUNDS["K054539"] = true
-##@src/devices/sound/k056800.h,SOUNDS["K056800"] = true
+##@src/devices/sound/k005289.h,list(APPEND SOUNDS K005289)
+##@src/devices/sound/k007232.h,list(APPEND SOUNDS K007232)
+##@src/devices/sound/k051649.h,list(APPEND SOUNDS K051649)
+##@src/devices/sound/k053260.h,list(APPEND SOUNDS K053260)
+##@src/devices/sound/k054539.h,list(APPEND SOUNDS K054539)
+##@src/devices/sound/k056800.h,list(APPEND SOUNDS K056800)
 ###################################################
 
 if("K005289" IN_LIST SOUNDS)
@@ -512,7 +512,7 @@ endif()
 
 ###################################################
 ## L7A1045 L6028 DSP-A
-##@src/devices/sound/l7a1045_l6028_dsp_a.h,SOUNDS["L7A1045"] = true
+##@src/devices/sound/l7a1045_l6028_dsp_a.h,list(APPEND SOUNDS L7A1045)
 ###################################################
 
 if("L7A1045" IN_LIST SOUNDS)
@@ -525,7 +525,7 @@ endif()
 
 ###################################################
 ## LMC1992 mixer chip
-##@src/devices/sound/lmc1992.h,SOUNDS["LMC1992"] = true
+##@src/devices/sound/lmc1992.h,list(APPEND SOUNDS LMC1992)
 ###################################################
 
 if("LMC1992" IN_LIST SOUNDS)
@@ -539,7 +539,7 @@ endif()
 
 ###################################################
 ## MAS 3507D MPEG 1/2 Layer 2/3 Audio Decoder
-##@src/devices/sound/mas3507d.h,SOUNDS["MAS3507D"] = true
+##@src/devices/sound/mas3507d.h,list(APPEND SOUNDS MAS3507D)
 ###################################################
 
 if("MAS3507D" IN_LIST SOUNDS)
@@ -553,7 +553,7 @@ endif()
 
 ###################################################
 ## MEA8000 Voice Synthesizer
-##@src/devices/sound/mea8000.h,SOUNDS["MEA8000"] = true
+##@src/devices/sound/mea8000.h,list(APPEND SOUNDS MEA8000)
 ###################################################
 
 if("MEA8000" IN_LIST SOUNDS)
@@ -567,7 +567,7 @@ endif()
 
 ###################################################
 ## MOS 6560VIC
-##@src/devices/sound/mos6560.h,SOUNDS["MOS656X"] = true
+##@src/devices/sound/mos6560.h,list(APPEND SOUNDS MOS656X)
 ###################################################
 
 if("MOS656X" IN_LIST SOUNDS)
@@ -581,7 +581,7 @@ endif()
 
 ###################################################
 ## MOS 7360 TED
-##@src/devices/sound/mos7360.h,SOUNDS["MOS7360"] = true
+##@src/devices/sound/mos7360.h,list(APPEND SOUNDS MOS7360)
 ###################################################
 
 if("MOS7360" IN_LIST SOUNDS)
@@ -595,11 +595,11 @@ endif()
 
 ###################################################
 ## Namco custom sound chips
-##@src/devices/sound/namco.h,SOUNDS["NAMCO"] = true
-##@src/devices/sound/namco_163.h,SOUNDS["NAMCO_163"] = true
-##@src/devices/sound/n63701x.h,SOUNDS["NAMCO_63701X"] = true
-##@src/devices/sound/c140.h,SOUNDS["C140"] = true
-##@src/devices/sound/c352.h,SOUNDS["C352"] = true
+##@src/devices/sound/namco.h,list(APPEND SOUNDS NAMCO)
+##@src/devices/sound/namco_163.h,list(APPEND SOUNDS NAMCO_163)
+##@src/devices/sound/n63701x.h,list(APPEND SOUNDS NAMCO_63701X)
+##@src/devices/sound/c140.h,list(APPEND SOUNDS C140)
+##@src/devices/sound/c352.h,list(APPEND SOUNDS C352)
 ###################################################
 
 if(("NAMCO" IN_LIST SOUNDS) OR ("NAMCO_15XX" IN_LIST SOUNDS) OR ("NAMCO_CUS30" IN_LIST SOUNDS))
@@ -641,7 +641,7 @@ endif()
 
 ###################################################
 ## National Semiconductor Digitalker
-##@src/devices/sound/digitalk.h,SOUNDS["DIGITALKER"] = true
+##@src/devices/sound/digitalk.h,list(APPEND SOUNDS DIGITALKER)
 ###################################################
 
 if("DIGITALKER" IN_LIST SOUNDS)
@@ -655,7 +655,7 @@ endif()
 
 ###################################################
 ## Nintendif()o custom sound chips
-##@src/devices/sound/nes_apu.h,SOUNDS["NES_APU"] = true
+##@src/devices/sound/nes_apu.h,list(APPEND SOUNDS NES_APU)
 ###################################################
 
 if("NES_APU" IN_LIST SOUNDS)
@@ -672,7 +672,7 @@ endif()
 
 ###################################################
 ## NEC uPD7759 ADPCM sample player
-##@src/devices/sound/upd7759.h,SOUNDS["UPD7759"] = true
+##@src/devices/sound/upd7759.h,list(APPEND SOUNDS UPD7759)
 ###################################################
 
 if("UPD7759" IN_LIST SOUNDS)
@@ -688,13 +688,13 @@ endif()
 
 ###################################################
 ## OKI ADPCM sample players
-##@src/devices/sound/okim6258.h,SOUNDS["OKIM6258"] = true
-##@src/devices/sound/msm5205.h,SOUNDS["MSM5205"] = true
-##@src/devices/sound/msm5232.h,SOUNDS["MSM5232"] = true
-##@src/devices/sound/okim6376.h,SOUNDS["OKIM6376"] = true
-##@src/devices/sound/okim6295.h,SOUNDS["OKIM6295"] = true
-##@src/devices/sound/okim9810.h,SOUNDS["OKIM9810"] = true
-##@src/devices/sound/okiadpcm.h,SOUNDS["OKIADPCM"] = true
+##@src/devices/sound/okim6258.h,list(APPEND SOUNDS OKIM6258)
+##@src/devices/sound/msm5205.h,list(APPEND SOUNDS MSM5205)
+##@src/devices/sound/msm5232.h,list(APPEND SOUNDS MSM5232)
+##@src/devices/sound/okim6376.h,list(APPEND SOUNDS OKIM6376)
+##@src/devices/sound/okim6295.h,list(APPEND SOUNDS OKIM6295)
+##@src/devices/sound/okim9810.h,list(APPEND SOUNDS OKIM9810)
+##@src/devices/sound/okiadpcm.h,list(APPEND SOUNDS OKIADPCM)
 ###################################################
 
 if(("OKIM6258" IN_LIST SOUNDS) OR ("OKIM6295" IN_LIST SOUNDS) OR ("OKIM9810" IN_LIST SOUNDS) OR ("I5000_SND" IN_LIST SOUNDS) OR ("OKIADPCM" IN_LIST SOUNDS))
@@ -750,7 +750,7 @@ endif()
 
 ###################################################
 ## Philips SAA1099
-##@src/devices/sound/saa1099.h,SOUNDS["SAA1099"] = true
+##@src/devices/sound/saa1099.h,list(APPEND SOUNDS SAA1099)
 ###################################################
 
 if("SAA1099" IN_LIST SOUNDS)
@@ -764,7 +764,7 @@ endif()
 
 ###################################################
 ## AdMOS QS1000
-##@src/devices/sound/qs1000.h,SOUNDS["QS1000"] = true
+##@src/devices/sound/qs1000.h,list(APPEND SOUNDS QS1000)
 ###################################################
 
 if("QS1000" IN_LIST SOUNDS)
@@ -778,7 +778,7 @@ endif()
 
 ###################################################
 ## QSound sample player
-##@src/devices/sound/qsound.h,SOUNDS["QSOUND"] = true
+##@src/devices/sound/qsound.h,list(APPEND SOUNDS QSOUND)
 ###################################################
 
 if("QSOUND" IN_LIST SOUNDS)
@@ -794,8 +794,8 @@ endif()
 
 ###################################################
 ## Ricoh sample players
-##@src/devices/sound/rf5c68.h,SOUNDS["RF5C68"] = true
-##@src/devices/sound/rf5c400.h,SOUNDS["RF5C400"] = true
+##@src/devices/sound/rf5c68.h,list(APPEND SOUNDS RF5C68)
+##@src/devices/sound/rf5c400.h,list(APPEND SOUNDS RF5C400)
 ###################################################
 
 if("RF5C68" IN_LIST SOUNDS)
@@ -816,10 +816,10 @@ endif()
 
 ###################################################
 ## Sega custom sound chips
-##@src/devices/sound/segapcm.h,SOUNDS["SEGAPCM"] = true
-##@src/devices/sound/multipcm.h,SOUNDS["MULTIPCM"] = true
-##@src/devices/sound/scsp.h,SOUNDS["SCSP"] = true
-##@src/devices/sound/aica.h,SOUNDS["AICA"] = true
+##@src/devices/sound/segapcm.h,list(APPEND SOUNDS SEGAPCM)
+##@src/devices/sound/multipcm.h,list(APPEND SOUNDS MULTIPCM)
+##@src/devices/sound/scsp.h,list(APPEND SOUNDS SCSP)
+##@src/devices/sound/aica.h,list(APPEND SOUNDS AICA)
 ###################################################
 
 if("SEGAPCM" IN_LIST SOUNDS)
@@ -856,9 +856,9 @@ endif()
 
 ###################################################
 ## Seta custom sound chips
-##@src/devices/sound/st0016.h,SOUNDS["ST0016"] = true
-##@src/devices/sound/setapcm.h,SOUNDS["SETAPCM"] = true
-##@src/devices/sound/x1_010.h,SOUNDS["X1_010"] = true
+##@src/devices/sound/st0016.h,list(APPEND SOUNDS ST0016)
+##@src/devices/sound/setapcm.h,list(APPEND SOUNDS SETAPCM)
+##@src/devices/sound/x1_010.h,list(APPEND SOUNDS X1_010)
 ###################################################
 
 if("ST0016" IN_LIST SOUNDS)
@@ -886,7 +886,7 @@ endif()
 
 ###################################################
 ## SID custom sound chips
-##@src/devices/sound/mos6581.h,SOUNDS["SID6581"] = true
+##@src/devices/sound/mos6581.h,list(APPEND SOUNDS SID6581)
 ###################################################
 
 if(("SID6581" IN_LIST SOUNDS) OR ("SID8580" IN_LIST SOUNDS))
@@ -908,7 +908,7 @@ endif()
 
 ###################################################
 ## SNK(?) custom stereo sn76489a clone
-##@src/devices/sound/t6w28.h,SOUNDS["T6W28"] = true
+##@src/devices/sound/t6w28.h,list(APPEND SOUNDS T6W28)
 ###################################################
 
 if("T6W28" IN_LIST SOUNDS)
@@ -922,7 +922,7 @@ endif()
 
 ###################################################
 ## SNK custom wave generator
-##@src/devices/sound/snkwave.h,SOUNDS["SNKWAVE"] = true
+##@src/devices/sound/snkwave.h,list(APPEND SOUNDS SNKWAVE)
 ###################################################
 
 if("SNKWAVE" IN_LIST SOUNDS)
@@ -936,7 +936,7 @@ endif()
 
 ###################################################
 ## Sony custom sound chips
-##@src/devices/sound/spu.h,SOUNDS["SPU"] = true
+##@src/devices/sound/spu.h,list(APPEND SOUNDS SPU)
 ###################################################
 
 if("SPU" IN_LIST SOUNDS)
@@ -952,7 +952,7 @@ endif()
 
 ###################################################
 ## SP0256 speech synthesizer
-##@src/devices/sound/sp0256.h,SOUNDS["SP0256"] = true
+##@src/devices/sound/sp0256.h,list(APPEND SOUNDS SP0256)
 ###################################################
 
 if("SP0256" IN_LIST SOUNDS)
@@ -966,7 +966,7 @@ endif()
 
 ###################################################
 ## SP0250 speech synthesizer
-##@src/devices/sound/sp0250.h,SOUNDS["SP0250"] = true
+##@src/devices/sound/sp0250.h,list(APPEND SOUNDS SP0250)
 ###################################################
 
 if("SP0250" IN_LIST SOUNDS)
@@ -980,7 +980,7 @@ endif()
 
 ###################################################
 ## S14001A speech synthesizer
-##@src/devices/sound/s14001a.h,SOUNDS["S14001A"] = true
+##@src/devices/sound/s14001a.h,list(APPEND SOUNDS S14001A)
 ###################################################
 
 if("S14001A" IN_LIST SOUNDS)
@@ -994,7 +994,7 @@ endif()
 
 ###################################################
 ## Texas Instruments SN76477 analog chip
-##@src/devices/sound/sn76477.h,SOUNDS["SN76477"] = true
+##@src/devices/sound/sn76477.h,list(APPEND SOUNDS SN76477)
 ###################################################
 
 if("SN76477" IN_LIST SOUNDS)
@@ -1008,7 +1008,7 @@ endif()
 
 ###################################################
 ## Texas Instruments SN76496
-##@src/devices/sound/sn76496.h,SOUNDS["SN76496"] = true
+##@src/devices/sound/sn76496.h,list(APPEND SOUNDS SN76496)
 ###################################################
 
 if("SN76496" IN_LIST SOUNDS)
@@ -1022,7 +1022,7 @@ endif()
 
 ###################################################
 ## Texas Instruments TMS36xx doorbell chime
-##@src/devices/sound/tms36xx.h,SOUNDS["TMS36XX"] = true
+##@src/devices/sound/tms36xx.h,list(APPEND SOUNDS TMS36XX)
 ###################################################
 
 if("TMS36XX" IN_LIST SOUNDS)
@@ -1036,7 +1036,7 @@ endif()
 
 ###################################################
 ## Texas Instruments TMS3615 Octave Multiple Tone Synthesizer
-##@src/devices/sound/tms3615.h,SOUNDS["TMS3615"] = true
+##@src/devices/sound/tms3615.h,list(APPEND SOUNDS TMS3615)
 ###################################################
 
 if("TMS3615" IN_LIST SOUNDS)
@@ -1050,7 +1050,7 @@ endif()
 
 ###################################################
 ## Texas Instruments TMS5100-series speech synthesizers
-##@src/devices/sound/tms5110.h,SOUNDS["TMS5110"] = true
+##@src/devices/sound/tms5110.h,list(APPEND SOUNDS TMS5110)
 ###################################################
 
 if("TMS5110" IN_LIST SOUNDS)
@@ -1063,7 +1063,7 @@ endif()
 
 ###################################################
 ## Texas Instruments TMS5200-series speech synthesizers
-##@src/devices/sound/tms5220.h,SOUNDS["TMS5220"] = true
+##@src/devices/sound/tms5220.h,list(APPEND SOUNDS TMS5220)
 ###################################################
 if("TMS5220" IN_LIST SOUNDS)
 	list(APPEND SOUND_SRCS
@@ -1078,7 +1078,7 @@ endif()
 
 ###################################################
 ## Toshiba T6721A voice synthesizer
-##@src/devices/sound/t6721a.h,SOUNDS["T6721A"] = true
+##@src/devices/sound/t6721a.h,list(APPEND SOUNDS T6721A)
 ###################################################
 
 if("T6721A" IN_LIST SOUNDS)
@@ -1092,7 +1092,7 @@ endif()
 
 ###################################################
 ## Toshiba TC8830F sample player/recorder
-##@src/devices/sound/tc8830f.h,SOUNDS["TC8830F"] = true
+##@src/devices/sound/tc8830f.h,list(APPEND SOUNDS TC8830F)
 ###################################################
 
 if("TC8830F" IN_LIST SOUNDS)
@@ -1105,7 +1105,7 @@ endif()
 
 ###################################################
 ## NEC uPD7752
-##@src/devices/sound/upd7752.h,SOUNDS["UPD7752"] = true
+##@src/devices/sound/upd7752.h,list(APPEND SOUNDS UPD7752)
 ###################################################
 
 if("UPD7752" IN_LIST SOUNDS)
@@ -1118,7 +1118,7 @@ endif()
 
 ###################################################
 ## VLM5030 speech synthesizer
-##@src/devices/sound/vlm5030.h,SOUNDS["VLM5030"] = true
+##@src/devices/sound/vlm5030.h,list(APPEND SOUNDS VLM5030)
 ###################################################
 
 if("VLM5030" IN_LIST SOUNDS)
@@ -1131,7 +1131,7 @@ endif()
 
 ###################################################
 ## Votrax speech synthesizer
-##@src/devices/sound/votrax.h,SOUNDS["VOTRAX"] = true
+##@src/devices/sound/votrax.h,list(APPEND SOUNDS VOTRAX)
 ###################################################
 
 if("VOTRAX" IN_LIST SOUNDS)
@@ -1145,7 +1145,7 @@ endif()
 
 ###################################################
 ## VRender0 custom sound chip
-##@src/devices/sound/vrender0.h,SOUNDS["VRENDER0"] = true
+##@src/devices/sound/vrender0.h,list(APPEND SOUNDS VRENDER0)
 ###################################################
 
 if("VRENDER0" IN_LIST SOUNDS)
@@ -1159,7 +1159,7 @@ endif()
 
 ###################################################
 ## WAVE file (used for MESS cassette)
-##@src/devices/sound/wave.h,SOUNDS["WAVE"] = true
+##@src/devices/sound/wave.h,list(APPEND SOUNDS WAVE)
 ###################################################
 
 if("WAVE" IN_LIST SOUNDS)
@@ -1172,21 +1172,21 @@ endif()
 
 ###################################################
 ## Yamaha FM synthesizers
-##@src/devices/sound/ym2154.h,SOUNDS["YM2154"] = true
-##@src/devices/sound/ymopm.h,SOUNDS["YM2151"] = true
-##@src/devices/sound/ymopz.h,SOUNDS["YM2414"] = true
-##@src/devices/sound/ymopq.h,SOUNDS["YM3806"] = true
-##@src/devices/sound/ymopn.h,SOUNDS["YM2203"] = true
-##@src/devices/sound/ymopl.h,SOUNDS["YM2413"] = true
-##@src/devices/sound/ymopn.h,SOUNDS["YM2608"] = true
-##@src/devices/sound/ymopn.h,SOUNDS["YM2610"] = true
-##@src/devices/sound/ymopn.h,SOUNDS["YM2612"] = true
-##@src/devices/sound/ymopl.h,SOUNDS["YM3526"] = true
-##@src/devices/sound/ymopl.h,SOUNDS["YM3812"] = true
-##@src/devices/sound/ymopl.h,SOUNDS["YMF262"] = true
-##@src/devices/sound/ymopl.h,SOUNDS["YMF278B"] = true
-##@src/devices/sound/ymf271.h,SOUNDS["YMF271"] = true
-##@src/devices/sound/ymopl.h,SOUNDS["Y8950"] = true
+##@src/devices/sound/ym2154.h,list(APPEND SOUNDS YM2154)
+##@src/devices/sound/ymopm.h,list(APPEND SOUNDS YM2151)
+##@src/devices/sound/ymopz.h,list(APPEND SOUNDS YM2414)
+##@src/devices/sound/ymopq.h,list(APPEND SOUNDS YM3806)
+##@src/devices/sound/ymopn.h,list(APPEND SOUNDS YM2203)
+##@src/devices/sound/ymopl.h,list(APPEND SOUNDS YM2413)
+##@src/devices/sound/ymopn.h,list(APPEND SOUNDS YM2608)
+##@src/devices/sound/ymopn.h,list(APPEND SOUNDS YM2610)
+##@src/devices/sound/ymopn.h,list(APPEND SOUNDS YM2612)
+##@src/devices/sound/ymopl.h,list(APPEND SOUNDS YM3526)
+##@src/devices/sound/ymopl.h,list(APPEND SOUNDS YM3812)
+##@src/devices/sound/ymopl.h,list(APPEND SOUNDS YMF262)
+##@src/devices/sound/ymopl.h,list(APPEND SOUNDS YMF278B)
+##@src/devices/sound/ymf271.h,list(APPEND SOUNDS YMF271)
+##@src/devices/sound/ymopl.h,list(APPEND SOUNDS Y8950)
 ###################################################
 
 if("YM2154" IN_LIST SOUNDS)
@@ -1242,7 +1242,7 @@ endif()
 
 ###################################################
 ## Yamaha YMZ280B ADPCM
-##@src/devices/sound/ymz280b.h,SOUNDS["YMZ280B"] = true
+##@src/devices/sound/ymz280b.h,list(APPEND SOUNDS YMZ280B)
 ###################################################
 
 if("YMZ280B" IN_LIST SOUNDS)
@@ -1254,7 +1254,7 @@ endif()
 
 ###################################################
 ## Yamaha YMZ770 AMM
-##@src/devices/sound/ymz770.h,SOUNDS["YMZ770"] = true
+##@src/devices/sound/ymz770.h,list(APPEND SOUNDS YMZ770)
 ###################################################
 
 if("YMZ770" IN_LIST SOUNDS)
@@ -1266,7 +1266,7 @@ endif()
 
 ###################################################
 ## MPEG AUDIO
-##@src/devices/sound/mpeg_audio.h,SOUNDS["MPEG_AUDIO"] = true
+##@src/devices/sound/mpeg_audio.h,list(APPEND SOUNDS MPEG_AUDIO)
 ###################################################
 
 if("MPEG_AUDIO" IN_LIST SOUNDS)
@@ -1278,7 +1278,7 @@ endif()
 
 ###################################################
 ## ZOOM ZSG-2
-##@src/devices/sound/zsg2.h,SOUNDS["ZSG2"] = true
+##@src/devices/sound/zsg2.h,list(APPEND SOUNDS ZSG2)
 ###################################################
 
 if("ZSG2" IN_LIST SOUNDS)
@@ -1290,7 +1290,7 @@ endif()
 
 ###################################################
 ## VRC6
-##@src/devices/sound/vrc6.h,SOUNDS["VRC6"] = true
+##@src/devices/sound/vrc6.h,list(APPEND SOUNDS VRC6)
 ###################################################
 
 if("VRC6" IN_LIST SOUNDS)
@@ -1302,7 +1302,7 @@ endif()
 
 ###################################################
 ## AD1848
-##@src/devices/sound/ad1848.h,SOUNDS["AD1848"] = true
+##@src/devices/sound/ad1848.h,list(APPEND SOUNDS AD1848)
 ###################################################
 
 if("AD1848" IN_LIST SOUNDS)
@@ -1314,7 +1314,7 @@ endif()
 
 ###################################################
 ## UPD1771
-##@src/devices/sound/upd1771.h,SOUNDS["UPD1771"] = true
+##@src/devices/sound/upd1771.h,list(APPEND SOUNDS UPD1771)
 ###################################################
 
 if("UPD1771" IN_LIST SOUNDS)
@@ -1326,7 +1326,7 @@ endif()
 
 ###################################################
 ## GB_SOUND
-##@src/devices/sound/gb.h,SOUNDS["GB_SOUND"] = true
+##@src/devices/sound/gb.h,list(APPEND SOUNDS GB_SOUND)
 ###################################################
 
 if("GB_SOUND" IN_LIST SOUNDS)
@@ -1338,7 +1338,7 @@ endif()
 
 ###################################################
 ## PCD3311
-##@src/devices/sound/pcd3311.h,SOUNDS["PCD3311"] = true
+##@src/devices/sound/pcd3311.h,list(APPEND SOUNDS PCD3311)
 ###################################################
 
 if("PCD3311" IN_LIST SOUNDS)
@@ -1350,7 +1350,7 @@ endif()
 
 ###################################################
 ## DAC-76 COMDAC
-##@src/devices/sound/dac76.h,SOUNDS["DAC76"] = true
+##@src/devices/sound/dac76.h,list(APPEND SOUNDS DAC76)
 ###################################################
 if("DAC76" IN_LIST SOUNDS)
 	list(APPEND SOUND_SRCS
@@ -1361,7 +1361,7 @@ endif()
 
 ###################################################
 ## MM5837 Noise Generator
-##@src/devices/sound/mm5837.h,SOUNDS["MM5837"] = true
+##@src/devices/sound/mm5837.h,list(APPEND SOUNDS MM5837)
 ###################################################
 
 if("MM5837" IN_LIST SOUNDS)
@@ -1373,7 +1373,7 @@ endif()
 
 ###################################################
 ## Intelligent Designs DAVE
-##@src/devices/sound/dave.h,SOUNDS["DAVE"] = true
+##@src/devices/sound/dave.h,list(APPEND SOUNDS DAVE)
 ###################################################
 
 if("DAVE" IN_LIST SOUNDS)
@@ -1385,7 +1385,7 @@ endif()
 
 ###################################################
 ## Toshiba TA7630
-##@src/devices/sound/ta7630.h,SOUNDS["TA7630"] = true
+##@src/devices/sound/ta7630.h,list(APPEND SOUNDS TA7630)
 ###################################################
 
 if("TA7630" IN_LIST SOUNDS)
@@ -1397,7 +1397,7 @@ endif()
 
 ###################################################
 ## Sanyo LC7535
-##@src/devices/sound/lc7535.h,SOUNDS["LC7535"] = true
+##@src/devices/sound/lc7535.h,list(APPEND SOUNDS LC7535)
 ###################################################
 
 if("LC7535" IN_LIST SOUNDS)
@@ -1409,7 +1409,7 @@ endif()
 
 ###################################################
 ## NEC uPD934G
-##@src/devices/sound/upd934g.h,SOUNDS["UPD934G"] = true
+##@src/devices/sound/upd934g.h,list(APPEND SOUNDS UPD934G)
 ###################################################
 
 if("UPD934G" IN_LIST SOUNDS)
@@ -1421,7 +1421,7 @@ endif()
 
 ###################################################
 ##
-##@src/devices/sound/iopspu.h,SOUNDS["IOPSPU"] = true
+##@src/devices/sound/iopspu.h,list(APPEND SOUNDS IOPSPU)
 ###################################################
 
 if("IOPSPU" IN_LIST SOUNDS)
@@ -1433,7 +1433,7 @@ endif()
 
 ###################################################
 ##
-##@src/devices/sound/swp00.h,SOUNDS["SWP00"] = true
+##@src/devices/sound/swp00.h,list(APPEND SOUNDS SWP00)
 ###################################################
 
 if("SWP00" IN_LIST SOUNDS)
@@ -1445,7 +1445,7 @@ endif()
 
 ###################################################
 ##
-##@src/devices/sound/swp20.h,SOUNDS["SWP20"] = true
+##@src/devices/sound/swp20.h,list(APPEND SOUNDS SWP20)
 ###################################################
 
 if("SWP20" IN_LIST SOUNDS)
@@ -1457,7 +1457,7 @@ endif()
 
 ###################################################
 ##
-##@src/devices/sound/swp30.h,SOUNDS["SWP30"] = true
+##@src/devices/sound/swp30.h,list(APPEND SOUNDS SWP30)
 ###################################################
 
 if("SWP30" IN_LIST SOUNDS)
@@ -1469,7 +1469,7 @@ endif()
 
 ###################################################
 ##
-##@src/devices/sound/xt446.h,SOUNDS["XT446"] = true
+##@src/devices/sound/xt446.h,list(APPEND SOUNDS XT446)
 ###################################################
 
 if("XT446" IN_LIST SOUNDS)
@@ -1481,7 +1481,7 @@ endif()
 
 ###################################################
 ## Roland sample players
-##@src/devices/sound/rolandpcm.h,SOUNDS["ROLANDPCM"] = true
+##@src/devices/sound/rolandpcm.h,list(APPEND SOUNDS ROLANDPCM)
 ###################################################
 
 if("ROLANDPCM" IN_LIST SOUNDS)
@@ -1493,7 +1493,7 @@ endif()
 
 ###################################################
 ##
-##@src/devices/sound/vgm_visualizer.h,SOUNDS["VGMVIZ"] = true
+##@src/devices/sound/vgm_visualizer.h,list(APPEND SOUNDS VGMVIZ)
 ###################################################
 
 if("VGMVIZ" IN_LIST SOUNDS)
@@ -1505,7 +1505,7 @@ endif()
 
 ###################################################
 ##
-##@src/devices/sound/s_dsp.h,SOUNDS["S_DSP"] = true
+##@src/devices/sound/s_dsp.h,list(APPEND SOUNDS S_DSP)
 ###################################################
 
 if("S_DSP" IN_LIST SOUNDS)
@@ -1517,7 +1517,7 @@ endif()
 
 ###################################################
 ##
-##@src/devices/sound/ks0164.h,SOUNDS["KS0164"] = true
+##@src/devices/sound/ks0164.h,list(APPEND SOUNDS KS0164)
 ###################################################
 
 if("KS0164" IN_LIST SOUNDS)
@@ -1529,7 +1529,7 @@ endif()
 
 ###################################################
 ##
-##@src/devices/sound/rp2c33_snd.h,SOUNDS["RP2C33_SOUND"] = true
+##@src/devices/sound/rp2c33_snd.h,list(APPEND SOUNDS RP2C33_SOUND)
 ###################################################
 
 if("RP2C33_SOUND" IN_LIST SOUNDS)
@@ -1541,7 +1541,7 @@ endif()
 
 ###################################################
 ##
-##@src/devices/sound/tt5665.h,SOUNDS["TT5665"] = true
+##@src/devices/sound/tt5665.h,list(APPEND SOUNDS TT5665)
 ###################################################
 
 if("TT5665" IN_LIST SOUNDS)
@@ -1553,7 +1553,7 @@ endif()
 
 ###################################################
 ##
-##@src/devices/sound/uda1344.h,SOUNDS["UDA1344"] = true
+##@src/devices/sound/uda1344.h,list(APPEND SOUNDS UDA1344)
 ###################################################
 
 if("UDA1344" IN_LIST SOUNDS)

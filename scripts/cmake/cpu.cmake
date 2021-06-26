@@ -49,19 +49,19 @@ if (CPU_INCLUDE_DRC)
 			${MAME_DIR}/src/devices/cpu/drcbex86.h
 		)
 	endif()
-#
-#	if _OPTIONS["targetos"]=="macosx" and _OPTIONS["gcc"]~=nil then
-#		if string.find(_OPTIONS["gcc"], "clang) and (str_to_version(_OPTIONS["gcc_version"]) < 80000 IN_LIST CPUS) OR TOOLS)
-#			defines {
-#				"TARGET_OS_OSX=1
-#			)
-#		endif()
-#	endif()
+##
+##	if _OPTIONS["targetos"]=="macosx" and _OPTIONS["gcc"]~=nil then
+##		if string.find(_OPTIONS["gcc"], "clang) and (str_to_version(_OPTIONS["gcc_version"]) < 80000 IN_LIST CPUS) OR TOOLS)
+##			defines {
+##				"TARGET_OS_OSX=1
+##			)
+##		endif()
+##	endif()
 endif()
 
 ##################################################
 ## Signetics 8X300 / Scientific Micro Systems SMS300
-##@src/devices/cpu/8x300/8x300.h,CPUS["8X300"] = true
+##@src/devices/cpu/8x300/8x300.h,list(APPEND CPUS 8X300)
 ##################################################
 
 if("8X300" IN_LIST CPUS)
@@ -78,7 +78,7 @@ endif()
 
 ##################################################
 ## 3DO Don's Super Performing Processor (DSPP)
-##@src/devices/cpu/dspp/dspp.h,CPUS["DSPP"] = true
+##@src/devices/cpu/dspp/dspp.h,list(APPEND CPUS DSPP)
 ##################################################
 
 if("DSPP" IN_LIST CPUS)
@@ -98,7 +98,7 @@ endif()
 
 ##################################################
 ## ARCangent A4
-##@src/devices/cpu/arc/arc.h,CPUS["ARC"] = true
+##@src/devices/cpu/arc/arc.h,list(APPEND CPUS ARC)
 ##################################################
 
 if("ARC" IN_LIST CPUS)
@@ -115,7 +115,7 @@ endif()
 
 ##################################################
 ## ARcompact (ARCtangent-A5, ARC 600, ARC 700)
-##@src/devices/cpu/arcompact/arcompact.h,CPUS["ARCOMPACT"] = true
+##@src/devices/cpu/arcompact/arcompact.h,list(APPEND CPUS ARCOMPACT)
 ##################################################
 
 if("ARCOMPACT" IN_LIST CPUS)
@@ -136,8 +136,8 @@ endif()
 ##################################################
 ## Acorn ARM series
 ##
-##@src/devices/cpu/arm/arm.h,CPUS["ARM"] = true
-##@src/devices/cpu/arm7/arm7.h,CPUS["ARM7"] = true
+##@src/devices/cpu/arm/arm.h,list(APPEND CPUS ARM)
+##@src/devices/cpu/arm7/arm7.h,list(APPEND CPUS ARM7)
 ##################################################
 
 if("ARM" IN_LIST CPUS)
@@ -176,7 +176,7 @@ endif()
 
 ##################################################
 ## Advanced Digital Chips SE3208
-##@src/devices/cpu/se3208/se3208.h,CPUS["SE3208"] = true
+##@src/devices/cpu/se3208/se3208.h,list(APPEND CPUS SE3208)
 ##################################################
 
 if("SE3208" IN_LIST CPUS)
@@ -193,7 +193,7 @@ endif()
 
 ##################################################
 ## American Microsystems, Inc.(AMI) S2000 series
-##@src/devices/cpu/amis2000/amis2000.h,CPUS["AMIS2000"] = true
+##@src/devices/cpu/amis2000/amis2000.h,list(APPEND CPUS AMIS2000)
 ##################################################
 
 if("AMIS2000" IN_LIST CPUS)
@@ -211,7 +211,7 @@ endif()
 
 ##################################################
 ## Analog Devices ADSP21xx series
-##@src/devices/cpu/adsp2100/adsp2100.h,CPUS["ADSP21XX"] = true
+##@src/devices/cpu/adsp2100/adsp2100.h,list(APPEND CPUS ADSP21XX)
 ##################################################
 
 if("ADSP21XX" IN_LIST CPUS)
@@ -229,7 +229,7 @@ endif()
 
 ##################################################
 ## Analog Devices "Sharc" ADSP21062
-##@src/devices/cpu/sharc/sharc.h,CPUS["ADSP21062"] = true
+##@src/devices/cpu/sharc/sharc.h,list(APPEND CPUS ADSP21062)
 ##################################################
 
 if("ADSP21062" IN_LIST CPUS)
@@ -254,7 +254,7 @@ endif()
 
 ##################################################
 ## APEXC
-##@src/devices/cpu/apexc/apexc.h,CPUS["APEXC"] = true
+##@src/devices/cpu/apexc/apexc.h,list(APPEND CPUS APEXC)
 ##################################################
 
 if("APEXC" IN_LIST CPUS)
@@ -271,7 +271,7 @@ endif()
 
 ##################################################
 ## WE|AT&T DSP16
-##@src/devices/cpu/dsp16/dsp16.h,CPUS["DSP16"] = true
+##@src/devices/cpu/dsp16/dsp16.h,list(APPEND CPUS DSP16)
 ##################################################
 
 if("DSP16" IN_LIST CPUS)
@@ -295,7 +295,7 @@ endif()
 
 ##################################################
 ## AT&T DSP32C
-##@src/devices/cpu/dsp32/dsp32.h,CPUS["DSP32C"] = true
+##@src/devices/cpu/dsp32/dsp32.h,list(APPEND CPUS DSP32C)
 ##################################################
 
 if("DSP32C" IN_LIST CPUS)
@@ -313,7 +313,7 @@ endif()
 
 ##################################################
 ## Atari custom RISC processor
-##@src/devices/cpu/asap/asap.h,CPUS["ASAP"] = true
+##@src/devices/cpu/asap/asap.h,list(APPEND CPUS ASAP)
 ##################################################
 
 if("ASAP" IN_LIST CPUS)
@@ -330,7 +330,7 @@ endif()
 
 ##################################################
 ## AMD Am29000
-##@src/devices/cpu/am29000/am29000.h,CPUS["AM29000"] = true
+##@src/devices/cpu/am29000/am29000.h,list(APPEND CPUS AM29000)
 ##################################################
 
 if("AM29000" IN_LIST CPUS)
@@ -348,7 +348,7 @@ endif()
 
 ##################################################
 ## Atari Jaguar custom DSPs
-##@src/devices/cpu/jaguar/jaguar.h,CPUS["JAGUAR"] = true
+##@src/devices/cpu/jaguar/jaguar.h,list(APPEND CPUS JAGUAR)
 ##################################################
 
 if("JAGUAR" IN_LIST CPUS)
@@ -365,7 +365,7 @@ endif()
 
 ##################################################
 ## Simutrek Cube Quest bit-sliced CPUs
-##@src/devices/cpu/cubeqcpu/cubeqcpu.h,CPUS["CUBEQCPU"] = true
+##@src/devices/cpu/cubeqcpu/cubeqcpu.h,list(APPEND CPUS CUBEQCPU)
 ##################################################
 
 if("CUBEQCPU" IN_LIST CPUS)
@@ -382,7 +382,7 @@ endif()
 
 ##################################################
 ## Ensoniq ES5510 ('ESP') DSP
-##@src/devices/cpu/es5510/es5510.h,CPUS["ES5510"] = true
+##@src/devices/cpu/es5510/es5510.h,list(APPEND CPUS ES5510)
 ##################################################
 
 if("ES5510" IN_LIST CPUS)
@@ -399,7 +399,7 @@ endif()
 
 ##################################################
 ## Entertainment Sciences AM29116-based RIP
-##@src/devices/cpu/esrip/esrip.h,CPUS["ESRIP"] = true
+##@src/devices/cpu/esrip/esrip.h,list(APPEND CPUS ESRIP)
 ##################################################
 
 if("ESRIP" IN_LIST CPUS)
@@ -416,7 +416,7 @@ endif()
 
 ##################################################
 ## Seiko Epson E0C6200 series
-##@src/devices/cpu/e0c6200/e0c6200.h,CPUS["E0C6200"] = true
+##@src/devices/cpu/e0c6200/e0c6200.h,list(APPEND CPUS E0C6200)
 ##################################################
 
 if("E0C6200" IN_LIST CPUS)
@@ -436,7 +436,7 @@ endif()
 
 ##################################################
 ## RCA COSMAC
-##@src/devices/cpu/cosmac/cosmac.h,CPUS["COSMAC"] = true
+##@src/devices/cpu/cosmac/cosmac.h,list(APPEND CPUS COSMAC)
 ##################################################
 
 if("COSMAC" IN_LIST CPUS)
@@ -453,7 +453,7 @@ endif()
 
 ##################################################
 ## National Semiconductor COPS(MM57) family
-##@src/devices/cpu/cops1/mm5799.h,CPUS["COPS1"] = true
+##@src/devices/cpu/cops1/mm5799.h,list(APPEND CPUS COPS1)
 ##################################################
 
 if("COPS1" IN_LIST CPUS)
@@ -473,7 +473,7 @@ endif()
 
 ##################################################
 ## National Semiconductor COPS(COP400) family
-##@src/devices/cpu/cop400/cop400.h,CPUS["COP400"] = true
+##@src/devices/cpu/cop400/cop400.h,list(APPEND CPUS COP400)
 ##################################################
 
 if("COP400" IN_LIST CPUS)
@@ -497,7 +497,7 @@ endif()
 
 ##################################################
 ## CP1610
-##@src/devices/cpu/cp1610/cp1610.h,CPUS["CP1610"] = true
+##@src/devices/cpu/cp1610/cp1610.h,list(APPEND CPUS CP1610)
 ##################################################
 
 if("CP1610" IN_LIST CPUS)
@@ -514,7 +514,7 @@ endif()
 
 ##################################################
 ## Cinematronics vector "CPU"
-##@src/devices/cpu/ccpu/ccpu.h,CPUS["CCPU"] = true
+##@src/devices/cpu/ccpu/ccpu.h,list(APPEND CPUS CCPU)
 ##################################################
 
 if("CCPU" IN_LIST CPUS)
@@ -531,7 +531,7 @@ endif()
 
 ##################################################
 ## DEC T-11
-##@src/devices/cpu/t11/t11.h,CPUS["T11"] = true
+##@src/devices/cpu/t11/t11.h,list(APPEND CPUS T11)
 ##################################################
 
 if("T11" IN_LIST CPUS)
@@ -550,7 +550,7 @@ endif()
 
 ##################################################
 ## DEC PDP-8
-##@src/devices/cpu/pdp8/pdp8.h,CPUS["PDP8"] = true
+##@src/devices/cpu/pdp8/pdp8.h,list(APPEND CPUS PDP8)
 ##################################################
 
 if("PDP8" IN_LIST CPUS)
@@ -569,7 +569,7 @@ endif()
 
 ##################################################
 ## F8
-##@src/devices/cpu/f8/f8.h,CPUS["F8"] = true
+##@src/devices/cpu/f8/f8.h,list(APPEND CPUS F8)
 ##################################################
 
 if("F8" IN_LIST CPUS)
@@ -586,7 +586,7 @@ endif()
 
 ##################################################
 ## Fujitsu FR
-##@src/devices/cpu/fr/fr.h,CPUS["FR"] = true
+##@src/devices/cpu/fr/fr.h,list(APPEND CPUS FR)
 ##################################################
 
 if("FR" IN_LIST CPUS)
@@ -603,7 +603,7 @@ endif()
 
 ##################################################
 ## G65816
-##@src/devices/cpu/g65816/g65816.h,CPUS["G65816"] = true
+##@src/devices/cpu/g65816/g65816.h,list(APPEND CPUS G65816)
 ##################################################
 
 if("G65816" IN_LIST CPUS)
@@ -628,7 +628,7 @@ endif()
 
 ##################################################
 ## Hitachi H16
-##@src/devices/cpu/h16/hd641016.h,CPUS["H16"] = true
+##@src/devices/cpu/h16/hd641016.h,list(APPEND CPUS H16)
 ##################################################
 
 if("H16" IN_LIST CPUS)
@@ -645,7 +645,7 @@ endif()
 
 ##################################################
 ## Hitachi H8 (16/32-bit H8/300, H8/300H, H8S2000 and H8S2600 series)
-##@src/devices/cpu/h8/h8.h,CPUS["H8"] = true
+##@src/devices/cpu/h8/h8.h,list(APPEND CPUS H8)
 ##################################################
 
 if("H8" IN_LIST CPUS)
@@ -783,7 +783,7 @@ endif()
 
 ##################################################
 ## Hitachi H8/500 series
-##@src/devices/cpu/h8500/h8500.h,CPUS["H8500"] = true
+##@src/devices/cpu/h8500/h8500.h,list(APPEND CPUS H8500)
 ##################################################
 
 if("H8500" IN_LIST CPUS)
@@ -808,7 +808,7 @@ endif()
 
 ##################################################
 ## Hitachi HCD62121
-##@src/devices/cpu/hcd62121/hcd62121.h,CPUS["HCD62121"] = true
+##@src/devices/cpu/hcd62121/hcd62121.h,list(APPEND CPUS HCD62121)
 ##################################################
 
 if("HCD62121" IN_LIST CPUS)
@@ -825,7 +825,7 @@ endif()
 
 ##################################################
 ## Hitachi HMCS40 series
-##@src/devices/cpu/hmcs40/hmcs40.h,CPUS["HMCS40"] = true
+##@src/devices/cpu/hmcs40/hmcs40.h,list(APPEND CPUS HMCS40)
 ##################################################
 
 if("HMCS40" IN_LIST CPUS)
@@ -843,8 +843,8 @@ endif()
 
 ##################################################
 ## Hitachi SuperH series (SH1/SH2/SH3/SH4)
-##@src/devices/cpu/sh/sh2.h,CPUS["SH"] = true
-##@src/devices/cpu/sh/sh4.h,CPUS["SH"] = true
+##@src/devices/cpu/sh/sh2.h,list(APPEND CPUS SH)
+##@src/devices/cpu/sh/sh4.h,list(APPEND CPUS SH)
 ##################################################
 
 if("SH" IN_LIST CPUS)
@@ -885,7 +885,7 @@ endif()
 
 ##################################################
 ## STmicro ST62xx
-##@src/devices/cpu/st62xx/st62xx.h,CPUS["ST62XX"] = true
+##@src/devices/cpu/st62xx/st62xx.h,list(APPEND CPUS ST62XX)
 ##################################################
 
 if("ST62XX" IN_LIST CPUS)
@@ -902,7 +902,7 @@ endif()
 
 ##################################################
 ## HP Hybrid processor
-##@src/devices/cpu/hphybrid/hphybrid.h,CPUS["HPHYBRID"] = true
+##@src/devices/cpu/hphybrid/hphybrid.h,list(APPEND CPUS HPHYBRID)
 ##################################################
 
 if("HPHYBRID" IN_LIST CPUS)
@@ -920,7 +920,7 @@ endif()
 
 ##################################################
 ## HP Nanoprocessor
-##@src/devices/cpu/nanoprocessor/nanoprocessor.h,CPUS["NANOPROCESSOR"] = true
+##@src/devices/cpu/nanoprocessor/nanoprocessor.h,list(APPEND CPUS NANOPROCESSOR)
 ##################################################
 
 if("NANOPROCESSOR" IN_LIST CPUS)
@@ -937,7 +937,7 @@ endif()
 
 ##################################################
 ## HP Capricorn
-##@src/devices/cpu/capricorn/capricorn.h,CPUS["CAPRICORN"] = true
+##@src/devices/cpu/capricorn/capricorn.h,list(APPEND CPUS CAPRICORN)
 ##################################################
 
 if("CAPRICORN" IN_LIST CPUS)
@@ -954,7 +954,7 @@ endif()
 
 ##################################################
 ## Hudsonsoft 6280
-##@src/devices/cpu/h6280/h6280.h,CPUS["H6280"] = true
+##@src/devices/cpu/h6280/h6280.h,list(APPEND CPUS H6280)
 ##################################################
 
 if("H6280" IN_LIST CPUS)
@@ -971,7 +971,7 @@ endif()
 
 ##################################################
 ## Hyperstone E1 series
-##@src/devices/cpu/e132xs/e132xs.h,CPUS["E1"] = true
+##@src/devices/cpu/e132xs/e132xs.h,list(APPEND CPUS E1)
 ##################################################
 
 if("E1" IN_LIST CPUS)
@@ -993,7 +993,7 @@ endif()
 
 ##################################################
 ## 15IE-00-013 CPU ("Microprogrammed Control Device)
-##@src/devices/cpu/ie15/ie15.h,CPUS["IE15"] = true
+##@src/devices/cpu/ie15/ie15.h,list(APPEND CPUS IE15)
 ##################################################
 
 if("IE15" IN_LIST CPUS)
@@ -1010,7 +1010,7 @@ endif()
 
 ##################################################
 ## Intel MCS-40
-##@src/devices/cpu/mcs40/mcs40.h,CPUS["MCS40"] = true
+##@src/devices/cpu/mcs40/mcs40.h,list(APPEND CPUS MCS40)
 ##################################################
 
 if("MCS40" IN_LIST CPUS)
@@ -1027,7 +1027,7 @@ endif()
 
 ##################################################
 ## Intel 8008
-##@src/devices/cpu/i8008/i8008.h,CPUS["I8008"] = true
+##@src/devices/cpu/i8008/i8008.h,list(APPEND CPUS I8008)
 ##################################################
 
 if("I8008" IN_LIST CPUS)
@@ -1044,7 +1044,7 @@ endif()
 
 ##################################################
 ##  National Semiconductor SC/MP
-##@src/devices/cpu/scmp/scmp.h,CPUS["SCMP"] = true
+##@src/devices/cpu/scmp/scmp.h,list(APPEND CPUS SCMP)
 ##################################################
 
 if("SCMP" IN_LIST CPUS)
@@ -1061,7 +1061,7 @@ endif()
 
 ##################################################
 ## Intel 8080/8085A
-##@src/devices/cpu/i8085/i8085.h,CPUS["I8085"] = true
+##@src/devices/cpu/i8085/i8085.h,list(APPEND CPUS I8085)
 ##################################################
 
 if("I8085" IN_LIST CPUS)
@@ -1078,7 +1078,7 @@ endif()
 
 ##################################################
 ## Intel 8089
-##@src/devices/cpu/i8089/i8089.h,CPUS["I8089"] = true
+##@src/devices/cpu/i8089/i8089.h,list(APPEND CPUS I8089)
 ##################################################
 
 if("I8089" IN_LIST CPUS)
@@ -1098,7 +1098,7 @@ endif()
 
 ##################################################
 ## Intel MCS-48 (8039 and derivatives)
-##@src/devices/cpu/mcs48/mcs48.h,CPUS["MCS48"] = true
+##@src/devices/cpu/mcs48/mcs48.h,list(APPEND CPUS MCS48)
 ##################################################
 
 if("MCS48" IN_LIST CPUS)
@@ -1115,7 +1115,7 @@ endif()
 
 ##################################################
 ## Intel 8051 and derivatives
-##@src/devices/cpu/mcs51/mcs51.h,CPUS["MCS51"] = true
+##@src/devices/cpu/mcs51/mcs51.h,list(APPEND CPUS MCS51)
 ##################################################
 
 if("MCS51" IN_LIST CPUS)
@@ -1137,7 +1137,7 @@ endif()
 
 ##################################################
 ## Intel MCS-96
-##@src/devices/cpu/mcs96/mcs96.h,CPUS["MCS96"] = true
+##@src/devices/cpu/mcs96/mcs96.h,list(APPEND CPUS MCS96)
 ##################################################
 
 if("MCS96" IN_LIST CPUS)
@@ -1200,9 +1200,9 @@ if(("MCS96" IN_LIST CPUS) OR TOOLS)
 
 ##################################################
 ## Intel 80x86 series (also a dynamic recompiler target)
-##@src/devices/cpu/i86/i86.h,CPUS["I86"] = true
-##@src/devices/cpu/i86/i286.h,CPUS["I86"] = true
-##@src/devices/cpu/i386/i386.h,CPUS["I386"] = true
+##@src/devices/cpu/i86/i86.h,list(APPEND CPUS I86)
+##@src/devices/cpu/i86/i286.h,list(APPEND CPUS I86)
+##@src/devices/cpu/i386/i386.h,list(APPEND CPUS I386)
 ##################################################
 
 if("I86" IN_LIST CPUS)
@@ -1246,7 +1246,7 @@ endif()
 
 ##################################################
 ## Intel i860
-##@src/devices/cpu/i860/i860.h,CPUS["I860"] = true
+##@src/devices/cpu/i860/i860.h,list(APPEND CPUS I860)
 ##################################################
 
 if("I860" IN_LIST CPUS)
@@ -1264,7 +1264,7 @@ endif()
 
 ##################################################
 ## Intel i960
-##@src/devices/cpu/i960/i960.h,CPUS["I960"] = true
+##@src/devices/cpu/i960/i960.h,list(APPEND CPUS I960)
 ##################################################
 
 if("I960" IN_LIST CPUS)
@@ -1281,7 +1281,7 @@ endif()
 
 ##################################################
 ## LH5801
-##@src/devices/cpu/lh5801/lh5801.h,CPUS["LH5801"] = true
+##@src/devices/cpu/lh5801/lh5801.h,list(APPEND CPUS LH5801)
 ##################################################
 
 if("LH5801" IN_LIST CPUS)
@@ -1299,7 +1299,7 @@ endif()
 ########
 ##########################################
 ## Manchester Small-Scale Experimental Machine
-##@src/devices/cpu/ssem/ssem.h,CPUS["SSEM"] = true
+##@src/devices/cpu/ssem/ssem.h,list(APPEND CPUS SSEM)
 ##################################################
 
 if("SSEM" IN_LIST CPUS)
@@ -1316,7 +1316,7 @@ endif()
 
 ##########################################
 ## Diablo Systems printer CPU
-##@src/devices/cpu/diablo/diablo1300.h,CPUS["DIABLO"] = true
+##@src/devices/cpu/diablo/diablo1300.h,list(APPEND CPUS DIABLO)
 ##################################################
 
 if("DIABLO" IN_LIST CPUS)
@@ -1333,7 +1333,7 @@ endif()
 
 ##################################################
 ## Fujitsu MB88xx
-##@src/devices/cpu/mb88xx/mb88xx.h,CPUS["MB88XX"] = true
+##@src/devices/cpu/mb88xx/mb88xx.h,list(APPEND CPUS MB88XX)
 ##################################################
 
 if("MB88XX" IN_LIST CPUS)
@@ -1350,7 +1350,7 @@ endif()
 
 ##################################################
 ## Fujitsu MB86233
-##@src/devices/cpu/mb86233/mb86233.h,CPUS["MB86233"] = true
+##@src/devices/cpu/mb86233/mb86233.h,list(APPEND CPUS MB86233)
 ##################################################
 
 if("MB86233" IN_LIST CPUS)
@@ -1367,7 +1367,7 @@ endif()
 
 ##################################################
 ## Fujitsu MB86235
-##@src/devices/cpu/mb86235/mb86235.h,CPUS["MB86235"] = true
+##@src/devices/cpu/mb86235/mb86235.h,list(APPEND CPUS MB86235)
 ##################################################
 
 if("MB86235" IN_LIST CPUS)
@@ -1388,7 +1388,7 @@ endif()
 
 ##################################################
 ## Microchip PIC16C5x
-##@src/devices/cpu/pic16c5x/pic16c5x.h,CPUS["PIC16C5X"] = true
+##@src/devices/cpu/pic16c5x/pic16c5x.h,list(APPEND CPUS PIC16C5X)
 ##################################################
 
 if("PIC16C5X" IN_LIST CPUS)
@@ -1405,7 +1405,7 @@ endif()
 
 ##################################################
 ## PIC1670 - Disassembler only temporarily
-##@src/devices/cpu/pic1670/pic1670.h,CPUS["PIC1670"] = true
+##@src/devices/cpu/pic1670/pic1670.h,list(APPEND CPUS PIC1670)
 ##################################################
 
 if(("PIC1670" IN_LIST CPUS) OR TOOLS)
@@ -1415,7 +1415,7 @@ endif()
 
 ##################################################
 ## Microchip PIC16C62x
-##@src/devices/cpu/pic16c62x/pic16c62x.h,CPUS["PIC16C62X"] = true
+##@src/devices/cpu/pic16c62x/pic16c62x.h,list(APPEND CPUS PIC16C62X)
 ##################################################
 
 if("PIC16C62X" IN_LIST CPUS)
@@ -1432,7 +1432,7 @@ endif()
 
 ##################################################
 ## Generic PIC16 - Disassembler only
-##@src/devices/cpu/pic16/pic16.h,CPUS["PIC16"] = true
+##@src/devices/cpu/pic16/pic16.h,list(APPEND CPUS PIC16)
 ##################################################
 
 if(("PIC16" IN_LIST CPUS) OR TOOLS)
@@ -1442,7 +1442,7 @@ endif()
 
 ##################################################
 ## Microchip PIC17
-##@src/devices/cpu/pic17/pic17.h,CPUS["PIC17"] = true
+##@src/devices/cpu/pic17/pic17.h,list(APPEND CPUS PIC17)
 ##################################################
 
 if("PIC17" IN_LIST CPUS)
@@ -1461,7 +1461,7 @@ endif()
 
 ##################################################
 ## MIPS R3000 (MIPS I/II) series
-##@src/devices/cpu/mips/mips1.h,CPUS["MIPS1"] = true
+##@src/devices/cpu/mips/mips1.h,list(APPEND CPUS MIPS1)
 ##################################################
 
 if("MIPS1" IN_LIST CPUS)
@@ -1478,8 +1478,8 @@ endif()
 
 ##################################################
 ## MIPS R4000 (MIPS III/IV) series
-##@src/devices/cpu/mips/mips3.h,CPUS["MIPS3"] = true
-##@src/devices/cpu/mips/r4000.h,CPUS["MIPS3"] = true
+##@src/devices/cpu/mips/mips3.h,list(APPEND CPUS MIPS3)
+##@src/devices/cpu/mips/r4000.h,list(APPEND CPUS MIPS3)
 ##################################################
 
 if("MIPS3" IN_LIST CPUS)
@@ -1510,7 +1510,7 @@ endif()
 
 ##################################################
 ## Sony PlayStation CPU (R3000-based + GTE)
-##@src/devices/cpu/psx/psx.h,CPUS["PSX"] = true
+##@src/devices/cpu/psx/psx.h,list(APPEND CPUS PSX)
 ##################################################
 
 if("PSX" IN_LIST CPUS)
@@ -1540,7 +1540,7 @@ endif()
 
 ##################################################
 ## Mitsubishi MELPS 4 series
-##@src/devices/cpu/melps4/melps4.h,CPUS["MELPS4"] = true
+##@src/devices/cpu/melps4/melps4.h,list(APPEND CPUS MELPS4)
 ##################################################
 
 if("MELPS4" IN_LIST CPUS)
@@ -1569,7 +1569,7 @@ endif()
 
 ##################################################
 ## Mitsubishi M37702 and M37710 (based on 65C816)
-##@src/devices/cpu/m37710/m37710.h,CPUS["M37710"] = true
+##@src/devices/cpu/m37710/m37710.h,list(APPEND CPUS M37710)
 ##################################################
 
 if("M37710" IN_LIST CPUS)
@@ -1593,31 +1593,31 @@ endif()
 
 ##################################################
 ## Mostek 6502 and its many derivatives
-##@src/devices/cpu/m6502/m6502.h,CPUS["M6502"] = true
-##@src/devices/cpu/m6502/deco16.h,CPUS["M6502"] = true
-##@src/devices/cpu/m6502/m4510.h,CPUS["M6502"] = true
-##@src/devices/cpu/m6502/m65ce02.h,CPUS["M6502"] = true
-##@src/devices/cpu/m6502/m65c02.h,CPUS["M6502"] = true
-##@src/devices/cpu/m6502/r65c02.h,CPUS["M6502"] = true
-##@src/devices/cpu/m6502/r65c19.h,CPUS["M6502"] = true
-##@src/devices/cpu/m6502/m65sc02.h,CPUS["M6502"] = true
-##@src/devices/cpu/m6502/m6500_1.h,CPUS["M6502"] = true
-##@src/devices/cpu/m6502/m6504.h,CPUS["M6502"] = true
-##@src/devices/cpu/m6502/m6507.h,CPUS["M6502"] = true
-##@src/devices/cpu/m6502/m6509.h,CPUS["M6502"] = true
-##@src/devices/cpu/m6502/m6510.h,CPUS["M6502"] = true
-##@src/devices/cpu/m6502/m6510t.h,CPUS["M6502"] = true
-##@src/devices/cpu/m6502/m7501.h,CPUS["M6502"] = true
-##@src/devices/cpu/m6502/m8502.h,CPUS["M6502"] = true
-##@src/devices/cpu/m6502/n2a03.h,CPUS["M6502"] = true
-##@src/devices/cpu/m6502/m740.h,CPUS["M6502"] = true
-##@src/devices/cpu/m6502/m3745x.h,CPUS["M6502"] = true
-##@src/devices/cpu/m6502/m5074x.h,CPUS["M6502"] = true
-##@src/devices/cpu/m6502/st2xxx.h,CPUS["ST2XXX"] = true
-##@src/devices/cpu/m6502/st2204.h,CPUS["ST2XXX"] = true
-##@src/devices/cpu/m6502/st2205u.h,CPUS["ST2XXX"] = true
-##@src/devices/cpu/m6502/xavix.h,CPUS["XAVIX"] = true
-##@src/devices/cpu/m6502/xavix.h,CPUS["XAVIX2000"] = true
+##@src/devices/cpu/m6502/m6502.h,list(APPEND CPUS M6502)
+##@src/devices/cpu/m6502/deco16.h,list(APPEND CPUS M6502)
+##@src/devices/cpu/m6502/m4510.h,list(APPEND CPUS M6502)
+##@src/devices/cpu/m6502/m65ce02.h,list(APPEND CPUS M6502)
+##@src/devices/cpu/m6502/m65c02.h,list(APPEND CPUS M6502)
+##@src/devices/cpu/m6502/r65c02.h,list(APPEND CPUS M6502)
+##@src/devices/cpu/m6502/r65c19.h,list(APPEND CPUS M6502)
+##@src/devices/cpu/m6502/m65sc02.h,list(APPEND CPUS M6502)
+##@src/devices/cpu/m6502/m6500_1.h,list(APPEND CPUS M6502)
+##@src/devices/cpu/m6502/m6504.h,list(APPEND CPUS M6502)
+##@src/devices/cpu/m6502/m6507.h,list(APPEND CPUS M6502)
+##@src/devices/cpu/m6502/m6509.h,list(APPEND CPUS M6502)
+##@src/devices/cpu/m6502/m6510.h,list(APPEND CPUS M6502)
+##@src/devices/cpu/m6502/m6510t.h,list(APPEND CPUS M6502)
+##@src/devices/cpu/m6502/m7501.h,list(APPEND CPUS M6502)
+##@src/devices/cpu/m6502/m8502.h,list(APPEND CPUS M6502)
+##@src/devices/cpu/m6502/n2a03.h,list(APPEND CPUS M6502)
+##@src/devices/cpu/m6502/m740.h,list(APPEND CPUS M6502)
+##@src/devices/cpu/m6502/m3745x.h,list(APPEND CPUS M6502)
+##@src/devices/cpu/m6502/m5074x.h,list(APPEND CPUS M6502)
+##@src/devices/cpu/m6502/st2xxx.h,list(APPEND CPUS ST2XXX)
+##@src/devices/cpu/m6502/st2204.h,list(APPEND CPUS ST2XXX)
+##@src/devices/cpu/m6502/st2205u.h,list(APPEND CPUS ST2XXX)
+##@src/devices/cpu/m6502/xavix.h,list(APPEND CPUS XAVIX)
+##@src/devices/cpu/m6502/xavix.h,list(APPEND CPUS XAVIX2000)
 
 ##################################################
 
@@ -1950,8 +1950,8 @@ endif()
 
 ##################################################
 ## Motorola 680x
-##@src/devices/cpu/m6800/m6800.h,CPUS["M6800"] = true
-##@src/devices/cpu/m6800/m6801.h,CPUS["M6800"] = true
+##@src/devices/cpu/m6800/m6800.h,list(APPEND CPUS M6800)
+##@src/devices/cpu/m6800/m6801.h,list(APPEND CPUS M6800)
 ##################################################
 
 if("M6800" IN_LIST CPUS)
@@ -1971,7 +1971,7 @@ endif()
 
 ##################################################
 ## Motorola 6805
-##@src/devices/cpu/m6805/m6805.h,CPUS["M6805"] = true
+##@src/devices/cpu/m6805/m6805.h,list(APPEND CPUS M6805)
 ##################################################
 
 if("M6805" IN_LIST CPUS)
@@ -1994,9 +1994,9 @@ endif()
 
 ##################################################
 ## Motorola 6809
-##@src/devices/cpu/m6809/m6809.h,CPUS["M6809"] = true
-##@src/devices/cpu/m6809/hd6309.h,CPUS["M6809"] = true
-##@src/devices/cpu/m6809/konami.h,CPUS["M6809"] = true
+##@src/devices/cpu/m6809/m6809.h,list(APPEND CPUS M6809)
+##@src/devices/cpu/m6809/hd6309.h,list(APPEND CPUS M6809)
+##@src/devices/cpu/m6809/konami.h,list(APPEND CPUS M6809)
 ##################################################
 
 if("M6809" IN_LIST CPUS)
@@ -2044,7 +2044,7 @@ endif()
 
 ##################################################
 ## Motorola 68HC11
-##@src/devices/cpu/mc68hc11/mc68hc11.h,CPUS["MC68HC11"] = true
+##@src/devices/cpu/mc68hc11/mc68hc11.h,list(APPEND CPUS MC68HC11)
 ##################################################
 
 if("MC68HC11" IN_LIST CPUS)
@@ -2063,7 +2063,7 @@ endif()
 
 ##################################################
 ## Motorola 68000 series
-##@src/devices/cpu/m68000/m68000.h,CPUS["M680X0"] = true
+##@src/devices/cpu/m68000/m68000.h,list(APPEND CPUS M680X0)
 ##################################################
 
 if("M680X0" IN_LIST CPUS)
@@ -2085,7 +2085,7 @@ endif()
 
 ##################################################
 ## Motorola/Freescale DSP56156
-##@src/devices/cpu/dsp56156/dsp56156.h,CPUS["DSP56156"] = true
+##@src/devices/cpu/dsp56156/dsp56156.h,list(APPEND CPUS DSP56156)
 ##################################################
 
 if("DSP56156" IN_LIST CPUS)
@@ -2116,7 +2116,7 @@ endif()
 
 ##################################################
 ## PDP-1
-##@src/devices/cpu/pdp1/pdp1.h,CPUS["PDP1"] = true
+##@src/devices/cpu/pdp1/pdp1.h,list(APPEND CPUS PDP1)
 ##################################################
 
 if("PDP1" IN_LIST CPUS)
@@ -2133,7 +2133,7 @@ endif()
 
 ##################################################
 ## PATINHO FEIO - Escola Politecnica - USP (Brazil)
-##@src/devices/cpu/patinhofeio/patinhofeio_cpu.h,CPUS["PATINHOFEIO"] = true
+##@src/devices/cpu/patinhofeio/patinhofeio_cpu.h,list(APPEND CPUS PATINHOFEIO)
 ##################################################
 
 if("PATINHOFEIO" IN_LIST CPUS)
@@ -2150,7 +2150,7 @@ endif()
 
 ##################################################
 ## Motorola PowerPC series
-##@src/devices/cpu/powerpc/ppc.h,CPUS["POWERPC"] = true
+##@src/devices/cpu/powerpc/ppc.h,list(APPEND CPUS POWERPC)
 ##################################################
 
 if("POWERPC" IN_LIST CPUS)
@@ -2171,10 +2171,10 @@ endif()
 
 ##################################################
 ## NEC V-series Intel-compatible
-##@src/devices/cpu/nec/nec.h,CPUS["NEC"] = true
-##@src/devices/cpu/nec/v25.h,CPUS["NEC"] = true
-##@src/devices/cpu/nec/v5x.h,CPUS["NEC"] = true
-##@src/devices/cpu/v30mz/v30mz.h,CPUS["V30MZ"] = true
+##@src/devices/cpu/nec/nec.h,list(APPEND CPUS NEC)
+##@src/devices/cpu/nec/v25.h,list(APPEND CPUS NEC)
+##@src/devices/cpu/nec/v5x.h,list(APPEND CPUS NEC)
+##@src/devices/cpu/v30mz/v30mz.h,list(APPEND CPUS V30MZ)
 ##################################################
 
 if("NEC" IN_LIST CPUS)
@@ -2218,7 +2218,7 @@ endif()
 
 ##################################################
 ## NEC V60/V70
-##@src/devices/cpu/v60/v60.h,CPUS["V60"] = true
+##@src/devices/cpu/v60/v60.h,list(APPEND CPUS V60)
 ##################################################
 
 if("V60" IN_LIST CPUS)
@@ -2247,7 +2247,7 @@ endif()
 
 ##################################################
 ## NEC V810 (uPD70732)
-##@src/devices/cpu/v810/v810.h,CPUS["V810"] = true
+##@src/devices/cpu/v810/v810.h,list(APPEND CPUS V810)
 ##################################################
 
 if("V810" IN_LIST CPUS)
@@ -2273,7 +2273,7 @@ endif()
 
 ##################################################
 ## NEC uPD7725
-##@src/devices/cpu/upd7725/upd7725.h,CPUS["UPD7725"] = true
+##@src/devices/cpu/upd7725/upd7725.h,list(APPEND CPUS UPD7725)
 ##################################################
 
 if("UPD7725" IN_LIST CPUS)
@@ -2290,7 +2290,7 @@ endif()
 
 ##################################################
 ## NEC uPD7810 series
-##@src/devices/cpu/upd7810/upd7810.h,CPUS["UPD7810"] = true
+##@src/devices/cpu/upd7810/upd7810.h,list(APPEND CPUS UPD7810)
 ##################################################
 
 if("UPD7810" IN_LIST CPUS)
@@ -2312,7 +2312,7 @@ endif()
 
 ##################################################
 ## NEC uCOM-4 series
-##@src/devices/cpu/ucom4/ucom4.h,CPUS["UCOM4"] = true
+##@src/devices/cpu/ucom4/ucom4.h,list(APPEND CPUS UCOM4)
 ##################################################
 
 if("UCOM4" IN_LIST CPUS)
@@ -2330,7 +2330,7 @@ endif()
 
 ##################################################
 ## Nintendif()o Minx
-##@src/devices/cpu/minx/minx.h,CPUS["MINX"] = true
+##@src/devices/cpu/minx/minx.h,list(APPEND CPUS MINX)
 ##################################################
 
 if("MINX" IN_LIST CPUS)
@@ -2351,7 +2351,7 @@ endif()
 
 ##################################################
 ## Nintendif()o/SGI RSP (R3000-based + vector processing)
-##@src/devices/cpu/rsp/rsp.h,CPUS["RSP"] = true
+##@src/devices/cpu/rsp/rsp.h,list(APPEND CPUS RSP)
 ##################################################
 
 if("RSP" IN_LIST CPUS)
@@ -2403,7 +2403,7 @@ endif()
 
 ##################################################
 ## Panasonic MN1880
-##@src/devices/cpu/mn1880/mn1880.h,CPUS["MN1880"] = true
+##@src/devices/cpu/mn1880/mn1880.h,list(APPEND CPUS MN1880)
 ##################################################
 
 if("MN1880" IN_LIST CPUS)
@@ -2420,7 +2420,7 @@ endif()
 
 ##################################################
 ## Panasonic MN10200
-##@src/devices/cpu/mn10200/mn10200.h,CPUS["MN10200"] = true
+##@src/devices/cpu/mn10200/mn10200.h,list(APPEND CPUS MN10200)
 ##################################################
 
 if("MN10200" IN_LIST CPUS)
@@ -2437,7 +2437,7 @@ endif()
 
 ##################################################
 ## Saturn
-##@src/devices/cpu/saturn/saturn.h,CPUS["SATURN"] = true
+##@src/devices/cpu/saturn/saturn.h,list(APPEND CPUS SATURN)
 ##################################################
 
 if("SATURN" IN_LIST CPUS)
@@ -2456,7 +2456,7 @@ endif()
 
 ##################################################
 ## Sharp SM510 series
-##@src/devices/cpu/sm510/sm510.h,CPUS["SM510"] = true
+##@src/devices/cpu/sm510/sm510.h,list(APPEND CPUS SM510)
 ##################################################
 
 if("SM510" IN_LIST CPUS)
@@ -2486,7 +2486,7 @@ endif()
 
 ##################################################
 ## Sharp SM8500
-##@src/devices/cpu/sm8500/sm8500.h,CPUS["SM8500"] = true
+##@src/devices/cpu/sm8500/sm8500.h,list(APPEND CPUS SM8500)
 ##################################################
 
 if("SM8500" IN_LIST CPUS)
@@ -2504,7 +2504,7 @@ endif()
 
 ##################################################
 ## Signetics 2650
-##@src/devices/cpu/s2650/s2650.h,CPUS["S2650"] = true
+##@src/devices/cpu/s2650/s2650.h,list(APPEND CPUS S2650)
 ##################################################
 
 if("S2650" IN_LIST CPUS)
@@ -2522,7 +2522,7 @@ endif()
 
 ##################################################
 ## SC61860
-##@src/devices/cpu/sc61860/sc61860.h,CPUS["SC61860"] = true
+##@src/devices/cpu/sc61860/sc61860.h,list(APPEND CPUS SC61860)
 ##################################################
 
 if("SC61860" IN_LIST CPUS)
@@ -2542,7 +2542,7 @@ endif()
 
 ##################################################
 ## Sony/Nintendif()o SPC700
-##@src/devices/cpu/spc700/spc700.h,CPUS["SPC700"] = true
+##@src/devices/cpu/spc700/spc700.h,list(APPEND CPUS SPC700)
 ##################################################
 
 if("SPC700" IN_LIST CPUS)
@@ -2560,7 +2560,7 @@ endif()
 
 ##################################################
 ## SSP1601
-##@src/devices/cpu/ssp1601/ssp1601.h,CPUS["SSP1601"] = true
+##@src/devices/cpu/ssp1601/ssp1601.h,list(APPEND CPUS SSP1601)
 ##################################################
 
 if("SSP1601" IN_LIST CPUS)
@@ -2577,7 +2577,7 @@ endif()
 
 ##################################################
 ## SunPlus u'nSP
-##@src/devices/cpu/unsp/unsp.h,CPUS["UNSP"] = true
+##@src/devices/cpu/unsp/unsp.h,list(APPEND CPUS UNSP)
 ##################################################
 
 if("UNSP" IN_LIST CPUS)
@@ -2608,7 +2608,7 @@ endif()
 
 ##################################################
 ## Atmel 8-bit AVR
-##@src/devices/cpu/avr8/avr8.h,CPUS["AVR8"] = true
+##@src/devices/cpu/avr8/avr8.h,list(APPEND CPUS AVR8)
 ##################################################
 
 if("AVR8" IN_LIST CPUS)
@@ -2625,14 +2625,14 @@ endif()
 
 ##################################################
 ## Texas Instruments TMS1000 series
-##@src/devices/cpu/tms1000/tms1000.h,CPUS["TMS1000"] = true
-##@src/devices/cpu/tms1000/tms1000c.h,CPUS["TMS1000"] = true
-##@src/devices/cpu/tms1000/tms1100.h,CPUS["TMS1000"] = true
-##@src/devices/cpu/tms1000/tms1400.h,CPUS["TMS1000"] = true
-##@src/devices/cpu/tms1000/tms0970.h,CPUS["TMS1000"] = true
-##@src/devices/cpu/tms1000/tms0980.h,CPUS["TMS1000"] = true
-##@src/devices/cpu/tms1000/tms0270.h,CPUS["TMS1000"] = true
-##@src/devices/cpu/tms1000/tp0320.h,CPUS["TMS1000"] = true
+##@src/devices/cpu/tms1000/tms1000.h,list(APPEND CPUS TMS1000)
+##@src/devices/cpu/tms1000/tms1000c.h,list(APPEND CPUS TMS1000)
+##@src/devices/cpu/tms1000/tms1100.h,list(APPEND CPUS TMS1000)
+##@src/devices/cpu/tms1000/tms1400.h,list(APPEND CPUS TMS1000)
+##@src/devices/cpu/tms1000/tms0970.h,list(APPEND CPUS TMS1000)
+##@src/devices/cpu/tms1000/tms0980.h,list(APPEND CPUS TMS1000)
+##@src/devices/cpu/tms1000/tms0270.h,list(APPEND CPUS TMS1000)
+##@src/devices/cpu/tms1000/tp0320.h,list(APPEND CPUS TMS1000)
 ##################################################
 
 if("TMS1000" IN_LIST CPUS)
@@ -2665,7 +2665,7 @@ endif()
 
 ##################################################
 ## Texas Instruments TMS7000 series
-##@src/devices/cpu/tms7000/tms7000.h,CPUS["TMS7000"] = true
+##@src/devices/cpu/tms7000/tms7000.h,list(APPEND CPUS TMS7000)
 ##################################################
 
 if("TMS7000" IN_LIST CPUS)
@@ -2683,10 +2683,10 @@ endif()
 
 ##################################################
 ## Texas Instruments TMS99xx series
-##@src/devices/cpu/tms9900/tms9900.h,CPUS["TMS9900"] = true
-##@src/devices/cpu/tms9900/tms9980a.h,CPUS["TMS9900"] = true
-##@src/devices/cpu/tms9900/tms9995.h,CPUS["TMS9900"] = true
-##@src/devices/cpu/tms9900/ti990_10.h,CPUS["TMS9900"] = true
+##@src/devices/cpu/tms9900/tms9900.h,list(APPEND CPUS TMS9900)
+##@src/devices/cpu/tms9900/tms9980a.h,list(APPEND CPUS TMS9900)
+##@src/devices/cpu/tms9900/tms9995.h,list(APPEND CPUS TMS9900)
+##@src/devices/cpu/tms9900/ti990_10.h,list(APPEND CPUS TMS9900)
 ##################################################
 
 if("TMS9900" IN_LIST CPUS)
@@ -2710,7 +2710,7 @@ endif()
 
 ##################################################
 ## Texas Instruments TMS340x0 graphics controllers
-##@src/devices/cpu/tms34010/tms34010.h,CPUS["TMS340X0"] = true
+##@src/devices/cpu/tms34010/tms34010.h,list(APPEND CPUS TMS340X0)
 ##################################################
 
 if("TMS340X0" IN_LIST CPUS)
@@ -2732,7 +2732,7 @@ endif()
 
 ##################################################
 ## Texas Instruments TMS3201x DSP
-##@src/devices/cpu/tms32010/tms32010.h,CPUS["TMS32010"] = true
+##@src/devices/cpu/tms32010/tms32010.h,list(APPEND CPUS TMS32010)
 ##################################################
 
 if("TMS32010" IN_LIST CPUS)
@@ -2749,7 +2749,7 @@ endif()
 
 ##################################################
 ## Texas Instruments TMS3202x DSP
-##@src/devices/cpu/tms32025/tms32025.h,CPUS["TMS32025"] = true
+##@src/devices/cpu/tms32025/tms32025.h,list(APPEND CPUS TMS32025)
 ##################################################
 
 if("TMS32025" IN_LIST CPUS)
@@ -2766,7 +2766,7 @@ endif()
 
 ##################################################
 ## Texas Instruments TMS3203x DSP
-##@src/devices/cpu/tms32031/tms32031.h,CPUS["TMS32031"] = true
+##@src/devices/cpu/tms32031/tms32031.h,list(APPEND CPUS TMS32031)
 ##################################################
 
 if("TMS32031" IN_LIST CPUS)
@@ -2784,7 +2784,7 @@ endif()
 
 ##################################################
 ## Texas Instruments TMS3205x DSP
-##@src/devices/cpu/tms32051/tms32051.h,CPUS["TMS32051"] = true
+##@src/devices/cpu/tms32051/tms32051.h,list(APPEND CPUS TMS32051)
 ##################################################
 
 if("TMS32051" IN_LIST CPUS)
@@ -2803,7 +2803,7 @@ endif()
 
 ##################################################
 ## Texas Instruments TMS3208x DSP
-##@src/devices/cpu/tms32082/tms32082.h,CPUS["TMS32082"] = true
+##@src/devices/cpu/tms32082/tms32082.h,list(APPEND CPUS TMS32082)
 ##################################################
 
 if("TMS32082" IN_LIST CPUS)
@@ -2823,7 +2823,7 @@ endif()
 
 ##################################################
 ## Texas Instruments TMS57002 DSP
-##@src/devices/cpu/tms57002/tms57002.h,CPUS["TMS57002"] = true
+##@src/devices/cpu/tms57002/tms57002.h,list(APPEND CPUS TMS57002)
 ##################################################
 
 if("TMS57002" IN_LIST CPUS)
@@ -2852,7 +2852,7 @@ endif()
 
 ##################################################
 ## Toshiba TLCS-90 Series
-##@src/devices/cpu/tlcs90/tlcs90.h,CPUS["TLCS90"] = true
+##@src/devices/cpu/tlcs90/tlcs90.h,list(APPEND CPUS TLCS90)
 ##################################################
 
 if("TLCS90" IN_LIST CPUS)
@@ -2869,7 +2869,7 @@ endif()
 
 ##################################################
 ## Toshiba TLCS-870 Series
-##@src/devices/cpu/tlcs870/tlcs870.h,CPUS["TLCS870"] = true
+##@src/devices/cpu/tlcs870/tlcs870.h,list(APPEND CPUS TLCS870)
 ##################################################
 
 if("TLCS870" IN_LIST CPUS)
@@ -2891,7 +2891,7 @@ endif()
 
 ##################################################
 ## Toshiba TLCS-900 Series
-##@src/devices/cpu/tlcs900/tlcs900.h,CPUS["TLCS900"] = true
+##@src/devices/cpu/tlcs900/tlcs900.h,list(APPEND CPUS TLCS900)
 ##################################################
 
 if("TLCS900" IN_LIST CPUS)
@@ -2916,7 +2916,7 @@ endif()
 
 ##################################################
 ## TX0
-##@src/devices/cpu/tx0/tx0.h,CPUS["TX0"] = true
+##@src/devices/cpu/tx0/tx0.h,list(APPEND CPUS TX0)
 ##################################################
 
 if("TX0" IN_LIST CPUS)
@@ -2933,11 +2933,11 @@ endif()
 
 ##################################################
 ## Zilog Z80
-##@src/devices/cpu/z80/z80.h,CPUS["Z80"] = true
-##@src/devices/cpu/z80/kc82.h,CPUS["KC80"] = true
-##@src/devices/cpu/z80/kl5c80a12.h,CPUS["KC80"] = true
-##@src/devices/cpu/z80/kl5c80a16.h,CPUS["KC80"] = true
-##@src/devices/cpu/z80/ky80.h,CPUS["KC80"] = true
+##@src/devices/cpu/z80/z80.h,list(APPEND CPUS Z80)
+##@src/devices/cpu/z80/kc82.h,list(APPEND CPUS KC80)
+##@src/devices/cpu/z80/kl5c80a12.h,list(APPEND CPUS KC80)
+##@src/devices/cpu/z80/kl5c80a16.h,list(APPEND CPUS KC80)
+##@src/devices/cpu/z80/ky80.h,list(APPEND CPUS KC80)
 ##################################################
 
 if (("Z80" IN_LIST CPUS) OR ("KC80" IN_LIST CPUS) OR TOOLS)
@@ -2977,7 +2977,7 @@ endif()
 
 ##################################################
 ## Sharp LR35902 (Game Boy CPU)
-##@src/devices/cpu/lr35902/lr35902.h,CPUS["LR35902"] = true
+##@src/devices/cpu/lr35902/lr35902.h,list(APPEND CPUS LR35902)
 ##################################################
 
 if("LR35902" IN_LIST CPUS)
@@ -2996,7 +2996,7 @@ endif()
 
 ##################################################
 ## Zilog Z180
-##@src/devices/cpu/z180/z180.h,CPUS["Z180"] = true
+##@src/devices/cpu/z180/z180.h,list(APPEND CPUS Z180)
 ##################################################
 
 if("Z180" IN_LIST CPUS)
@@ -3023,7 +3023,7 @@ endif()
 
 ##################################################
 ## Zilog Z8000
-##@src/devices/cpu/z8000/z8000.h,CPUS["Z8000"] = true
+##@src/devices/cpu/z8000/z8000.h,list(APPEND CPUS Z8000)
 ##################################################
 
 if("Z8000" IN_LIST CPUS)
@@ -3045,7 +3045,7 @@ endif()
 
 ##################################################
 ## Zilog Z8
-##@src/devices/cpu/z8/z8.h,CPUS["Z8"] = true
+##@src/devices/cpu/z8/z8.h,list(APPEND CPUS Z8)
 ##################################################
 
 if("Z8" IN_LIST CPUS)
@@ -3063,7 +3063,7 @@ endif()
 
 ##################################################
 ## Argonaut SuperFX
-##@src/devices/cpu/superfx/superfx.h,CPUS["SUPERFX"] = true
+##@src/devices/cpu/superfx/superfx.h,list(APPEND CPUS SUPERFX)
 ##################################################
 
 if("SUPERFX" IN_LIST CPUS)
@@ -3080,7 +3080,7 @@ endif()
 
 ##################################################
 ## Rockwell PPS-4
-##@src/devices/cpu/pps4/pps4.h,CPUS["PPS4"] = true
+##@src/devices/cpu/pps4/pps4.h,list(APPEND CPUS PPS4)
 ##################################################
 
 if("PPS4" IN_LIST CPUS)
@@ -3097,10 +3097,10 @@ endif()
 
 ##################################################
 ## Rockwell PPS-4/1
-##@src/devices/cpu/pps41/mm75.h,CPUS["PPS41"] = true
-##@src/devices/cpu/pps41/mm76.h,CPUS["PPS41"] = true
-##@src/devices/cpu/pps41/mm78.h,CPUS["PPS41"] = true
-##@src/devices/cpu/pps41/mm78la.h,CPUS["PPS41"] = true
+##@src/devices/cpu/pps41/mm75.h,list(APPEND CPUS PPS41)
+##@src/devices/cpu/pps41/mm76.h,list(APPEND CPUS PPS41)
+##@src/devices/cpu/pps41/mm78.h,list(APPEND CPUS PPS41)
+##@src/devices/cpu/pps41/mm78la.h,list(APPEND CPUS PPS41)
 ##################################################
 
 if("PPS41" IN_LIST CPUS)
@@ -3129,7 +3129,7 @@ endif()
 
 ##################################################
 ## Hitachi HD61700
-##@src/devices/cpu/hd61700/hd61700.h,CPUS["HD61700"] = true
+##@src/devices/cpu/hd61700/hd61700.h,list(APPEND CPUS HD61700)
 ##################################################
 
 if("HD61700" IN_LIST CPUS)
@@ -3146,7 +3146,7 @@ endif()
 
 ##################################################
 ## Sanyo LC8670
-##@src/devices/cpu/lc8670/lc8670.h,CPUS["LC8670"] = true
+##@src/devices/cpu/lc8670/lc8670.h,list(APPEND CPUS LC8670)
 ##################################################
 
 if("LC8670" IN_LIST CPUS)
@@ -3163,7 +3163,7 @@ endif()
 
 ##################################################
 ## Sega SCU DSP
-##@src/devices/cpu/scudsp/scudsp.h,CPUS["SCUDSP"] = true
+##@src/devices/cpu/scudsp/scudsp.h,list(APPEND CPUS SCUDSP)
 ##################################################
 
 if("SCUDSP" IN_LIST CPUS)
@@ -3180,7 +3180,7 @@ endif()
 
 ##################################################
 ## Sunplus Technology S+core
-##@src/devices/cpu/score/score.h,CPUS["SCORE"] = true
+##@src/devices/cpu/score/score.h,list(APPEND CPUS SCORE)
 ##################################################
 
 if("SCORE" IN_LIST CPUS)
@@ -3198,7 +3198,7 @@ endif()
 
 ##################################################
 ## Xerox Alto-II
-##@src/devices/cpu/alto2/alto2cpu.h,CPUS["ALTO2"] = true
+##@src/devices/cpu/alto2/alto2cpu.h,list(APPEND CPUS ALTO2)
 ##################################################
 
 if("ALTO2" IN_LIST CPUS)
@@ -3252,7 +3252,7 @@ endif()
 
 ##########################################
 ## Sun SPARCv7, SPARCv8 implementation
-##@src/devices/cpu/sparc/sparc.h,CPUS["SPARC"] = true
+##@src/devices/cpu/sparc/sparc.h,list(APPEND CPUS SPARC)
 ##################################################
 
 if("SPARC" IN_LIST CPUS)
@@ -3271,7 +3271,7 @@ endif()
 
 ##################################################
 ## Intergraph CLIPPER (C100/C300/C400) series
-##@src/devices/cpu/clipper/clipper.h,CPUS["CLIPPER"] = true
+##@src/devices/cpu/clipper/clipper.h,list(APPEND CPUS CLIPPER)
 ##################################################
 
 if("CLIPPER" IN_LIST CPUS)
@@ -3298,7 +3298,7 @@ endif()
 
 ##################################################
 ## DEC Alpha (EV4/EV5/EV6/EV7) series
-##@src/devices/cpu/alpha/alpha.h,CPUS["ALPHA"] = true
+##@src/devices/cpu/alpha/alpha.h,list(APPEND CPUS ALPHA)
 ##################################################
 
 if("ALPHA" IN_LIST CPUS)
@@ -3315,7 +3315,7 @@ endif()
 
 ##################################################
 ## National Semiconductor HPC
-##@src/devices/cpu/hpc/hpc.h,CPUS["HPC"] = true
+##@src/devices/cpu/hpc/hpc.h,list(APPEND CPUS HPC)
 ##################################################
 
 if("HPC" IN_LIST CPUS)
@@ -3332,7 +3332,7 @@ endif()
 
 ##################################################
 ## Yamaha Multiple Effects Generator
-##@src/devices/sound/meg.h,CPUS["MEG"] = true
+##@src/devices/sound/meg.h,list(APPEND CPUS MEG)
 ##################################################
 
 if("MEG" IN_LIST CPUS)
@@ -3349,7 +3349,7 @@ endif()
 
 ##################################################
 ## Yamaha DSPV
-##@src/devices/sound/dspv.h,CPUS["DSPV"] = true
+##@src/devices/sound/dspv.h,list(APPEND CPUS DSPV)
 ##################################################
 
 if("DSPV" IN_LIST CPUS)
@@ -3366,7 +3366,7 @@ endif()
 
 ##################################################
 ##  National Semiconductor NS32000 series
-##@src/devices/cpu/ns32000/ns32000.h,CPUS["NS32000"] = true
+##@src/devices/cpu/ns32000/ns32000.h,list(APPEND CPUS NS32000)
 ##################################################
 
 if("NS32000" IN_LIST CPUS)
@@ -3384,7 +3384,7 @@ endif()
 
 ##################################################
 ## Elan RISC II series
-##@src/devices/cpu/rii/riscii.h,CPUS["RII"] = true
+##@src/devices/cpu/rii/riscii.h,list(APPEND CPUS RII)
 ##################################################
 
 if("RII" IN_LIST CPUS)
@@ -3401,7 +3401,7 @@ endif()
 
 ##################################################
 ## National Semiconductor BCP
-##@src/devices/cpu/bcp/dp8344.h,CPUS["BCP"] = true
+##@src/devices/cpu/bcp/dp8344.h,list(APPEND CPUS BCP)
 ##################################################
 
 if("BCP" IN_LIST CPUS)
@@ -3418,7 +3418,7 @@ endif()
 
 ##################################################
 ## Fujitsu F2MC-16 series
-##@src/devices/cpu/f2mc16/f2mc16.h,CPUS["F2MC16"] = true
+##@src/devices/cpu/f2mc16/f2mc16.h,list(APPEND CPUS F2MC16)
 ##################################################
 
 if("F2MC16" IN_LIST CPUS)
@@ -3437,7 +3437,7 @@ endif()
 
 ##################################################
 ## National Semiconductor CR16B
-##@src/devices/cpu/cr16b/cr16b.h,CPUS["CR16B"] = true
+##@src/devices/cpu/cr16b/cr16b.h,list(APPEND CPUS CR16B)
 ##################################################
 
 if("CR16B" IN_LIST CPUS)
@@ -3463,7 +3463,7 @@ endif()
 
 ##################################################
 ## Gigatron
-##@src/devices/cpu/gigatron/gigatron.h,CPUS["GTRON"] = true
+##@src/devices/cpu/gigatron/gigatron.h,list(APPEND CPUS GTRON)
 ##################################################
 
 if("GTRON" IN_LIST CPUS)
@@ -3480,7 +3480,7 @@ endif()
 
 ##################################################
 ## Motorola DSP56000
-##@src/devices/cpu/dsp56000/dsp56000.h,CPUS["DSP56000"] = true
+##@src/devices/cpu/dsp56000/dsp56000.h,list(APPEND CPUS DSP56000)
 ##################################################
 
 if("DSP56000" IN_LIST CPUS)
@@ -3497,7 +3497,7 @@ endif()
 
 ##################################################
 ## DEC VT50/VT52
-##@src/devices/cpu/vt50/vt50.h,CPUS["VT50"] = true
+##@src/devices/cpu/vt50/vt50.h,list(APPEND CPUS VT50)
 ##################################################
 
 if("VT50" IN_LIST CPUS)
@@ -3514,7 +3514,7 @@ endif()
 
 ##################################################
 ## DEC VT61
-##@src/devices/cpu/vt61/vt61.h,CPUS["VT61"] = true
+##@src/devices/cpu/vt61/vt61.h,list(APPEND CPUS VT61)
 ##################################################
 
 if("VT61" IN_LIST CPUS)
@@ -3531,7 +3531,7 @@ endif()
 
 ##################################################
 ## National Semiconductor PACE/INS8900
-##@src/devices/cpu/pace/pace.h,CPUS["PACE"] = true
+##@src/devices/cpu/pace/pace.h,list(APPEND CPUS PACE)
 ##################################################
 
 if("PACE" IN_LIST CPUS)
@@ -3548,7 +3548,7 @@ endif()
 
 ##################################################
 ## AT&T WE32000/WE32100/WE32200
-##@src/devices/cpu/we32000/we32100.h,CPUS["WE32000"] = true
+##@src/devices/cpu/we32000/we32100.h,list(APPEND CPUS WE32000)
 ##################################################
 
 if("WE32000" IN_LIST CPUS)
@@ -3565,7 +3565,7 @@ endif()
 
 ##################################################
 ## DEC RX01
-##@src/devices/cpu/rx01/rx01.h,CPUS["RX01"] = true
+##@src/devices/cpu/rx01/rx01.h,list(APPEND CPUS RX01)
 ##################################################
 
 if("RX01" IN_LIST CPUS)
@@ -3582,7 +3582,7 @@ endif()
 
 ##################################################
 ## Motorola M88000
-##@src/devices/cpu/m88000/m88000.h,CPUS["M88000"] = true
+##@src/devices/cpu/m88000/m88000.h,list(APPEND CPUS M88000)
 ##################################################
 
 if("M88000" IN_LIST CPUS)
@@ -3599,7 +3599,7 @@ endif()
 
 ##################################################
 ## XAVIX2
-##@src/devices/cpu/xavix2/xavix2.h,CPUS["XAVIX2"] = true
+##@src/devices/cpu/xavix2/xavix2.h,list(APPEND CPUS XAVIX2)
 ##################################################
 
 if("XAVIX2" IN_LIST CPUS)
@@ -3616,9 +3616,9 @@ endif()
 
 ##################################################
 ## NEC 78K
-##@src/devices/cpu/upd78k/upd78k0.h,CPUS["UPD78K"] = true
-##@src/devices/cpu/upd78k/upd78k2.h,CPUS["UPD78K"] = true
-##@src/devices/cpu/upd78k/upd78k3.h,CPUS["UPD78K"] = true
+##@src/devices/cpu/upd78k/upd78k0.h,list(APPEND CPUS UPD78K)
+##@src/devices/cpu/upd78k/upd78k2.h,list(APPEND CPUS UPD78K)
+##@src/devices/cpu/upd78k/upd78k3.h,list(APPEND CPUS UPD78K)
 ##################################################
 
 if("UPD78K" IN_LIST CPUS)
@@ -3647,7 +3647,7 @@ endif()
 
 ##################################################
 ## IBM ROMP
-##@src/devices/cpu/romp/romp.h,CPUS["ROMP"] = true
+##@src/devices/cpu/romp/romp.h,list(APPEND CPUS ROMP)
 ##################################################
 
 if("ROMP" IN_LIST CPUS)
@@ -3665,7 +3665,7 @@ endif()
 
 ##################################################
 ## KS0164
-##@src/devices/cpu/ks0164/ks0164.h,CPUS["KS0164"] = true
+##@src/devices/cpu/ks0164/ks0164.h,list(APPEND CPUS KS0164)
 ##################################################
 
 if("KS0164" IN_LIST CPUS)
@@ -3682,7 +3682,7 @@ endif()
 
 ##################################################
 ## uPD177x - Disassembler only
-##@src/devices/cpu/upd177x/upd177x.h,CPUS["UPD177X"] = true
+##@src/devices/cpu/upd177x/upd177x.h,list(APPEND CPUS UPD177X)
 ##################################################
 
 if(("UPD177X" IN_LIST CPUS) OR TOOLS)
@@ -3692,7 +3692,7 @@ endif()
 
 ##################################################
 ## Sanyo LC58 - Disassembler only
-##@src/devices/cpu/lc58/lc58.h,CPUS["LC58"] = true
+##@src/devices/cpu/lc58/lc58.h,list(APPEND CPUS LC58)
 ##################################################
 
 if(("LC58" IN_LIST CPUS) OR TOOLS)
@@ -3702,7 +3702,7 @@ endif()
 
 ##################################################
 ## OKI MSM6502/6512 - Disassembler only
-##@src/devices/cpu/msm65x2/msm65x2.h,CPUS["MSM65X2"] = true
+##@src/devices/cpu/msm65x2/msm65x2.h,list(APPEND CPUS MSM65X2)
 ##################################################
 
 if(("MSM65X2" IN_LIST CPUS) OR TOOLS)
@@ -3712,7 +3712,7 @@ endif()
 
 ##################################################
 ## Sanyo LC57 - Disassembler only
-##@src/devices/cpu/lc57/lc57.h,CPUS["LC57"] = true
+##@src/devices/cpu/lc57/lc57.h,list(APPEND CPUS LC57)
 ##################################################
 
 if(("LC57" IN_LIST CPUS) OR TOOLS)
@@ -3722,7 +3722,7 @@ endif()
 
 ##################################################
 ## Mark I (Andrew Holme)
-##@src/devices/cpu/mk1/mk1.h,CPUS["MK1"] = true
+##@src/devices/cpu/mk1/mk1.h,list(APPEND CPUS MK1)
 ##################################################
 
 if("MK1" IN_LIST CPUS)
@@ -3739,7 +3739,7 @@ endif()
 
 ##################################################
 ## Motorola M68HC16 (CPU16) - Disassembler only
-##@src/devices/cpu/m68hc16/m68hc16.h,CPUS["M68HC16"] = true
+##@src/devices/cpu/m68hc16/m68hc16.h,list(APPEND CPUS M68HC16)
 ##################################################
 
 if(("M68HC16" IN_LIST CPUS) OR TOOLS)
