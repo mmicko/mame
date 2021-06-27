@@ -155,7 +155,7 @@ macro(precompiledheaders _project)
 endmacro()
 
 macro(precompiledheaders_novs _project)
-	if(MSVC)
+	if(NOT MSVC)
 		precompiledheaders(${_project})
 	endif()
 endmacro()
