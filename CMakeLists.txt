@@ -143,6 +143,10 @@ endif()
 
 find_package(PythonInterp 3.6 REQUIRED)
 
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
+  set_option(NOASM ON)
+endif()
+
 if(NOT ((${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64") OR (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "AMD64")))
   set_option(FORCE_DRC_C_BACKEND ON)
 endif()
@@ -739,36 +743,6 @@ generate_has_header(FORMATS)
 
 dump_mame_options()
 
-
-
-## Emscripten
-#ifeq ($(findstring emcc,$(CC)),emcc)
-#TARGETOS := asmjs
-#ARCHITECTURE :=
-#ifndef NOASM
-#	NOASM := 1
-#endif
-#endif
-#
-
-##-------------------------------------------------
-## Clean/bootstrap
-##-------------------------------------------------
-
-
-#$(GENDIR)/includes/SDL2:
-#	-$(call MKDIR,$@)
-#	-$(call COPY,3rdparty/SDL2/include,$(GENDIR)/includes/SDL2)
-##-------------------------------------------------
-## Regression tests
-##-------------------------------------------------
-#
-#include regtests/regtests.mak
-#
-#.PHONY: tests
-#
-#tests: $(REGTESTS)
-#
 ##-------------------------------------------------
 ## Source cleanup
 ##-------------------------------------------------
