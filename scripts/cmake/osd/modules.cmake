@@ -247,71 +247,73 @@ endmacro()
 
 # -Wno-inconsistent-missing-override for Clang
 
-set(QTDEBUGGER_SRCS ${MAME_DIR}/src/osd/modules/debugger/debugqt.cpp)
+macro(qtdebuggerbuild _projectname)
+	set(QTDEBUGGER_SRCS ${MAME_DIR}/src/osd/modules/debugger/debugqt.cpp)
 
-if(USE_QTDEBUG)
-	list(APPEND QTDEBUGGER_SRCS
-		${MAME_DIR}/src/osd/modules/debugger/qt/debuggerview.cpp
-		${MAME_DIR}/src/osd/modules/debugger/qt/debuggerview.h
-		${MAME_DIR}/src/osd/modules/debugger/qt/windowqt.cpp
-		${MAME_DIR}/src/osd/modules/debugger/qt/windowqt.h
-		${MAME_DIR}/src/osd/modules/debugger/qt/logwindow.cpp
-		${MAME_DIR}/src/osd/modules/debugger/qt/logwindow.h
-		${MAME_DIR}/src/osd/modules/debugger/qt/dasmwindow.cpp
-		${MAME_DIR}/src/osd/modules/debugger/qt/dasmwindow.h
-		${MAME_DIR}/src/osd/modules/debugger/qt/mainwindow.cpp
-		${MAME_DIR}/src/osd/modules/debugger/qt/mainwindow.h
-		${MAME_DIR}/src/osd/modules/debugger/qt/memorywindow.cpp
-		${MAME_DIR}/src/osd/modules/debugger/qt/memorywindow.h
-		${MAME_DIR}/src/osd/modules/debugger/qt/breakpointswindow.cpp
-		${MAME_DIR}/src/osd/modules/debugger/qt/breakpointswindow.h
-		${MAME_DIR}/src/osd/modules/debugger/qt/deviceswindow.cpp
-		${MAME_DIR}/src/osd/modules/debugger/qt/deviceinformationwindow.cpp
-		${MAME_DIR}/src/osd/modules/debugger/qt/deviceinformationwindow.h
-		${MAME_DIR}/src/osd/modules/debugger/qt/deviceswindow.h
-		${GEN_DIR}/osd/modules/debugger/qt/debuggerview.moc.cpp
-		${GEN_DIR}/osd/modules/debugger/qt/windowqt.moc.cpp
-		${GEN_DIR}/osd/modules/debugger/qt/logwindow.moc.cpp
-		${GEN_DIR}/osd/modules/debugger/qt/dasmwindow.moc.cpp
-		${GEN_DIR}/osd/modules/debugger/qt/mainwindow.moc.cpp
-		${GEN_DIR}/osd/modules/debugger/qt/memorywindow.moc.cpp
-		${GEN_DIR}/osd/modules/debugger/qt/breakpointswindow.moc.cpp
-		${GEN_DIR}/osd/modules/debugger/qt/deviceswindow.moc.cpp
-		${GEN_DIR}/osd/modules/debugger/qt/deviceinformationwindow.moc.cpp
+	if(USE_QTDEBUG)
+		list(APPEND QTDEBUGGER_SRCS
+			${MAME_DIR}/src/osd/modules/debugger/qt/debuggerview.cpp
+			${MAME_DIR}/src/osd/modules/debugger/qt/debuggerview.h
+			${MAME_DIR}/src/osd/modules/debugger/qt/windowqt.cpp
+			${MAME_DIR}/src/osd/modules/debugger/qt/windowqt.h
+			${MAME_DIR}/src/osd/modules/debugger/qt/logwindow.cpp
+			${MAME_DIR}/src/osd/modules/debugger/qt/logwindow.h
+			${MAME_DIR}/src/osd/modules/debugger/qt/dasmwindow.cpp
+			${MAME_DIR}/src/osd/modules/debugger/qt/dasmwindow.h
+			${MAME_DIR}/src/osd/modules/debugger/qt/mainwindow.cpp
+			${MAME_DIR}/src/osd/modules/debugger/qt/mainwindow.h
+			${MAME_DIR}/src/osd/modules/debugger/qt/memorywindow.cpp
+			${MAME_DIR}/src/osd/modules/debugger/qt/memorywindow.h
+			${MAME_DIR}/src/osd/modules/debugger/qt/breakpointswindow.cpp
+			${MAME_DIR}/src/osd/modules/debugger/qt/breakpointswindow.h
+			${MAME_DIR}/src/osd/modules/debugger/qt/deviceswindow.cpp
+			${MAME_DIR}/src/osd/modules/debugger/qt/deviceinformationwindow.cpp
+			${MAME_DIR}/src/osd/modules/debugger/qt/deviceinformationwindow.h
+			${MAME_DIR}/src/osd/modules/debugger/qt/deviceswindow.h
+			${GEN_DIR}/osd/modules/debugger/qt/debuggerview.moc.cpp
+			${GEN_DIR}/osd/modules/debugger/qt/windowqt.moc.cpp
+			${GEN_DIR}/osd/modules/debugger/qt/logwindow.moc.cpp
+			${GEN_DIR}/osd/modules/debugger/qt/dasmwindow.moc.cpp
+			${GEN_DIR}/osd/modules/debugger/qt/mainwindow.moc.cpp
+			${GEN_DIR}/osd/modules/debugger/qt/memorywindow.moc.cpp
+			${GEN_DIR}/osd/modules/debugger/qt/breakpointswindow.moc.cpp
+			${GEN_DIR}/osd/modules/debugger/qt/deviceswindow.moc.cpp
+			${GEN_DIR}/osd/modules/debugger/qt/deviceinformationwindow.moc.cpp
+		)
+	endif()
+
+	add_library(${_projectname} ${LIBTYPE} ${QTDEBUGGER_SRCS})
+	add_project_to_group(libs ${_projectname})
+
+	if(USE_QTDEBUG)
+		target_compile_definitions(${_projectname} PRIVATE USE_QTDEBUG=1)
+
+		find_package(Qt5 COMPONENTS Core Widgets Gui REQUIRED)
+		target_link_libraries(${_projectname} PUBLIC Qt5::Core Qt5::Widgets Qt5::Gui)
+
+		qt5_generate_moc(${MAME_DIR}/src/osd/modules/debugger/qt/debuggerview.h ${GEN_DIR}/osd/modules/debugger/qt/debuggerview.moc.cpp)
+		qt5_generate_moc(${MAME_DIR}/src/osd/modules/debugger/qt/windowqt.h ${GEN_DIR}/osd/modules/debugger/qt/windowqt.moc.cpp)
+		qt5_generate_moc(${MAME_DIR}/src/osd/modules/debugger/qt/logwindow.h ${GEN_DIR}/osd/modules/debugger/qt/logwindow.moc.cpp)
+		qt5_generate_moc(${MAME_DIR}/src/osd/modules/debugger/qt/dasmwindow.h ${GEN_DIR}/osd/modules/debugger/qt/dasmwindow.moc.cpp)
+		qt5_generate_moc(${MAME_DIR}/src/osd/modules/debugger/qt/mainwindow.h ${GEN_DIR}/osd/modules/debugger/qt/mainwindow.moc.cpp)
+		qt5_generate_moc(${MAME_DIR}/src/osd/modules/debugger/qt/memorywindow.h ${GEN_DIR}/osd/modules/debugger/qt/memorywindow.moc.cpp)
+		qt5_generate_moc(${MAME_DIR}/src/osd/modules/debugger/qt/breakpointswindow.h ${GEN_DIR}/osd/modules/debugger/qt/breakpointswindow.moc.cpp)
+		qt5_generate_moc(${MAME_DIR}/src/osd/modules/debugger/qt/deviceswindow.h ${GEN_DIR}/osd/modules/debugger/qt/deviceswindow.moc.cpp)
+		qt5_generate_moc(${MAME_DIR}/src/osd/modules/debugger/qt/deviceinformationwindow.h ${GEN_DIR}/osd/modules/debugger/qt/deviceinformationwindow.moc.cpp)
+	else()
+		target_compile_definitions(${_projectname} PRIVATE USE_QTDEBUG=0)
+	endif()
+
+	target_include_directories(${_projectname} PRIVATE 
+			${MAME_DIR}/src/emu
+			${MAME_DIR}/src/devices # accessing imagedev from debugger
+			${MAME_DIR}/src/osd
+			${MAME_DIR}/src/lib
+			${MAME_DIR}/src/lib/util
+			${MAME_DIR}/src/osd/modules/render
+			${MAME_DIR}/3rdparty
 	)
-endif()
-
-add_library(qtdbg ${LIBTYPE} ${QTDEBUGGER_SRCS})
-add_project_to_group(libs qtdbg)
-
-if(USE_QTDEBUG)
-	target_compile_definitions(qtdbg PRIVATE USE_QTDEBUG=1)
-
-	find_package(Qt5 COMPONENTS Core Widgets Gui REQUIRED)
-	target_link_libraries(qtdbg PUBLIC Qt5::Core Qt5::Widgets Qt5::Gui)
-
-	qt5_generate_moc(${MAME_DIR}/src/osd/modules/debugger/qt/debuggerview.h ${GEN_DIR}/osd/modules/debugger/qt/debuggerview.moc.cpp)
-	qt5_generate_moc(${MAME_DIR}/src/osd/modules/debugger/qt/windowqt.h ${GEN_DIR}/osd/modules/debugger/qt/windowqt.moc.cpp)
-	qt5_generate_moc(${MAME_DIR}/src/osd/modules/debugger/qt/logwindow.h ${GEN_DIR}/osd/modules/debugger/qt/logwindow.moc.cpp)
-	qt5_generate_moc(${MAME_DIR}/src/osd/modules/debugger/qt/dasmwindow.h ${GEN_DIR}/osd/modules/debugger/qt/dasmwindow.moc.cpp)
-	qt5_generate_moc(${MAME_DIR}/src/osd/modules/debugger/qt/mainwindow.h ${GEN_DIR}/osd/modules/debugger/qt/mainwindow.moc.cpp)
-	qt5_generate_moc(${MAME_DIR}/src/osd/modules/debugger/qt/memorywindow.h ${GEN_DIR}/osd/modules/debugger/qt/memorywindow.moc.cpp)
-	qt5_generate_moc(${MAME_DIR}/src/osd/modules/debugger/qt/breakpointswindow.h ${GEN_DIR}/osd/modules/debugger/qt/breakpointswindow.moc.cpp)
-	qt5_generate_moc(${MAME_DIR}/src/osd/modules/debugger/qt/deviceswindow.h ${GEN_DIR}/osd/modules/debugger/qt/deviceswindow.moc.cpp)
-	qt5_generate_moc(${MAME_DIR}/src/osd/modules/debugger/qt/deviceinformationwindow.h ${GEN_DIR}/osd/modules/debugger/qt/deviceinformationwindow.moc.cpp)
-else()
-	target_compile_definitions(qtdbg PRIVATE USE_QTDEBUG=0)
-endif()
-
-target_include_directories(qtdbg PRIVATE 
-		${MAME_DIR}/src/emu
-		${MAME_DIR}/src/devices # accessing imagedev from debugger
-		${MAME_DIR}/src/osd
-		${MAME_DIR}/src/lib
-		${MAME_DIR}/src/lib/util
-		${MAME_DIR}/src/osd/modules/render
-		${MAME_DIR}/3rdparty
-)
+endmacro()
 
 macro(osdmodulestargetconf _projectname)
 	

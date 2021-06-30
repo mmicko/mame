@@ -41,22 +41,8 @@
 #end
 #
 
-#project ("qtdbg_" .. _OPTIONS["osd"])
-#	uuid (os.uuid("qtdbg_" .. _OPTIONS["osd"]))
-#	kind (LIBTYPE)
-#
-#	dofile("windows_cfg.lua")
-#	includedirs {
-#		${MAME_DIR}/src/emu
-#		${MAME_DIR}/src/devices -- accessing imagedev from debugger
-#		${MAME_DIR}/src/osd
-#		${MAME_DIR}/src/lib
-#		${MAME_DIR}/src/lib/util
-#		${MAME_DIR}/src/osd/modules/render
-#		${MAME_DIR}/3rdparty
-#	}
-#	qtdebuggerbuild()
-#
+qtdebuggerbuild(qtdbg_${OSD})
+osd_cfg(qtdbg_${OSD})
 
 set(OSD_SRCS
     ${MAME_DIR}/src/osd/modules/render/d3d/d3dhlsl.cpp
@@ -108,8 +94,8 @@ set(OSD_SRCS
     ${MAME_DIR}/src/osd/modules/debugger/win/uimetrics.h
     ${MAME_DIR}/src/osd/modules/debugger/win/debugwin.h
 )
-osdmodulesbuild("osd" "${OSD_SRCS}")
-osd_cfg(osd)
+osdmodulesbuild(osd_${OSD} "${OSD_SRCS}")
+osd_cfg(osd_${OSD})
 
 target_include_directories(osd PRIVATE 
 		${MAME_DIR}/src/emu
@@ -123,16 +109,16 @@ target_include_directories(osd PRIVATE
     	${MAME_DIR}/src/osd/windows
 )
 if(MSVC)
-	target_include_directories(osd PRIVATE ${MAME_DIR}/3rdparty/dxsdk/Include)
+	target_include_directories(osd_${OSD} PRIVATE ${MAME_DIR}/3rdparty/dxsdk/Include)
 endif()
 
-target_compile_definitions(osd PRIVATE DIRECT3D_VERSION=0x0900)
+target_compile_definitions(osd_${OSD} PRIVATE DIRECT3D_VERSION=0x0900)
 
 #	if _OPTIONS["DIRECTINPUT"] == "8" then
 #		defines {
 #			"DIRECTINPUT_VERSION=0x0800
 #		}
-target_compile_definitions(osd PRIVATE DIRECTINPUT_VERSION=0x0800)
+target_compile_definitions(osd_${OSD} PRIVATE DIRECTINPUT_VERSION=0x0800)
 #	else
 #		defines {
 #			"DIRECTINPUT_VERSION=0x0700
@@ -167,10 +153,10 @@ set(OCORE_SRCS
     ${MAME_DIR}/src/osd/modules/file/winsocket.cpp
     ${MAME_DIR}/src/osd/modules/lib/osdlib_win32.cpp
 )
-add_library(ocore ${LIBTYPE} ${OCORE_SRCS})
-osd_cfg(ocore)
+add_library(ocore_${OSD} ${LIBTYPE} ${OCORE_SRCS})
+osd_cfg(ocore_${OSD})
 
-target_include_directories(ocore PRIVATE 
+target_include_directories(ocore_${OSD} PRIVATE 
 	${MAME_DIR}/3rdparty
 	${MAME_DIR}/src/emu
 	${MAME_DIR}/src/osd
@@ -181,15 +167,15 @@ target_include_directories(ocore PRIVATE
 	${MAME_DIR}/src/osd/windows
 )
 
-target_link_libraries(ocore PRIVATE utils)
-target_link_libraries(ocore PUBLIC 
+target_link_libraries(ocore_${OSD} PRIVATE utils)
+target_link_libraries(ocore_${OSD} PUBLIC 
 	comctl32
 	comdlg32
 	psapi
 	ole32
 	shlwapi
 )
-target_link_libraries(ocore PUBLIC 
+target_link_libraries(ocore_${OSD} PUBLIC 
 	wsock32
 	ws2_32
 )

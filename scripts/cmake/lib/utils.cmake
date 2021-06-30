@@ -106,7 +106,7 @@ target_include_directories(utils PRIVATE
 )
 
 target_link_libraries(utils PUBLIC
-	ocore
+	ocore_${OSD}
 	expat
 	zlib
 	flac

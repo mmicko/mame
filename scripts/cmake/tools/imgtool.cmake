@@ -66,4 +66,4 @@ target_include_directories(imgtool PRIVATE
 )
 
 
-target_link_libraries(imgtool PRIVATE ocore formats)
+target_link_libraries(imgtool PRIVATE ocore_${OSD} formats)

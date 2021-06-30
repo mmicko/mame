@@ -47,6 +47,7 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Cla
         target_link_options(${projectname} PRIVATE "-Wl,-Map,${projectname}.map")
     endif()
 endif()
+
 #	addprojectflags()
 #	flags {
 #		"NoManifest",
@@ -60,18 +61,19 @@ endif()
 #				"$(SILENT) objdump --section=.text --line-numbers --syms --demangle $(TARGET) >$(subst .exe,.sym,$(TARGET))"
 #			}
 #	end
-#	configuration { "Release" }
-#		targetsuffix ""
-#		if _OPTIONS["PROFILE"] then
-#			targetsuffix "p"
-#		end
-#
-#	configuration { "Debug" }
-#		targetsuffix "d"
-#		if _OPTIONS["PROFILE"] then
-#			targetsuffix "dp"
-#		end
-#
+
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    if(PROFILE)
+        set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${projectname}p")
+    endif()
+endif()
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${projectname}d")
+    if(PROFILE)
+        set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${projectname}dp")
+    endif()
+endif()
 
 #	configuration { "asmjs" }
 #		targetextension ".bc"
@@ -136,14 +138,8 @@ if(NOT STANDALONE)
     cmake_language(CALL linkProjects_${TARGET}_${SUBTARGET} ${TARGET} ${SUBTARGET} ${projectname})
 endif()
 
-#	links {
-#		"osd_" .. _OPTIONS["osd"],
-#	}
-target_link_libraries(${projectname} PRIVATE osd)
-#	links {
-#		"qtdbg_" .. _OPTIONS["osd"],
-#	}
-target_link_libraries(${projectname} PRIVATE qtdbg)
+target_link_libraries(${projectname} PRIVATE osd_${OSD})
+target_link_libraries(${projectname} PRIVATE qtdbg_${OSD})
 
 if(NOT STANDALONE)
     target_link_libraries(${projectname} PRIVATE frontend)
@@ -216,17 +212,11 @@ if(NOT NO_USE_MIDI)
     target_link_libraries(${projectname} PRIVATE portmidi)
 endif()
 
-#	links {
-#		"bgfx",
-#		"bimg",
-#		"bx",
-#		"ocore_" .. _OPTIONS["osd"],
-#	}
 target_link_libraries(${projectname} PRIVATE
     bgfx
     bimg
     bx
-    ocore
+    ocore_${OSD}
 )
 #
 #	override_resources = false;

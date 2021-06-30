@@ -294,6 +294,9 @@ if (${BASE_TARGETOS} STREQUAL "unix")
     endif()
 endif()
 
+qtdebuggerbuild(qtdbg_${OSD})
+osd_cfg(qtdbg_${OSD})
+
 set(OSD_SRCS
     ${MAME_DIR}/src/osd/sdl/osdsdl.h
     ${MAME_DIR}/src/osd/sdl/sdlprefix.h
@@ -353,9 +356,9 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
         ${MAME_DIR}/src/osd/modules/debugger/osx/debugosx.h
     )
 endif()
-osdmodulesbuild("osd" "${OSD_SRCS}")
+osdmodulesbuild(osd_${OSD} "${OSD_SRCS}")
 
-target_include_directories(osd PRIVATE 
+target_include_directories(osd_${OSD} PRIVATE 
     ${MAME_DIR}/src/emu
     ${MAME_DIR}/src/devices # accessing imagedev from debugger
     ${MAME_DIR}/src/osd
@@ -366,8 +369,8 @@ target_include_directories(osd PRIVATE
     ${MAME_DIR}/3rdparty
     ${MAME_DIR}/src/osd/sdl
 )
-osd_cfg(osd)
-target_link_libraries(osd PRIVATE SDL2::SDL2)
+osd_cfg(osd_${OSD})
+target_link_libraries(osd_${OSD} PRIVATE SDL2::SDL2)
 
 set(OCORE_SRCS
     ${MAME_DIR}/src/osd/osdcore.cpp
@@ -410,11 +413,11 @@ else()
     )
 endif()
 
-add_library(ocore ${LIBTYPE} ${OCORE_SRCS})
+add_library(ocore_${OSD} ${LIBTYPE} ${OCORE_SRCS})
 
-osd_cfg(ocore)
+osd_cfg(ocore_${OSD})
 
-target_include_directories(ocore PRIVATE 
+target_include_directories(ocore_${OSD} PRIVATE 
 	${MAME_DIR}/src/emu
 	${MAME_DIR}/src/osd
 	${MAME_DIR}/src/lib
@@ -422,12 +425,12 @@ target_include_directories(ocore PRIVATE
 	${MAME_DIR}/src/osd/sdl
 )
 
-target_link_libraries(ocore PUBLIC 
+target_link_libraries(ocore_${OSD} PUBLIC 
 	dl
 	pthread
     SDL2::SDL2
 )
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-    target_link_libraries(ocore PUBLIC "-framework Carbon")
+    target_link_libraries(ocore_${OSD} PUBLIC "-framework Carbon")
 endif()
