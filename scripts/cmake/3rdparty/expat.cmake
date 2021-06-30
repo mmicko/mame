@@ -49,8 +49,8 @@ if(UNIX)
 endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-	add_compile_options(/wd4100) # warning C4100: 'xxx' : unreferenced formal parameter
-	add_compile_options(/wd4127) # warning C4127: conditional expression is constant
-	add_compile_options(/wd4244) # warning C4244: 'argument' : conversion from 'xxx' to 'xxx', possible loss of data
-	add_compile_options(/wd4456) # warning C4456: declaration of 'xxx' hides previous local declaration
+	target_compile_options(expat PRIVATE /wd4100) # warning C4100: 'xxx' : unreferenced formal parameter
+	target_compile_options(expat PRIVATE /wd4127) # warning C4127: conditional expression is constant
+	target_compile_options(expat PRIVATE /wd4244) # warning C4244: 'argument' : conversion from 'xxx' to 'xxx', possible loss of data
+	target_compile_options(expat PRIVATE /wd4456) # warning C4456: declaration of 'xxx' hides previous local declaration
 endif()
