@@ -1,4 +1,25 @@
-set(BENCHMARK_SRCS
+# license:BSD-3-Clause
+# copyright-holders:MAMEdev Team
+
+##########################################################################
+##
+##   benchmarks.lua
+##
+##   Rules for building benchmarks
+##
+##########################################################################
+
+##################################################
+## Google Benchmark library objects
+##################################################
+
+add_library(benchmark ${LIBTYPE})
+add_project_to_group(benchmarks benchmark)
+
+target_compile_definitions(benchmark PRIVATE HAVE_STD_REGEX)
+target_include_directories(benchmark PRIVATE ${MAME_DIR}/3rdparty/benchmark/include)
+
+target_sources(benchmark PRIVATE
 	${MAME_DIR}/3rdparty/benchmark/src/benchmark.cc
 	${MAME_DIR}/3rdparty/benchmark/src/colorprint.cc
 	${MAME_DIR}/3rdparty/benchmark/src/commandlineflags.cc
@@ -14,19 +35,11 @@ set(BENCHMARK_SRCS
 	${MAME_DIR}/3rdparty/benchmark/src/re_std.cc
 )
 
-add_library(benchmark ${LIBTYPE} ${BENCHMARK_SRCS})
-add_project_to_group(benchmarks benchmark)
+##################################################
+## MAME benchmarks
+##################################################
 
-target_compile_definitions(benchmark PRIVATE HAVE_STD_REGEX)
-target_include_directories(benchmark PRIVATE ${MAME_DIR}/3rdparty/benchmark/include)
-
-set(BENCHMARKS_SRCS
-	${MAME_DIR}/benchmarks/main.cpp
-	${MAME_DIR}/benchmarks/eminline_native.cpp
-	${MAME_DIR}/benchmarks/eminline_noasm.cpp
-)
-
-add_executable(benchmarks ${BENCHMARKS_SRCS})
+add_executable(benchmarks)
 add_project_to_group(benchmarks benchmarks)
 
 target_include_directories(benchmarks PRIVATE 
@@ -41,3 +54,9 @@ if (WIN32)
 else()
 	target_link_libraries(benchmarks PRIVATE pthread)
 endif()
+
+target_sources(benchmarks PRIVATE
+	${MAME_DIR}/benchmarks/main.cpp
+	${MAME_DIR}/benchmarks/eminline_native.cpp
+	${MAME_DIR}/benchmarks/eminline_noasm.cpp
+)
