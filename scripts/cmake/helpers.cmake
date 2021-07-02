@@ -150,7 +150,18 @@ endmacro()
 
 macro(precompiledheaders _project)
 	if(PRECOMPILE)
-		target_precompile_headers(${_project} REUSE_FROM precompile)
+		if(${CMAKE_GENERATOR} MATCHES "Makefiles")
+			# Precompile works fine with CMake but for Makefiles it also add comments in flags.make
+			# this creates a problem since after adding new file to library using precompile header
+			# all needs to be recompiled even if there is not need. For MAME this is no go.
+			# Patch is here until it is resolved upstream
+			add_dependencies(${_project} precompile)
+			target_compile_options(${_project} PRIVATE -include ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/precompile.dir/cmake_pch.hxx)
+			get_target_property(MY_PROJECT_SOURCES ${_project} SOURCES)
+			set_source_files_properties(${MY_PROJECT_SOURCES} PROPERTIES OBJECT_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/precompile.dir/cmake_pch.hxx;${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/precompile.dir/cmake_pch.hxx.gch")
+		else()
+			target_precompile_headers(${_project} REUSE_FROM precompile)
+		endif()
 	endif()
 endmacro()
 
