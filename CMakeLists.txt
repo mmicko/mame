@@ -256,6 +256,8 @@ else()
   endforeach()
   execute_process(
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/build
+  )
+  execute_process( 
     COMMAND ${PYTHON_EXECUTABLE} ${MAME_DIR}/scripts/build/makedep.py sourcesproject -r ${MAME_DIR} -t ${SUBTARGET} ${SOURCES_LIST}
     OUTPUT_FILE ${CMAKE_BINARY_DIR}/build/sources_${SUBTARGET}.cmake
     RESULT_VARIABLE sourceproject_result
@@ -263,6 +265,8 @@ else()
   include(${CMAKE_BINARY_DIR}/build/sources_${SUBTARGET}.cmake)
   execute_process(
     COMMAND ${CMAKE_COMMAND} -E make_directory ${GEN_DIR}/${TARGET}
+  )
+  execute_process(
     COMMAND ${PYTHON_EXECUTABLE} ${MAME_DIR}/scripts/build/makedep.py sourcesfilter ${SOURCES_LIST} 
     OUTPUT_FILE ${GEN_DIR}/${TARGET}/sources_${SUBTARGET}.flt
     RESULT_VARIABLE sourcesfilter_result
