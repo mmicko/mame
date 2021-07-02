@@ -257,14 +257,14 @@ else()
   execute_process(
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/build
     COMMAND ${PYTHON_EXECUTABLE} ${MAME_DIR}/scripts/build/makedep.py sourcesproject -r ${MAME_DIR} -t ${SUBTARGET} ${SOURCES_LIST}
-    OUTPUT_FILE ${CMAKE_BINARY_DIR}/build/${SUBTARGET}.cmake
+    OUTPUT_FILE ${CMAKE_BINARY_DIR}/build/sources_${SUBTARGET}.cmake
     RESULT_VARIABLE sourceproject_result
   )
-  include(${CMAKE_BINARY_DIR}/build/${SUBTARGET}.cmake)
+  include(${CMAKE_BINARY_DIR}/build/sources_${SUBTARGET}.cmake)
   execute_process(
     COMMAND ${CMAKE_COMMAND} -E make_directory ${GEN_DIR}/${TARGET}
     COMMAND ${PYTHON_EXECUTABLE} ${MAME_DIR}/scripts/build/makedep.py sourcesfilter ${SOURCES_LIST} 
-    OUTPUT_FILE ${GEN_DIR}/${TARGET}/${SUBTARGET}.flt
+    OUTPUT_FILE ${GEN_DIR}/${TARGET}/sources_${SUBTARGET}.flt
     RESULT_VARIABLE sourcesfilter_result
   )
 endif()

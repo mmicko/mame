@@ -303,8 +303,8 @@ if(NOT STANDALONE)
     else()
         add_custom_command(
             COMMAND ${CMAKE_COMMAND} -E make_directory ${GEN_DIR}/${_target}/${_subtarget}/
-            COMMAND ${PYTHON_EXECUTABLE} ${MAME_DIR}/scripts/build/makedep.py driverlist ${MAME_DIR}/src/${_target}/${_target}.lst -f ${GEN_DIR}/${_target}/${_subtarget}.flt > ${GEN_DIR}/${_target}/${_subtarget}/drivlist.cpp
-            DEPENDS ${MAME_DIR}/scripts/build/makedep.py ${MAME_DIR}/src/${_target}/${_target}.lst ${GEN_DIR}/${_target}/${_subtarget}.flt
+            COMMAND ${PYTHON_EXECUTABLE} ${MAME_DIR}/scripts/build/makedep.py driverlist ${MAME_DIR}/src/${_target}/${_target}.lst -f ${GEN_DIR}/${_target}/sources_${_subtarget}.flt > ${GEN_DIR}/${_target}/${_subtarget}/drivlist.cpp
+            DEPENDS ${MAME_DIR}/scripts/build/makedep.py ${MAME_DIR}/src/${_target}/${_target}.lst ${GEN_DIR}/${_target}/sources_${_subtarget}.flt
             OUTPUT ${GEN_DIR}/${_target}/${_subtarget}/drivlist.cpp
             COMMENT "Building driver list..."
         )
