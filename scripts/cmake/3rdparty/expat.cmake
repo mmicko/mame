@@ -1,10 +1,8 @@
-set(EXPAT_SRCS
-	${MAME_DIR}/3rdparty/expat/lib/xmlparse.c
-	${MAME_DIR}/3rdparty/expat/lib/xmlrole.c
-	${MAME_DIR}/3rdparty/expat/lib/xmltok.c
-)
+##################################################
+## expat library objects
+##################################################
 
-add_library(expat ${LIBTYPE} ${EXPAT_SRCS})
+add_library(expat ${LIBTYPE})
 
 # fake out the enough of expat_config.h to get by
 # could possibly add more defines here for specific targets
@@ -54,3 +52,9 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	target_compile_options(expat PRIVATE /wd4244) # warning C4244: 'argument' : conversion from 'xxx' to 'xxx', possible loss of data
 	target_compile_options(expat PRIVATE /wd4456) # warning C4456: declaration of 'xxx' hides previous local declaration
 endif()
+
+target_sources(expat PRIVATE
+	${MAME_DIR}/3rdparty/expat/lib/xmlparse.c
+	${MAME_DIR}/3rdparty/expat/lib/xmlrole.c
+	${MAME_DIR}/3rdparty/expat/lib/xmltok.c
+)

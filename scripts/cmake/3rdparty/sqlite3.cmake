@@ -1,6 +1,6 @@
-set(SQLITE3_SRCS
-	${MAME_DIR}/3rdparty/sqlite3/sqlite3.c
-)
+##################################################
+## SQLite3 library objects
+##################################################
 
 add_library(sqlite3 ${LIBTYPE} ${SQLITE3_SRCS})
 
@@ -13,3 +13,7 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Cla
 		target_compile_options(sqlite3 PRIVATE -Wno-incompatible-pointer-types-discards-qualifiers)
 	endif()
 endif()
+
+target_sources(sqlite3 PRIVATE
+	${MAME_DIR}/3rdparty/sqlite3/sqlite3.c
+)

@@ -1,4 +1,24 @@
-set(BIMG_SRCS
+##################################################
+## BIMG library objects
+##################################################
+
+add_library(bimg ${LIBTYPE})
+
+target_link_libraries(bimg PUBLIC bx)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+	target_compile_options(bimg PRIVATE -Wno-unused-const-variable)
+endif()
+
+target_include_directories(bimg
+	PUBLIC
+		${MAME_DIR}/3rdparty/bimg/include
+	PRIVATE
+		${MAME_DIR}/3rdparty/bimg/3rdparty/astc-codec
+		${MAME_DIR}/3rdparty/bimg/3rdparty/astc-codec/include
+)
+
+target_sources(bimg PRIVATE
 	${MAME_DIR}/3rdparty/bimg/src/image.cpp
 	${MAME_DIR}/3rdparty/bimg/src/image_gnf.cpp
 
@@ -14,19 +34,3 @@ set(BIMG_SRCS
 	${MAME_DIR}/3rdparty/bimg/3rdparty/astc-codec/src/decoder/quantization.cc
 	${MAME_DIR}/3rdparty/bimg/3rdparty/astc-codec/src/decoder/weight_infill.cc
 )
-
-add_library(bimg ${LIBTYPE} ${BIMG_SRCS})
-
-target_link_libraries(bimg PUBLIC bx)
-
-target_include_directories(bimg
-	PUBLIC
-		${MAME_DIR}/3rdparty/bimg/include
-	PRIVATE
-		${MAME_DIR}/3rdparty/bimg/3rdparty/astc-codec
-		${MAME_DIR}/3rdparty/bimg/3rdparty/astc-codec/include
-)
-
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-	target_compile_options(bimg PRIVATE -Wno-unused-const-variable)
-endif()

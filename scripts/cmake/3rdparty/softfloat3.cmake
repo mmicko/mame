@@ -1,3 +1,7 @@
+##################################################
+## SoftFloat 3 library objects
+##################################################
+
 set(SOFTFLOAT3_SRCS
 	${MAME_DIR}/3rdparty/softfloat3/source/s_eq128.c
 	${MAME_DIR}/3rdparty/softfloat3/source/s_le128.c
@@ -306,14 +310,6 @@ set_source_files_properties(${SOFTFLOAT3_SRCS} PROPERTIES LANGUAGE "CXX")
 
 add_library(softfloat3 ${LIBTYPE} ${SOFTFLOAT3_SRCS})
 
-target_compile_definitions(softfloat3 PRIVATE
-	SOFTFLOAT_ROUND_ODD
-	INLINE_LEVEL=5
-	SOFTFLOAT_FAST_DIV32TO16
-	SOFTFLOAT_FAST_DIV64TO32
-	SOFTFLOAT_FAST_INT64
-)
-
 target_include_directories(softfloat3 PRIVATE
 	${MAME_DIR}/src/osd
 	${MAME_DIR}/3rdparty/softfloat3/build/MAME
@@ -322,15 +318,23 @@ target_include_directories(softfloat3 PRIVATE
 	${MAME_DIR}/3rdparty/softfloat3/source/8086
 )
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-	target_compile_options(softfloat3 PRIVATE -Wno-implicit-fallthrough)
-endif()
-
 if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
 	target_compile_options(softfloat3 PRIVATE -x c++)
+endif()
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+	target_compile_options(softfloat3 PRIVATE -Wno-implicit-fallthrough)
 endif()
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	target_compile_options(softfloat3 PRIVATE /wd4701) # warning C4701: potentially uninitialized local variable 'xxx' used
 	target_compile_options(softfloat3 PRIVATE /wd4703) # warning C4703: potentially uninitialized local pointer variable 'xxx' used
 endif()
+
+target_compile_definitions(softfloat3 PRIVATE
+	SOFTFLOAT_ROUND_ODD
+	INLINE_LEVEL=5
+	SOFTFLOAT_FAST_DIV32TO16
+	SOFTFLOAT_FAST_DIV64TO32
+	SOFTFLOAT_FAST_INT64
+)

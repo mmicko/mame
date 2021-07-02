@@ -1,4 +1,30 @@
-set(7Z_SRCS
+##################################################
+## lib7z library objects
+##################################################
+
+add_library(7z ${LIBTYPE})
+
+if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
+	target_compile_options(7z PRIVATE -Wno-strict-prototypes)
+	target_compile_options(7z PRIVATE -Wno-undef)
+endif()
+
+if((CMAKE_CXX_COMPILER_ID MATCHES "Clang") AND (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 10))
+	target_compile_options(7z PRIVATE -Wno-misleading-indentation)
+endif()
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+	target_compile_options(7z PRIVATE /wd4100) # warning C4100: 'xxx' : unreferenced formal parameter
+	target_compile_options(7z PRIVATE /wd4456) # warning C4456: declaration of 'xxx' hides previous local declaration
+	target_compile_options(7z PRIVATE /wd4457) # warning C4457: declaration of 'xxx' hides function parameter
+endif()
+
+target_compile_definitions(7z PRIVATE
+	_7ZIP_PPMD_SUPPPORT
+	_7ZIP_ST
+)
+
+target_sources(7z PRIVATE
 	${MAME_DIR}/3rdparty/lzma/C/7zAlloc.c
 	${MAME_DIR}/3rdparty/lzma/C/7zArcIn.c
 	${MAME_DIR}/3rdparty/lzma/C/7zBuf.c
@@ -42,25 +68,3 @@ set(7Z_SRCS
 	# ${MAME_DIR}/3rdparty/lzma/C/XzEnc.c
 	# ${MAME_DIR}/3rdparty/lzma/C/XzIn.c
 )
-
-add_library(7z ${LIBTYPE} ${7Z_SRCS})
-
-target_compile_definitions(7z PRIVATE
-	_7ZIP_PPMD_SUPPPORT
-	_7ZIP_ST
-)
-
-if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
-	target_compile_options(7z PRIVATE -Wno-strict-prototypes)
-	target_compile_options(7z PRIVATE -Wno-undef)
-endif()
-
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-	target_compile_options(7z PRIVATE -Wno-misleading-indentation)
-endif()
-
-if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-	target_compile_options(7z PRIVATE /wd4100) # warning C4100: 'xxx' : unreferenced formal parameter
-	target_compile_options(7z PRIVATE /wd4456) # warning C4456: declaration of 'xxx' hides previous local declaration
-	target_compile_options(7z PRIVATE /wd4457) # warning C4457: declaration of 'xxx' hides function parameter
-endif()

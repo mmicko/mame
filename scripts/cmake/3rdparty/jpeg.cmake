@@ -1,4 +1,16 @@
-set(JPEG_SRCS
+##################################################
+## libJPEG library objects
+##################################################
+
+add_library(jpeg ${LIBTYPE})
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+	target_compile_options(jpeg PRIVATE /wd4100) # warning C4100: 'xxx' : unreferenced formal parameter
+	target_compile_options(jpeg PRIVATE /wd4127) # warning C4127: conditional expression is constant
+	target_compile_options(jpeg PRIVATE /wd4244) # warning C4244: 'argument' : conversion from 'xxx' to 'xxx', possible loss of data
+endif()
+
+target_sources(jpeg PRIVATE
 	${MAME_DIR}/3rdparty/libjpeg/jaricom.c
 	${MAME_DIR}/3rdparty/libjpeg/jcapimin.c
 	${MAME_DIR}/3rdparty/libjpeg/jcapistd.c
@@ -46,11 +58,3 @@ set(JPEG_SRCS
 	${MAME_DIR}/3rdparty/libjpeg/jmemmgr.c
 	${MAME_DIR}/3rdparty/libjpeg/jmemansi.c
 )
-
-add_library(jpeg ${LIBTYPE} ${JPEG_SRCS})
-
-if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-	target_compile_options(jpeg PRIVATE /wd4100) # warning C4100: 'xxx' : unreferenced formal parameter
-	target_compile_options(jpeg PRIVATE /wd4127) # warning C4127: conditional expression is constant
-	target_compile_options(jpeg PRIVATE /wd4244) # warning C4244: 'argument' : conversion from 'xxx' to 'xxx', possible loss of data
-endif()

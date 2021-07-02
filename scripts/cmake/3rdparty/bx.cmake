@@ -1,28 +1,8 @@
-set(BX_SRCS
-	${MAME_DIR}/3rdparty/bx/src/allocator.cpp
-	${MAME_DIR}/3rdparty/bx/src/bx.cpp
-	${MAME_DIR}/3rdparty/bx/src/commandline.cpp
-	${MAME_DIR}/3rdparty/bx/src/crtnone.cpp
-	${MAME_DIR}/3rdparty/bx/src/debug.cpp
-	${MAME_DIR}/3rdparty/bx/src/dtoa.cpp
-	${MAME_DIR}/3rdparty/bx/src/easing.cpp
-	${MAME_DIR}/3rdparty/bx/src/file.cpp
-	${MAME_DIR}/3rdparty/bx/src/filepath.cpp
-	${MAME_DIR}/3rdparty/bx/src/hash.cpp
-	${MAME_DIR}/3rdparty/bx/src/math.cpp
-	${MAME_DIR}/3rdparty/bx/src/mutex.cpp
-	${MAME_DIR}/3rdparty/bx/src/os.cpp
-	${MAME_DIR}/3rdparty/bx/src/process.cpp
-	${MAME_DIR}/3rdparty/bx/src/semaphore.cpp
-	${MAME_DIR}/3rdparty/bx/src/settings.cpp
-	${MAME_DIR}/3rdparty/bx/src/sort.cpp
-	${MAME_DIR}/3rdparty/bx/src/string.cpp
-	${MAME_DIR}/3rdparty/bx/src/thread.cpp
-	${MAME_DIR}/3rdparty/bx/src/timer.cpp
-	${MAME_DIR}/3rdparty/bx/src/url.cpp
-)
+##################################################
+## BX library objects
+##################################################
 
-add_library(bx ${LIBTYPE} ${BX_SRCS})
+add_library(bx ${LIBTYPE})
 
 target_compile_definitions(bx PUBLIC
 	__STDC_LIMIT_MACROS
@@ -51,4 +31,28 @@ target_include_directories(bx
 		${MAME_DIR}/3rdparty/bx/include
 	PRIVATE
 		${MAME_DIR}/3rdparty/bx/3rdparty
+)
+
+target_sources(bx PRIVATE
+	${MAME_DIR}/3rdparty/bx/src/allocator.cpp
+	${MAME_DIR}/3rdparty/bx/src/bx.cpp
+	${MAME_DIR}/3rdparty/bx/src/commandline.cpp
+	${MAME_DIR}/3rdparty/bx/src/crtnone.cpp
+	${MAME_DIR}/3rdparty/bx/src/debug.cpp
+	${MAME_DIR}/3rdparty/bx/src/dtoa.cpp
+	${MAME_DIR}/3rdparty/bx/src/easing.cpp
+	${MAME_DIR}/3rdparty/bx/src/file.cpp
+	${MAME_DIR}/3rdparty/bx/src/filepath.cpp
+	${MAME_DIR}/3rdparty/bx/src/hash.cpp
+	${MAME_DIR}/3rdparty/bx/src/math.cpp
+	${MAME_DIR}/3rdparty/bx/src/mutex.cpp
+	${MAME_DIR}/3rdparty/bx/src/os.cpp
+	${MAME_DIR}/3rdparty/bx/src/process.cpp
+	${MAME_DIR}/3rdparty/bx/src/semaphore.cpp
+	${MAME_DIR}/3rdparty/bx/src/settings.cpp
+	${MAME_DIR}/3rdparty/bx/src/sort.cpp
+	${MAME_DIR}/3rdparty/bx/src/string.cpp
+	${MAME_DIR}/3rdparty/bx/src/thread.cpp
+	${MAME_DIR}/3rdparty/bx/src/timer.cpp
+	${MAME_DIR}/3rdparty/bx/src/url.cpp
 )

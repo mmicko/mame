@@ -1,4 +1,46 @@
-set(BGFX_SRCS
+##################################################
+## BGFX library objects
+##################################################
+add_library(bgfx ${LIBTYPE})
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+	target_compile_options(bgfx PRIVATE /wd4324) # warning C4324: 'xxx' : structure was padded due to __declspec(align())
+	target_compile_options(bgfx PRIVATE /wd4244) # warning C4244: 'argument' : conversion from 'xxx' to 'xxx', possible loss of data
+	target_compile_options(bgfx PRIVATE /wd4611) # warning C4611: interaction between '_setjmp' and C++ object destruction is non-portable
+	target_compile_options(bgfx PRIVATE /wd4310) # warning C4310: cast truncates constant value
+	target_compile_options(bgfx PRIVATE /wd4701) # warning C4701: potentially uninitialized local variable 'xxx' used
+endif()
+
+target_link_libraries(bgfx PRIVATE bx bimg)
+
+target_include_directories(bgfx 
+	PUBLIC
+		${MAME_DIR}/3rdparty/bgfx/include	
+	PRIVATE
+		${MAME_DIR}/3rdparty/bgfx/3rdparty
+		${MAME_DIR}/3rdparty/bgfx/3rdparty/khronos
+		${MAME_DIR}/3rdparty/bgfx/3rdparty/dxsdk/include
+)
+
+target_compile_definitions(bgfx PRIVATE
+	BGFX_CONFIG_MAX_FRAME_BUFFERS=128
+	IMGUI_DISABLE_OBSOLETE_FUNCTIONS
+)
+
+if((${CMAKE_SYSTEM_NAME} STREQUAL "Linux") OR (${CMAKE_SYSTEM_NAME} STREQUAL "NetBSD") OR (${CMAKE_SYSTEM_NAME} STREQUAL "OpenBSD"))
+	if (NO_X11)
+		target_compile_definitions(bgfx PRIVATE 
+			BGFX_CONFIG_RENDERER_OPENGLES=1
+			BGFX_CONFIG_RENDERER_OPENGL=0
+		)
+	endif()
+endif()
+
+if((CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang") AND (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8))
+	target_compile_definitions(bgfx PRIVATE TARGET_OS_OSX=1)
+endif()
+
+target_sources(bgfx PRIVATE
 	${MAME_DIR}/3rdparty/bgfx/src/bgfx.cpp
 	${MAME_DIR}/3rdparty/bgfx/src/debug_renderdoc.cpp
 	${MAME_DIR}/3rdparty/bgfx/src/dxgi.cpp
@@ -30,54 +72,16 @@ set(BGFX_SRCS
 )
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-	set(BGFX_MACOSX_SRCS
+	target_sources(bgfx PRIVATE
 		${MAME_DIR}/3rdparty/bgfx/src/glcontext_eagl.mm
 		${MAME_DIR}/3rdparty/bgfx/src/glcontext_nsgl.mm
 		${MAME_DIR}/3rdparty/bgfx/src/renderer_mtl.mm
 	)
-endif()
 
-add_library(bgfx ${LIBTYPE} ${BGFX_SRCS} ${BGFX_MACOSX_SRCS})
-
-target_link_libraries(bgfx PRIVATE bx bimg)
-
-target_compile_definitions(bgfx PRIVATE
-	BGFX_CONFIG_MAX_FRAME_BUFFERS=128
-	IMGUI_DISABLE_OBSOLETE_FUNCTIONS
-)
-
-target_include_directories(bgfx 
-	PUBLIC
-		${MAME_DIR}/3rdparty/bgfx/include	
-	PRIVATE
-		${MAME_DIR}/3rdparty/bgfx/3rdparty
-		${MAME_DIR}/3rdparty/bgfx/3rdparty/khronos
-		${MAME_DIR}/3rdparty/bgfx/3rdparty/dxsdk/include
-)
-
-if((CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang") AND (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8))
-	target_compile_definitions(bgfx PRIVATE TARGET_OS_OSX=1)
-endif()
-
-if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
 	target_compile_definitions(bgfx PRIVATE BGFX_CONFIG_MULTITHREADED=0)
-	target_compile_options(bgfx PRIVATE -x objective-c++)
-	target_compile_options(bgfx PRIVATE -Wno-unused-variable)
-endif()
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-	target_compile_options(bgfx PRIVATE /wd4324) # warning C4324: 'xxx' : structure was padded due to __declspec(align())
-	target_compile_options(bgfx PRIVATE /wd4244) # warning C4244: 'argument' : conversion from 'xxx' to 'xxx', possible loss of data
-	target_compile_options(bgfx PRIVATE /wd4611) # warning C4611: interaction between '_setjmp' and C++ object destruction is non-portable
-	target_compile_options(bgfx PRIVATE /wd4310) # warning C4310: cast truncates constant value
-	target_compile_options(bgfx PRIVATE /wd4701) # warning C4701: potentially uninitialized local variable 'xxx' used
-endif()
-
-if((${CMAKE_SYSTEM_NAME} STREQUAL "Linux") OR (${CMAKE_SYSTEM_NAME} STREQUAL "NetBSD") OR (${CMAKE_SYSTEM_NAME} STREQUAL "OpenBSD"))
-	if (NO_X11)
-		target_compile_definitions(bgfx PRIVATE 
-			BGFX_CONFIG_RENDERER_OPENGLES=1
-			BGFX_CONFIG_RENDERER_OPENGL=0
-		)
+	if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+		target_compile_options(bgfx PRIVATE -x objective-c++)
+		target_compile_options(bgfx PRIVATE -Wno-unused-variable)		
 	endif()
 endif()

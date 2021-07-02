@@ -1,4 +1,14 @@
-set(ASMJIT_SRCS
+##################################################
+## asmjit library
+##################################################
+
+add_library(asmjit ${LIBTYPE})
+
+if((CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang") AND (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8))
+	target_compile_definitions(asmjit PRIVATE TARGET_OS_OSX=1)
+endif()
+
+target_sources(asmjit PRIVATE
 	${MAME_DIR}/3rdparty/asmjit/src/asmjit/asmjit.h
 	${MAME_DIR}/3rdparty/asmjit/src/asmjit/core.h
 	${MAME_DIR}/3rdparty/asmjit/src/asmjit/x86.h
@@ -113,9 +123,3 @@ set(ASMJIT_SRCS
 	${MAME_DIR}/3rdparty/asmjit/src/asmjit/x86/x86rapass.cpp
 	${MAME_DIR}/3rdparty/asmjit/src/asmjit/x86/x86rapass_p.h
 )
-
-add_library(asmjit ${LIBTYPE} ${ASMJIT_SRCS})
-
-if((CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang") AND (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8))
-	target_compile_definitions(asmjit PRIVATE TARGET_OS_OSX=1)
-endif()
