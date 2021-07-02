@@ -244,9 +244,6 @@ endif()
 
 endmacro()
 
-
-# -Wno-inconsistent-missing-override for Clang
-
 macro(qtdebuggerbuild _projectname)
 	set(QTDEBUGGER_SRCS ${MAME_DIR}/src/osd/modules/debugger/debugqt.cpp)
 
@@ -284,6 +281,10 @@ macro(qtdebuggerbuild _projectname)
 
 	add_library(${_projectname} ${LIBTYPE} ${QTDEBUGGER_SRCS})
 	add_project_to_group(libs ${_projectname})
+
+	if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+		target_compile_options(${_projectname} PRIVATE -Wno-inconsistent-missing-override)
+	endif()
 
 	if(USE_QTDEBUG)
 		target_compile_definitions(${_projectname} PRIVATE USE_QTDEBUG=1)
