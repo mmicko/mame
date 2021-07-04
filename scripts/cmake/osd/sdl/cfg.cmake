@@ -20,12 +20,6 @@ if(USE_TAPTUN OR USE_PCAP)
 	endif()
 endif()
 #
-#if _OPTIONS["NO_OPENGL"]~="1" and _OPTIONS["USE_DISPATCH_GL"]~="1" and _OPTIONS["MESA_INSTALL_ROOT"] then
-#	includedirs {
-#		path.join(_OPTIONS["MESA_INSTALL_ROOT"],"include"),
-#	}
-#end
-#
 #if _OPTIONS["SDL_INI_PATH"]~=nil then
 #	defines {
 #		"'INI_PATH=\"" .. _OPTIONS["SDL_INI_PATH"] .. "\"'",
@@ -102,35 +96,18 @@ if(${BASE_TARGETOS} STREQUAL "unix")
 #	end
 endif()
 
-#if _OPTIONS["targetos"]=="windows" then
-#	configuration { "mingw* or vs*" }
-#		defines {
-#			"UNICODE",
-#			"_UNICODE",
-#			"_WIN32_WINNT=0x0501",
-#			"WIN32_LEAN_AND_MEAN",
-#			"NOMINMAX",
-#		}
-#
-#	configuration { }
-#
-#elseif _OPTIONS["targetos"]=="linux" then
-#	if _OPTIONS["QT_HOME"]~=nil then
-#		buildoptions {
-#			"-I" .. backtick(_OPTIONS["QT_HOME"] .. "/bin/qmake -query QT_INSTALL_HEADERS"),
-#		}
-#	else
-#		buildoptions {
-#			backtick(pkgconfigcmd() .. " --cflags Qt5Widgets"),
-#		}
-#	end
-#elseif _OPTIONS["targetos"]=="freebsd" then
-#	buildoptions {
-#		-- /usr/local/include is not considered a system include director on FreeBSD.  GL.h resides there and throws warnings
-#		"-isystem /usr/local/include",
-#	}
-#end
-#
+    if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+        target_compile_definitions(${_project} PRIVATE 
+            WIN32
+            _WIN32
+            UNICODE
+            _UNICODE           
+            _WIN32_WINNT=0x0501
+            WIN32_LEAN_AND_MEAN
+            NOMINMAX
+        )
+    endif()
+
     if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
         target_include_directories(${_project} PRIVATE ${MAME_DIR}/3rdparty/bx/include/compat/osx)
         target_compile_definitions(${_project} PRIVATE SDLMAME_MACOSX SDLMAME_DARWIN)

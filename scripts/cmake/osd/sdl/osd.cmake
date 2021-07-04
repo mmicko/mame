@@ -120,24 +120,8 @@ endif()
 #	end
 #
 endmacro()
-#
-#
-#function sdlconfigcmd()
-#	if _OPTIONS["targetos"]=="asmjs" then
-#		return "sdl2-config"
-#	elseif not _OPTIONS["SDL_INSTALL_ROOT"] then
-#		return pkgconfigcmd() .. " sdl2"
-#	else
-#		return path.join(_OPTIONS["SDL_INSTALL_ROOT"],"bin"sdl2") .. "-config"
-#	end
-#end
-#
-#
-#newoption {
-#	trigger = "MESA_INSTALL_ROOT
-#	description = "link against specific GL-Library - also adds rpath to executable (overridden by USE_DISPATCH_GL)
-#}
-#
+
+
 #newoption {
 #	trigger = "SDL_INI_PATH
 #	description = "Default search path for .ini files
@@ -149,23 +133,7 @@ else()
     set(NO_X11_DEFAULT OFF)
 endif()
 option(NO_X11 "Disable use of X11" ${NO_X11_DEFAULT})
-#
-#if not _OPTIONS["NO_X11"] then
-#	if _OPTIONS["targetos"]=="windows" or _OPTIONS["targetos"]=="macosx" or _OPTIONS["targetos"]=="haiku" or _OPTIONS["targetos"]=="asmjs" then
-#		_OPTIONS["NO_X11"] = "1"
-#	else
-#		_OPTIONS["NO_X11"] = "0"
-#	end
-#end
 
-#
-#if not _OPTIONS["NO_USE_XINPUT"] then
-#	if _OPTIONS["targetos"]=="windows" or _OPTIONS["targetos"]=="macosx" or _OPTIONS["targetos"]=="haiku" or _OPTIONS["targetos"]=="asmjs" then
-#		_OPTIONS["NO_USE_XINPUT"] = "1"
-#	else
-#		_OPTIONS["NO_USE_XINPUT"] = "0"
-#	end
-#end
 if((${CMAKE_SYSTEM_NAME} STREQUAL "Windows") OR (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin") OR (${CMAKE_SYSTEM_NAME} STREQUAL "Haiku") OR (${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten"))
     set(NO_USE_XINPUT_DEFAULT ON)
 else()
@@ -177,21 +145,6 @@ option(NO_USE_XINPUT_WII_LIGHTGUN_HACK "Disable use of Xinput Wii Lightgun Hack"
 
 
 option(SDL2_MULTIAPI "Use couriersud's multi-keyboard patch for SDL 2.1? (this API was removed prior to the 2.0 release)" OFF)
-
-
-#newoption {
-#	trigger = "SDL_INSTALL_ROOT
-#	description = "Equivalent to the ./configure --prefix=<path>
-#}
-#
-#newoption {
-#	trigger = "SDL_FRAMEWORK_PATH
-#	description = "Location of SDL framework for custom OS X installations
-#}
-#
-#if not _OPTIONS["SDL_FRAMEWORK_PATH"] then
-#	_OPTIONS["SDL_FRAMEWORK_PATH"] = "/Library/Frameworks/"
-#end
 
 option(USE_LIBSDL "Use SDL library on OS (rather than framework/dll)" OFF)
 
@@ -396,9 +349,6 @@ if(${BASE_TARGETOS} STREQUAL "unix")
         ${MAME_DIR}/src/osd/modules/file/posixsocket.cpp
     )
 elseif(${BASE_TARGETOS} STREQUAL "win32")
-    target_include_directories(ocore PRIVATE 
-		${MAME_DIR}/src/osd/windows
-    )
     list(APPEND OCORE_SRCS
         ${MAME_DIR}/src/osd/modules/file/windir.cpp
         ${MAME_DIR}/src/osd/modules/file/winfile.cpp
@@ -425,12 +375,34 @@ target_include_directories(ocore_${OSD} PRIVATE
 	${MAME_DIR}/src/osd/sdl
 )
 
+if(${BASE_TARGETOS} STREQUAL "win32")
+    target_include_directories(ocore_${OSD} PRIVATE 
+		${MAME_DIR}/src/osd/windows
+    )
+endif()
+
+if (NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
+    target_link_libraries(ocore_${OSD} PUBLIC dl)
+endif()
+
 target_link_libraries(ocore_${OSD} PUBLIC 
-	dl
 	pthread
     SDL2::SDL2
 )
-
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    target_link_libraries(ocore_${OSD} PUBLIC 
+        comctl32
+        comdlg32
+        psapi
+        ole32
+        shlwapi
+    )
+    target_link_libraries(ocore_${OSD} PUBLIC 
+        utils
+        wsock32
+        ws2_32
+    )
+endif()
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
     target_link_libraries(ocore_${OSD} PUBLIC "-framework Carbon")
 endif()
