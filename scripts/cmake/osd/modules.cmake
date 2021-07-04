@@ -332,7 +332,8 @@ endif()
 
 if(NOT NO_USE_MIDI)
 	if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-		target_link_libraries(${_projectname} PRIVATE asound) #pkgconfig alsa
+		find_package(ALSA REQUIRED)
+		target_link_libraries(${_projectname} PRIVATE ALSA::ALSA)
 	elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
 		target_link_libraries(${_projectname} PRIVATE "-framework CoreMIDI")
 	endif()
