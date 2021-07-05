@@ -386,10 +386,15 @@ if (NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
     target_link_libraries(ocore_${OSD} PUBLIC dl)
 endif()
 
-target_link_libraries(ocore_${OSD} PUBLIC 
-	pthread
-    ${EXTLIB_SDL2_LIBRARY}
-)
+target_link_libraries(ocore_${OSD} PUBLIC pthread)
+
+if (NOT MINGW)
+    target_link_libraries(ocore_${OSD} PUBLIC ${EXTLIB_SDL2_LIBRARY})
+else()
+	target_link_libraries(ocore_${OSD} PUBLIC mingw32)
+    target_link_libraries(ocore_${OSD} PUBLIC SDL2::SDL2main SDL2::SDL2)
+endif()
+
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     target_link_libraries(ocore_${OSD} PUBLIC 
         comctl32

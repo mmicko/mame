@@ -11,10 +11,6 @@ target_include_directories(testkeys PRIVATE
 	${MAME_DIR}/src/osd
 	${MAME_DIR}/src/lib/util
 )
-if (MINGW)
-	target_link_libraries(testkeys PRIVATE mingw32)
-	target_link_libraries(testkeys PRIVATE SDL2::SDL2main)
-endif()
 
 target_link_libraries(testkeys PRIVATE ocore_sdl)
 
