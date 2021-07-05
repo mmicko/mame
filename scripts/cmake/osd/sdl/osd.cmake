@@ -121,12 +121,8 @@ endif()
 #
 endmacro()
 
+set(SDL_INI_PATH "" CACHE STRING "Default search path for .ini files.")
 
-#newoption {
-#	trigger = "SDL_INI_PATH
-#	description = "Default search path for .ini files
-#}
-#
 if((${CMAKE_SYSTEM_NAME} STREQUAL "Windows") OR (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin") OR (${CMAKE_SYSTEM_NAME} STREQUAL "Haiku") OR (${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten"))
     set(NO_X11_DEFAULT ON)
 else()

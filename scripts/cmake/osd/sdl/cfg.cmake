@@ -19,13 +19,11 @@ if(USE_TAPTUN OR USE_PCAP)
         target_compile_definitions(${_project} PRIVATE OSD_NET_USE_PCAP)
 	endif()
 endif()
-#
-#if _OPTIONS["SDL_INI_PATH"]~=nil then
-#	defines {
-#		"'INI_PATH=\"" .. _OPTIONS["SDL_INI_PATH"] .. "\"'",
-#	}
-#end
-#
+
+if(NOT SDL_INI_PATH STREQUAL "")
+    target_compile_definitions(${_project} PRIVATE INI_PATH=${SDL_INI_PATH})
+endif()
+
 if(NO_X11)
     target_compile_definitions(${_project} PRIVATE SDLMAME_NO_X11)
 else()
