@@ -10,6 +10,11 @@ else()
     target_compile_options(${_project} PRIVATE "-include${MAME_DIR}/src/osd/sdl/sdlprefix.h")
 endif()
 
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
+    target_compile_options(${_project} PRIVATE "SHELL:-s USE_SDL=2")
+    target_compile_options(${_project} PRIVATE "SHELL:-s USE_SDL_TTF=2")
+endif()
+
 if(USE_TAPTUN OR USE_PCAP)
     target_compile_definitions(${_project} PRIVATE USE_NETWORK)
 	if (USE_TAPTUN)

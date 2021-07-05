@@ -9,7 +9,12 @@
 ###
 ############################################################################
 
-find_package(SDL2 REQUIRED)
+if (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
+    find_package(SDL2 REQUIRED)
+    set(EXTLIB_SDL2_LIBRARY SDL2::SDL2)
+else()
+    set(EXTLIB_SDL2_LIBRARY SDL2)
+endif()
 macro(maintargetosdoptions _projectname)
 	osdmodulestargetconf(${_projectname})
 
@@ -319,7 +324,7 @@ target_include_directories(osd_${OSD} PRIVATE
     ${MAME_DIR}/src/osd/sdl
 )
 osd_cfg(osd_${OSD})
-target_link_libraries(osd_${OSD} PRIVATE SDL2::SDL2)
+target_link_libraries(osd_${OSD} PRIVATE ${EXTLIB_SDL2_LIBRARY})
 
 set(OCORE_SRCS
     ${MAME_DIR}/src/osd/osdcore.cpp
@@ -383,7 +388,7 @@ endif()
 
 target_link_libraries(ocore_${OSD} PUBLIC 
 	pthread
-    SDL2::SDL2
+    ${EXTLIB_SDL2_LIBRARY}
 )
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     target_link_libraries(ocore_${OSD} PUBLIC 

@@ -547,23 +547,12 @@ endif()
 
 endif()
 
-# configuration { "asmjs" }
-# 	buildoptions {
-# 		"-std=gnu89",
-# 		"-Wno-implicit-function-declaration",
-# 		"-s USE_SDL_TTF=2",
-# 	}
-# 	buildoptions_cpp {
-# 		"-std=c++17",
-# 		"-s DISABLE_EXCEPTION_CATCHING=2",
-# 		"-s EXCEPTION_CATCHING_WHITELIST=\"['_ZN15running_machine17start_all_devicesEv','_ZN12cli_frontend7executeEiPPc','_ZN8chd_file11open_commonEb','_ZN8chd_file13read_metadataEjjRNSt3__212basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEE','_ZN8chd_file13read_metadataEjjRNSt3__26vectorIhNS0_9allocatorIhEEEE','_ZNK19netlist_mame_device19base_validity_checkER16validity_checker']\"",
-# 	}
-# 	linkoptions {
-# 		"-Wl,--start-group",
-# 		"-r",
-# 	}
-# 	archivesplit_size "20"
-# 
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
+		add_compile_options(-Wno-unused-but-set-variable)
+    #In old version it is: EXCEPTION_CATCHING_WHITELIST and required DISABLE_EXCEPTION_CATCHING
+    #add_compile_options("SHELL:-s DISABLE_EXCEPTION_CATCHING=2")
+    add_compile_options("SHELL:-s EXCEPTION_CATCHING_ALLOWED=\"['_ZN15running_machine17start_all_devicesEv','_ZN12cli_frontend7executeEiPPc','_ZN8chd_file11open_commonEb','_ZN8chd_file13read_metadataEjjRNSt3__212basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEE','_ZN8chd_file13read_metadataEjjRNSt3__26vectorIhNS0_9allocatorIhEEEE','_ZNK19netlist_mame_device19base_validity_checkER16validity_checker']\"")
+endif()
 
 # configuration { "linux-*"}
 # 		links {
