@@ -110,7 +110,7 @@ if(MSVC)
 endif()
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
-  option(WEBASSEMBLY "Produce WebAssembly output when building with Emscripten." OFF)
+  option(WEBASSEMBLY "Produce WebAssembly output when building with Emscripten." ON)
 endif()
 
 set(SANITIZE "" CACHE STRING "Specifies the santizer(s) to use.")
