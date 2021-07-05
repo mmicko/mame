@@ -1,8 +1,11 @@
-set(ROMCMP_SRCS
-	${MAME_DIR}/src/tools/romcmp.cpp
-)
+# license:BSD-3-Clause
+# copyright-holders:MAMEdev Team
 
-add_executable(romcmp ${ROMCMP_SRCS})
+##########################################################################
+## romcmp
+##########################################################################
+
+add_executable(romcmp)
 
 target_include_directories(romcmp PRIVATE 
 	${MAME_DIR}/src/osd
@@ -10,3 +13,7 @@ target_include_directories(romcmp PRIVATE
 )
 
 target_link_libraries(romcmp PRIVATE utils)
+
+target_sources(romcmp PRIVATE
+	${MAME_DIR}/src/tools/romcmp.cpp
+)

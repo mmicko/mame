@@ -1,8 +1,11 @@
-set(JEDUTIL_SRCS
-	${MAME_DIR}/src/tools/jedutil.cpp
-)
+# license:BSD-3-Clause
+# copyright-holders:MAMEdev Team
 
-add_executable(jedutil ${JEDUTIL_SRCS})
+##########################################################################
+## jedutil
+##########################################################################
+
+add_executable(jedutil)
 
 target_include_directories(jedutil PRIVATE 
 	${MAME_DIR}/src/osd
@@ -10,3 +13,7 @@ target_include_directories(jedutil PRIVATE
 )
 
 target_link_libraries(jedutil PRIVATE utils)
+
+target_sources(jedutil PRIVATE
+	${MAME_DIR}/src/tools/jedutil.cpp
+)

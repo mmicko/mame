@@ -1,10 +1,11 @@
-set(FLOPTOOL_SRCS
-	${MAME_DIR}/src/tools/image_handler.cpp
-	${MAME_DIR}/src/tools/image_handler.h
-	${MAME_DIR}/src/tools/floptool.cpp
-)
+# license:BSD-3-Clause
+# copyright-holders:MAMEdev Team
 
-add_executable(floptool ${FLOPTOOL_SRCS})
+##########################################################################
+## floptool
+##########################################################################
+
+add_executable(floptool)
 
 target_include_directories(floptool PRIVATE 
 	${MAME_DIR}/src/osd
@@ -13,3 +14,9 @@ target_include_directories(floptool PRIVATE
 )
 
 target_link_libraries(floptool PRIVATE formats)
+
+target_sources(floptool PRIVATE
+	${MAME_DIR}/src/tools/image_handler.cpp
+	${MAME_DIR}/src/tools/image_handler.h
+	${MAME_DIR}/src/tools/floptool.cpp
+)

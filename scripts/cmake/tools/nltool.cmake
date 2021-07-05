@@ -1,8 +1,11 @@
-set(NLTOOLS_SRCS
-	${MAME_DIR}/src/lib/netlist/prg/nltool.cpp
-)
+# license:BSD-3-Clause
+# copyright-holders:MAMEdev Team
 
-add_executable(nltool ${NLTOOLS_SRCS})
+##########################################################################
+## nltool
+##########################################################################
+
+add_executable(nltool)
 
 target_include_directories(nltool PRIVATE 
 	${MAME_DIR}/src/lib
@@ -14,3 +17,7 @@ if (MINGW)
 endif()
 
 target_link_libraries(nltool PRIVATE netlist)
+
+target_sources(nltool PRIVATE
+	${MAME_DIR}/src/lib/netlist/prg/nltool.cpp
+)

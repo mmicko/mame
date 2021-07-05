@@ -1,8 +1,11 @@
-set(PNGCMP_SRCS
-	${MAME_DIR}/src/tools/pngcmp.cpp
-)
+# license:BSD-3-Clause
+# copyright-holders:MAMEdev Team
 
-add_executable(pngcmp ${PNGCMP_SRCS})
+##########################################################################
+## pngcmp
+##########################################################################
+
+add_executable(pngcmp)
 
 target_include_directories(pngcmp PRIVATE 
 	${MAME_DIR}/src/osd
@@ -10,3 +13,7 @@ target_include_directories(pngcmp PRIVATE
 )
 
 target_link_libraries(pngcmp PRIVATE utils)
+
+target_sources(pngcmp PRIVATE
+	${MAME_DIR}/src/tools/pngcmp.cpp
+)

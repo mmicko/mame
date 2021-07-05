@@ -1,4 +1,23 @@
-set(IMGTOOL_SRCS
+# license:BSD-3-Clause
+# copyright-holders:MAMEdev Team
+
+##########################################################################
+## imgtool
+##########################################################################
+
+add_executable(imgtool)
+
+target_include_directories(imgtool PRIVATE 
+	${MAME_DIR}/src/osd
+	${MAME_DIR}/src/lib
+	${MAME_DIR}/src/lib/util
+	${MAME_DIR}/src/tools/imgtool
+	${MAME_DIR}/3rdparty/zlib
+)
+
+target_link_libraries(imgtool PRIVATE ocore_${OSD} formats)
+
+target_sources(imgtool PRIVATE
 	${MAME_DIR}/src/tools/imgtool/main.cpp
 	${MAME_DIR}/src/tools/imgtool/main.h
 	${MAME_DIR}/src/tools/imgtool/stream.cpp
@@ -54,16 +73,3 @@ set(IMGTOOL_SRCS
 	${MAME_DIR}/src/tools/imgtool/modules/hp85_tape.cpp
 	${MAME_DIR}/src/tools/imgtool/modules/rt11.cpp
 )
-
-add_executable(imgtool ${IMGTOOL_SRCS})
-
-target_include_directories(imgtool PRIVATE 
-	${MAME_DIR}/src/osd
-	${MAME_DIR}/src/lib
-	${MAME_DIR}/src/lib/util
-	${MAME_DIR}/src/tools/imgtool
-	${MAME_DIR}/3rdparty/zlib
-)
-
-
-target_link_libraries(imgtool PRIVATE ocore_${OSD} formats)

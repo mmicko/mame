@@ -1,11 +1,11 @@
-set(CHDMAN_SRCS
-	${MAME_DIR}/src/tools/chdman.cpp
-	${GEN_DIR}/version.cpp
-)
+# license:BSD-3-Clause
+# copyright-holders:MAMEdev Team
 
-set_source_files_properties(${GEN_DIR}/version.cpp	PROPERTIES GENERATED TRUE)
+##########################################################################
+## chdman
+##########################################################################
 
-add_executable(chdman ${CHDMAN_SRCS})
+add_executable(chdman)
 
 target_include_directories(chdman PRIVATE 
 	${MAME_DIR}/src/osd
@@ -14,3 +14,10 @@ target_include_directories(chdman PRIVATE
 )
 
 target_link_libraries(chdman PRIVATE utils)
+
+target_sources(chdman PRIVATE
+	${MAME_DIR}/src/tools/chdman.cpp
+	${GEN_DIR}/version.cpp
+)
+
+set_source_files_properties(${GEN_DIR}/version.cpp PROPERTIES GENERATED TRUE)

@@ -1,8 +1,11 @@
-set(LDRESAMPLE_SRCS
-	${MAME_DIR}/src/tools/ldresample.cpp
-)
+# license:BSD-3-Clause
+# copyright-holders:MAMEdev Team
 
-add_executable(ldresample ${LDRESAMPLE_SRCS})
+##########################################################################
+## ldresample
+##########################################################################
+
+add_executable(ldresample)
 
 target_include_directories(ldresample PRIVATE 
 	${MAME_DIR}/src/osd
@@ -11,3 +14,7 @@ target_include_directories(ldresample PRIVATE
 )
 
 target_link_libraries(ldresample PRIVATE utils)
+
+target_sources(ldresample PRIVATE
+	${MAME_DIR}/src/tools/ldresample.cpp
+)

@@ -1,8 +1,11 @@
-set(REGREP_SRCS
-	${MAME_DIR}/src/tools/regrep.cpp
-)
+# license:BSD-3-Clause
+# copyright-holders:MAMEdev Team
 
-add_executable(regrep ${REGREP_SRCS})
+##########################################################################
+## regrep
+##########################################################################
+
+add_executable(regrep)
 
 target_include_directories(regrep PRIVATE 
 	${MAME_DIR}/src/osd
@@ -10,3 +13,7 @@ target_include_directories(regrep PRIVATE
 )
 
 target_link_libraries(regrep PRIVATE utils)
+
+target_sources(regrep PRIVATE
+	${MAME_DIR}/src/tools/regrep.cpp
+)

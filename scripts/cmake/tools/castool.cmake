@@ -1,8 +1,11 @@
-set(CASTOOL_SRCS
-	${MAME_DIR}/src/tools/castool.cpp
-)
+# license:BSD-3-Clause
+# copyright-holders:MAMEdev Team
 
-add_executable(castool ${CASTOOL_SRCS})
+##########################################################################
+## castool
+##########################################################################
+
+add_executable(castool)
 
 target_include_directories(castool PRIVATE 
 	${MAME_DIR}/src/osd
@@ -11,3 +14,7 @@ target_include_directories(castool PRIVATE
 )
 
 target_link_libraries(castool PRIVATE formats)
+
+target_sources(castool PRIVATE
+	${MAME_DIR}/src/tools/castool.cpp
+)

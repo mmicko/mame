@@ -1,8 +1,12 @@
-set(TESTKEYS_SRCS
-	${MAME_DIR}/src/tools/testkeys.cpp
-)
+# license:BSD-3-Clause
+# copyright-holders:MAMEdev Team
 
-add_executable(testkeys ${TESTKEYS_SRCS})
+##########################################################################
+## testkeys
+##########################################################################
+
+add_executable(testkeys)
+
 if (MINGW)
 	target_link_options(testkeys PRIVATE -municode)
 endif()
@@ -13,3 +17,7 @@ target_include_directories(testkeys PRIVATE
 )
 
 target_link_libraries(testkeys PRIVATE utils)
+
+target_sources(testkeys PRIVATE
+	${MAME_DIR}/src/tools/testkeys.cpp
+)

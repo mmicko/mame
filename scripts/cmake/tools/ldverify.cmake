@@ -1,8 +1,11 @@
-set(LDVERIFY_SRCS
-	${MAME_DIR}/src/tools/ldverify.cpp
-)
+# license:BSD-3-Clause
+# copyright-holders:MAMEdev Team
 
-add_executable(ldverify ${LDVERIFY_SRCS})
+##########################################################################
+## ldverify
+##########################################################################
+
+add_executable(ldverify)
 
 target_include_directories(ldverify PRIVATE 
 	${MAME_DIR}/src/osd
@@ -11,3 +14,7 @@ target_include_directories(ldverify PRIVATE
 )
 
 target_link_libraries(ldverify PRIVATE utils)
+
+target_sources(ldverify PRIVATE
+	${MAME_DIR}/src/tools/ldverify.cpp
+)

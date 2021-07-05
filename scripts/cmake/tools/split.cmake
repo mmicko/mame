@@ -1,8 +1,11 @@
-set(SPLIT_SRCS
-	${MAME_DIR}/src/tools/split.cpp
-)
+# license:BSD-3-Clause
+# copyright-holders:MAMEdev Team
 
-add_executable(split ${SPLIT_SRCS})
+##########################################################################
+## split
+##########################################################################
+
+add_executable(split)
 
 target_include_directories(split PRIVATE 
 	${MAME_DIR}/src/osd
@@ -10,3 +13,7 @@ target_include_directories(split PRIVATE
 )
 
 target_link_libraries(split PRIVATE utils)
+
+target_sources(split PRIVATE
+	${MAME_DIR}/src/tools/split.cpp
+)

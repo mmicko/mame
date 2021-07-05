@@ -1,8 +1,11 @@
-set(UNIDASM_SRCS
-	${MAME_DIR}/src/tools/unidasm.cpp
-)
+# license:BSD-3-Clause
+# copyright-holders:MAMEdev Team
 
-add_executable(unidasm ${UNIDASM_SRCS})
+##########################################################################
+## testkeys
+##########################################################################
+
+add_executable(unidasm)
 
 target_include_directories(unidasm PRIVATE 
 	${MAME_DIR}/src/osd
@@ -13,3 +16,7 @@ target_include_directories(unidasm PRIVATE
 )
 
 target_link_libraries(unidasm PRIVATE dasm utils)
+
+target_sources(unidasm PRIVATE
+	${MAME_DIR}/src/tools/unidasm.cpp
+)

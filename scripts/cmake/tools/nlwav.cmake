@@ -1,8 +1,11 @@
-set(NLTOOLS_SRCS
-	${MAME_DIR}/src/lib/netlist/prg/nlwav.cpp
-)
+# license:BSD-3-Clause
+# copyright-holders:MAMEdev Team
 
-add_executable(nlwav ${NLTOOLS_SRCS})
+##########################################################################
+## nlwav
+##########################################################################
+
+add_executable(nlwav)
 
 target_include_directories(nlwav PRIVATE 
 	${MAME_DIR}/src/lib
@@ -14,3 +17,7 @@ if (MINGW)
 endif()
 
 target_link_libraries(nlwav PRIVATE netlist)
+
+target_sources(nlwav PRIVATE
+	${MAME_DIR}/src/lib/netlist/prg/nlwav.cpp
+)
