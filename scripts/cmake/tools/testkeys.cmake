@@ -7,10 +7,6 @@
 
 add_executable(testkeys)
 
-if (MINGW)
-	target_link_options(testkeys PRIVATE -municode)
-endif()
-
 target_include_directories(testkeys PRIVATE 
 	${MAME_DIR}/src/osd
 	${MAME_DIR}/src/lib/util
