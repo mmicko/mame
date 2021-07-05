@@ -567,35 +567,13 @@ endif()
 # 
 
 if (MINGW)
-  add_link_options(-static)
+  if (OSD STREQUAL "sdl")
+    add_link_options(-Wl,--start-group)
+    set(CMAKE_CXX_STANDARD_LIBRARIES "-Wl,--end-group ${CMAKE_CXX_STANDARD_LIBRARIES}")
+  else()
+    add_link_options(-static)
+  endif()
 endif()
-
-# configuration { "mingw*" }
-# 		if _OPTIONS["osd"]=="sdl" then
-# 			linkoptions {
-# 				"-Wl,--start-group",
-# 			}
-# 		else
-# 			linkoptions {
-# 				"-static",
-# 			}
-# 			flags {
-# 				"LinkSupportCircularDependencies",
-# 			}
-# 		end
-# 		links {
-# 			"user32",
-# 			"winmm",
-# 			"advapi32",
-# 			"shlwapi",
-# 			"wsock32",
-# 			"ws2_32",
-# 			"psapi",
-# 			"iphlpapi",
-# 			"shell32",
-# 			"userenv",
-# 		}
-# 
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   add_compile_definitions(
