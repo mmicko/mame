@@ -7,7 +7,7 @@ if(MSVC)
     target_compile_options(${_project} PRIVATE "/FI\"${MAME_DIR}/src/osd/sdl/sdlprefix.h\"")
 else()
     # GCC or Clang
-    target_compile_options(${_project} PRIVATE "-include${MAME_DIR}/src/osd/sdl/sdlprefix.h")
+    target_compile_options(${_project} PRIVATE "SHELL:-include ${MAME_DIR}/src/osd/sdl/sdlprefix.h")
 endif()
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
