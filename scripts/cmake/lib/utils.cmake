@@ -114,6 +114,6 @@ target_link_libraries(utils PUBLIC
 	utf8proc
 )
 
-if (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+if ((NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows") AND (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten"))
 	target_link_libraries(utils PUBLIC util)
 endif()
