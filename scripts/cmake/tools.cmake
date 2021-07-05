@@ -16,3 +16,6 @@ add_project_to_group_and_include(tools imgtool scripts/cmake/tools/imgtool.cmake
 if(${OSD} STREQUAL "sdl")
     add_project_to_group_and_include(tools testkeys scripts/cmake/tools/testkeys.cmake)
 endif()
+if(${OSD} STREQUAL "windows")
+    add_project_to_group_and_include(tools ledutil scripts/cmake/tools/ledutil.cmake)
+endif()

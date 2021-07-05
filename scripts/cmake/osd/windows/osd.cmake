@@ -1,45 +1,17 @@
-#-- license:BSD-3-Clause
-#-- copyright-holders:MAMEdev Team
-#
-#---------------------------------------------------------------------------
-#--
-#--   windows.lua
-#--
-#--   Rules for the building for Windows
-#--
-#---------------------------------------------------------------------------
-#
-#dofile("modules.lua")
-#
-#
+# license:BSD-3-Clause
+# copyright-holders:MAMEdev Team
 
+##########################################################################
+##
+##   windows.lua
+##
+##   Rules for the building for Windows
+##
+##########################################################################
 
-#newoption {
-#	trigger = "DIRECTINPUT
-#	description = "Minimum DirectInput version to support
-#	allowed = {
-#		{ "7  "Support DirectInput 7 or later"  },
-#		{ "8  "Support DirectInput 8 or later"  },
-#	},
-#}
-#
-#if not _OPTIONS["DIRECTINPUT"] then
-#	_OPTIONS["DIRECTINPUT"] = "8"
-#end
-#
-#newoption {
-#	trigger = "USE_SDL
-#	description = "Enable SDL sound output
-#	allowed = {
-#		{ "0  "Disable SDL sound output"  },
-#		{ "1  "Enable SDL sound output"   },
-#	},
-#}
-#
-#if not _OPTIONS["USE_SDL"] then
-#	_OPTIONS["USE_SDL"] = "0"
-#end
-#
+set(DIRECTINPUT "8" CACHE STRING "inimum DirectInput version to support.")
+
+option(USE_SDL "Enable SDL sound output." OFF)
 
 qtdebuggerbuild(qtdbg_${OSD})
 osd_cfg(qtdbg_${OSD})
@@ -97,7 +69,7 @@ set(OSD_SRCS
 osdmodulesbuild(osd_${OSD} "${OSD_SRCS}")
 osd_cfg(osd_${OSD})
 
-target_include_directories(osd PRIVATE 
+target_include_directories(osd_${OSD} PRIVATE 
 		${MAME_DIR}/src/emu
 		${MAME_DIR}/src/devices # accessing imagedev from debugger
 		${MAME_DIR}/src/osd
@@ -114,16 +86,11 @@ endif()
 
 target_compile_definitions(osd_${OSD} PRIVATE DIRECT3D_VERSION=0x0900)
 
-#	if _OPTIONS["DIRECTINPUT"] == "8" then
-#		defines {
-#			"DIRECTINPUT_VERSION=0x0800
-#		}
-target_compile_definitions(osd_${OSD} PRIVATE DIRECTINPUT_VERSION=0x0800)
-#	else
-#		defines {
-#			"DIRECTINPUT_VERSION=0x0700
-#		}
-#	end
+if(DIRECTINPUT STREQUAL "8")
+    target_compile_definitions(osd_${OSD} PRIVATE DIRECTINPUT_VERSION=0x0800)
+else()
+    target_compile_definitions(osd_${OSD} PRIVATE DIRECTINPUT_VERSION=0x0700)
+endif()
 
 set(OCORE_SRCS
     ${MAME_DIR}/src/osd/eigccppc.h
@@ -187,85 +154,15 @@ if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	target_link_libraries(${_projectname} PUBLIC mingw32)
 endif()
 
-#	if _OPTIONS["DIRECTINPUT"] == "8" then
-#		links {
-#			"dinput8
-#		}
-#	else
-#		links {
-#			"dinput
-#		}
-#	end
-target_link_libraries(${_projectname} PUBLIC dinput8)
+if(DIRECTINPUT STREQUAL "8")
+    target_link_libraries(${_projectname} PUBLIC dinput8)
+else()
+    target_link_libraries(${_projectname} PUBLIC dinput)
+endif()
 
-#
-#
-#	if _OPTIONS["USE_SDL"] == "1" then
-#		links {
-#			"SDL.dll
-#		}
-#	end
-#
-#	links {
-#		"comctl32
-#		"comdlg32
-#		"psapi
-#		"ole32
-#		"shlwapi
-#	}
-#end
-#
-#target_link_libraries(${_projectname} PUBLIC 
-#	comctl32
-#	comdlg32
-#	psapi
-#	ole32
-#	shlwapi
-#)
+if(USE_SDL)
+    find_package(SDL2 REQUIRED)
+    target_link_libraries(${_projectname} PUBLIC SDL2::SDL2)
+endif()
 
-
-#target_link_libraries(ocore PUBLIC 
-#	user32
-#	winmm
-#	advapi32
-#	shlwapi
-#	wsock32
-#	ws2_32
-#	psapi
-#	iphlpapi
-#	shell32
-#	userenv
-#)
-#
 endmacro()
-
-
-#--------------------------------------------------
-#-- ledutil
-#--------------------------------------------------
-#
-#if _OPTIONS["with-tools"] then
-#	project("ledutil")
-#		uuid ("061293ca-7290-44ac-b2b5-5913ae8dc9c0")
-#		kind "ConsoleApp"
-#
-#		flags {
-#			"Symbols -- always include minimum symbols for executables
-#		}
-#
-#		if _OPTIONS["SEPARATE_BIN"]~="1" then
-#			targetdir(MAME_DIR)
-#		end
-#
-#		links {
-#			"ocore_" .. _OPTIONS["osd"],
-#		}
-#
-#		includedirs {
-#			${MAME_DIR}/src/osd
-#		}
-#
-#		files {
-#			${MAME_DIR}/src/osd/windows/ledutil.cpp
-#		}
-#end

@@ -454,12 +454,10 @@ add_compile_options(-Wno-error=deprecated-declarations)
 add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wpointer-arith>)
 add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes>)
 
-# if _OPTIONS["targetos"]~="freebsd" then
-# 	buildoptions_c {
-# 		"-Wbad-function-cast",
-# 	}
-# end
-# 
+if(${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD")
+  add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wbad-function-cast)
+endif()
+
 # warnings only applicable to OBJ-C compiles
 add_compile_options($<$<COMPILE_LANGUAGE:OBJCXX>:-Wpointer-arith>)
 
@@ -616,38 +614,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	add_compile_options(/wd4805) # warning C4805: 'x' : unsafe mix of type 'xxx' and type 'xxx' in operation
 	add_compile_options(/wd4996) # warning C4996: 'function': was declared deprecated
 endif()
-
-
-
-# if _OPTIONS["vs"]=="clangcl" then
-# 		buildoptions {
-# 			"-Wno-enum-conversion",
-# 			"-Wno-ignored-qualifiers",
-# 			"-Wno-missing-braces",
-# 			"-Wno-missing-field-initializers",
-# 			"-Wno-new-returns-null",
-# 			"-Wno-nonportable-include-path",
-# 			"-Wno-pointer-bool-conversion",
-# 			"-Wno-pragma-pack",
-# 			"-Wno-switch",
-# 			"-Wno-tautological-constant-out-of-range-compare",
-# 			"-Wno-tautological-pointer-compare",
-# 			"-Wno-unknown-warning-option",
-# 			"-Wno-unused-const-variable",
-# 			"-Wno-unused-function",
-# 			"-Wno-unused-label",
-# 			"-Wno-unused-local-typedef",
-# 			"-Wno-unused-private-field",
-# 			"-Wno-unused-variable",
-# 			"-Wno-xor-used-as-pow",
-# 			"-Wno-microsoft-cast",
-# 		}
-# end
-# 
-# 		linkoptions {
-# 			"/ignore:4221", -- LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
-# 		}
-
 
 add_custom_command(
     OUTPUT ${GEN_DIR}/version.cpp

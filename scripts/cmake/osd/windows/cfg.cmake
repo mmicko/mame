@@ -18,11 +18,6 @@ macro(osd_cfg _project)
         _UNICODE
     )
 
-    #configuration { "vs*" }
-    #	flags {
-    #		"Unicode",
-    #	}
-
     if (MODERN_WIN_API)
         target_compile_definitions(${_project} PRIVATE 
             WINVER=0x0602
