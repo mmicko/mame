@@ -273,7 +273,7 @@ else()
   )
 endif()
 
-if(WIN32 AND CMAKE_SIZEOF_VOID_P EQUAL 8)
+if ((${CMAKE_SYSTEM_NAME} STREQUAL "Windows") AND CMAKE_SIZEOF_VOID_P EQUAL 8)
   add_compile_definitions(X64_WINDOWS_ABI)
 endif()
 
