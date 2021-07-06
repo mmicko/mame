@@ -1,9 +1,9 @@
-if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+if(MSVC)
 	set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 endif()
 
 function(add_project_to_group folder target)
-	if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+	if(MSVC)
 		set(SOURCE_GROUP_DELIMITER "/")
 		set(last_dir "")
 		set(files "")

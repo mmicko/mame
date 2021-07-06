@@ -150,7 +150,7 @@ target_link_libraries(ocore_${OSD} PUBLIC
 macro(maintargetosdoptions _projectname)
 	osdmodulestargetconf(${_projectname})
 
-if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+if (NOT MSVC)
 	target_link_libraries(${_projectname} PUBLIC mingw32)
 endif()
 

@@ -318,7 +318,7 @@ target_include_directories(softfloat3 PRIVATE
 	${MAME_DIR}/3rdparty/softfloat3/source/8086
 )
 
-if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
+if(((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang")) AND NOT MSVC)
 	target_compile_options(softfloat3 PRIVATE -x c++)
 endif()
 

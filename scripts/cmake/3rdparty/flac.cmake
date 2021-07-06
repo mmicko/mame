@@ -23,7 +23,9 @@ target_compile_definitions(flac PRIVATE
 
 if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
 	target_compile_options(flac PRIVATE -Wno-unused-function)
-	target_compile_options(flac PRIVATE -O0)
+	if(NOT MSVC)
+		target_compile_options(flac PRIVATE -O0)
+	endif()
 endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")

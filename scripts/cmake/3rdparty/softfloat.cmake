@@ -14,7 +14,7 @@ add_library(softfloat ${LIBTYPE} ${SOFTFLOAT_SRCS})
 
 target_include_directories(softfloat PRIVATE ${MAME_DIR}/src/osd)
 
-if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
+if(((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang")) AND NOT MSVC)
 	target_compile_options(softfloat PRIVATE -x c++)
 endif()
 

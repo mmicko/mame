@@ -141,6 +141,11 @@ add_library(frontend ${LIBTYPE} ${FRONTEND_SRCS})
 addprojectflags(frontend)
 precompiledheaders(frontend)
 
+if((CMAKE_CXX_COMPILER_ID MATCHES "Clang") AND MSVC)
+	target_compile_options(frontend PRIVATE -Wno-clang-cl-pch)
+	target_compile_options(frontend PRIVATE -Wno-microsoft-cast)
+endif()
+
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	target_compile_definitions(frontend PRIVATE UI_WINDOWS)
 endif()

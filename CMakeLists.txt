@@ -373,8 +373,10 @@ endif()
 
 # GCC
 if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
-# this speeds it up a bit by piping between the preprocessor/compiler/assembler
-add_compile_options(-pipe)
+if(NOT MSVC) # Visual Studio Clang CL does not support this
+	# this speeds it up a bit by piping between the preprocessor/compiler/assembler
+	add_compile_options(-pipe)
+endif()
 
 # add -g if we need symbols, and ensure we have frame pointers
 if(SYMBOLS)
@@ -411,7 +413,9 @@ if(NOT NOWERROR)
 endif()
 
 # if we are optimizing, include optimization options
-add_compile_options(-O${OPTIMIZE})
+if(NOT MSVC) # Visual Studio Clang CL does not support this
+  add_compile_options(-O${OPTIMIZE})
+endif()
 add_compile_options(-fno-strict-aliasing)
 # 
 # configuration { "mingw-clang" }
@@ -434,7 +438,9 @@ if(SSE3)
 endif()
 
 # add a basic set of warnings
-add_compile_options(-Wall)
+if(NOT MSVC) # Visual Studio Clang CL value is already set 
+  add_compile_options(-Wall)
+endif()
 
 if(OPENMP)
   add_compile_options(-fopenmp)
@@ -488,7 +494,9 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 6)
     message(FATAL_ERROR "Clang version 6.0 or later needed. Found ${CMAKE_CXX_COMPILER_VERSION}.")
   endif()
-  add_compile_options(-fdiagnostics-show-note-include-stack)
+  if(NOT MSVC) # Visual Studio Clang CL does not support this
+    add_compile_options(-fdiagnostics-show-note-include-stack)
+  endif()
   add_compile_options(-Wno-cast-align)
   add_compile_options(-Wno-constant-logical-operand)
   add_compile_options(-Wno-extern-c-compat)
@@ -516,6 +524,31 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-flto-visibility-public-std)   # workround for __imp___ link errors
     add_compile_options(-Wno-nonportable-include-path) # workround for clang 9.0.0 case sensitivity bug when including GL/glext.h
   endif()
+  if(MSVC) # Visual Studio Clang CL
+    add_compile_options(-Wno-tautological-constant-out-of-range-compare)
+    add_compile_options(-Wno-missing-field-initializers)
+    add_compile_options(-Wno-ignored-pragma-optimize)
+    add_compile_options(-Wno-unused-function)
+    add_compile_options(-Wno-unused-label)
+    add_compile_options(-Wno-unused-local-typedef)
+    add_compile_options(-Wno-unused-parameter)
+    add_compile_options(-Wno-unneeded-internal-declaration)
+    add_compile_options(-Wno-unused-private-field)
+    add_compile_options(-Wno-missing-braces)
+    add_compile_options(-Wno-unused-variable)
+    add_compile_options(-Wno-tautological-pointer-compare)
+    add_compile_options(-Wno-enum-conversion)
+    add_compile_options(-Wno-pragma-pack)
+    add_compile_options(-Wno-new-returns-null)
+    add_compile_options(-Wno-sign-compare)
+    add_compile_options(-Wno-switch)
+    add_compile_options(-Wno-tautological-undefined-compare)
+    add_compile_options(-Wno-deprecated-declarations)
+    add_compile_options(-Wno-macro-redefined)
+    add_compile_options(-Wno-narrowing)
+    add_compile_options(-Wno-undef)
+  endif()
+
 endif()
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -581,7 +614,7 @@ if (MINGW)
   endif()
 endif()
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+if(MSVC) # For both Visual Studio MSVC and Clang CL
   add_compile_definitions(
     XML_STATIC
     WIN32
@@ -591,9 +624,10 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     _CRT_SECURE_NO_DEPRECATE
     _CRT_STDIO_LEGACY_WIDE_SPECIFIERS
   )
-
-  add_compile_options(/WX)     # Treats all compiler warnings as errors.
-  add_compile_options(/w45038) # warning C5038: data member 'member1' will be initialized after data member 'member2'
+endif()
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+	add_compile_options(/WX)     # Treats all compiler warnings as errors.
+	add_compile_options(/w45038) # warning C5038: data member 'member1' will be initialized after data member 'member2'
 	add_compile_options(/wd4003) # warning C4003: not enough actual parameters for macro 'xxx'
 	add_compile_options(/wd4005) # warning C4005: The macro identifier is defined twice. The compiler uses the second macro definition
 	add_compile_options(/wd4018) # warning C4018: 'x' : signed/unsigned mismatch

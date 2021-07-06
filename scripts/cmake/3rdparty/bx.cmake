@@ -11,7 +11,7 @@ target_compile_definitions(bx PUBLIC
 )
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-	if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+	if (MSVC)
 		target_include_directories(bx PUBLIC ${MAME_DIR}/3rdparty/bx/include/compat/msvc)
 	else() 
 		target_include_directories(bx PUBLIC ${MAME_DIR}/3rdparty/bx/include/compat/mingw)

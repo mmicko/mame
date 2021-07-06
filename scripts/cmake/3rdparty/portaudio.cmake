@@ -72,7 +72,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	target_include_directories(portaudio PRIVATE
 		${MAME_DIR}/3rdparty/portaudio/src/os/win
 	)
-	if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC") 
+	if (NOT MSVC) 
 		target_include_directories(portaudio PRIVATE
 			${MAME_DIR}/3rdparty/portaudio/src/hostapi/wasapi/mingw-include
 		)
@@ -92,7 +92,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 		${MAME_DIR}/3rdparty/portaudio/src/common/pa_ringbuffer.c
 	)
 
-   	target_link_libraries(portaudio PUBLIC setupapi) # required for WDMKS
+   	target_link_libraries(portaudio PUBLIC setupapi ksuser) # required for WDMKS
 endif()
 
 
