@@ -10,7 +10,6 @@
 ###########################################################################
 
 add_executable(mametests ${MAMETESTS_SRCS})
-add_project_to_group(tests mametests)
 
 target_include_directories(mametests PRIVATE 
 	${MAME_DIR}/3rdparty/catch/single_include
@@ -36,3 +35,4 @@ target_sources(mametests PRIVATE
 	${MAME_DIR}/tests/emu/video/rgbutil.cpp
 )
 
+add_project_to_group(tests mametests)

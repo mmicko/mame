@@ -14,7 +14,6 @@
 ##################################################
 
 add_library(benchmark ${LIBTYPE})
-add_project_to_group(benchmarks benchmark)
 
 target_compile_definitions(benchmark PRIVATE HAVE_STD_REGEX)
 target_include_directories(benchmark PRIVATE ${MAME_DIR}/3rdparty/benchmark/include)
@@ -35,12 +34,13 @@ target_sources(benchmark PRIVATE
 	${MAME_DIR}/3rdparty/benchmark/src/re_std.cc
 )
 
+add_project_to_group(benchmarks benchmark)
+
 ##################################################
 ## MAME benchmarks
 ##################################################
 
 add_executable(benchmarks)
-add_project_to_group(benchmarks benchmarks)
 
 target_include_directories(benchmarks PRIVATE 
 	${MAME_DIR}/3rdparty/benchmark/include
@@ -60,3 +60,5 @@ target_sources(benchmarks PRIVATE
 	${MAME_DIR}/benchmarks/eminline_native.cpp
 	${MAME_DIR}/benchmarks/eminline_noasm.cpp
 )
+
+add_project_to_group(benchmarks benchmarks)
