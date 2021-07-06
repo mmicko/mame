@@ -432,6 +432,10 @@ endif()
 if(SSE3)
   add_compile_options(-msse -msse2 -msse3)
 endif()
+
+# add a basic set of warnings
+add_compile_options(-Wall)
+
 if(OPENMP)
   add_compile_options(-fopenmp)
   add_link_options(-fopenmp)
@@ -440,8 +444,6 @@ else()
   add_compile_options(-Wno-unknown-pragmas)
 endif()
 
-# add a basic set of warnings
-add_compile_options(-Wall)
 add_compile_options(-Wcast-align)
 add_compile_options(-Wformat-security)
 add_compile_options(-Wundef)
@@ -507,6 +509,12 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   if((CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 10) OR ((CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang") AND (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 12)))
     # clang 10.0 complains that expressions like 10 ^ 7 look like exponention
     add_compile_options(-Wno-xor-used-as-pow)
+  endif()
+
+  if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    add_compile_options(-Xclang)
+    add_compile_options(-flto-visibility-public-std)   # workround for __imp___ link errors
+    add_compile_options(-Wno-nonportable-include-path) # workround for clang 9.0.0 case sensitivity bug when including GL/glext.h
   endif()
 endif()
 

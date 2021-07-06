@@ -11,6 +11,10 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
 	target_compile_options(bgfx PRIVATE /wd4701) # warning C4701: potentially uninitialized local variable 'xxx' used
 endif()
 
+if ((${CMAKE_SYSTEM_NAME} STREQUAL "Windows") AND (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
+	target_compile_options(bgfx PRIVATE -Wno-unneeded-internal-declaration)
+endif()
+
 target_link_libraries(bgfx PRIVATE bx bimg)
 
 target_include_directories(bgfx 
