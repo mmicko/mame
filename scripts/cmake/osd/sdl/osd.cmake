@@ -1,130 +1,17 @@
-### license:BSD-3-Clause
-### copyright-holders:MAMEdev Team
-#
-############################################################################
-###
-###   sdl.lua
-###
-###   Rules for the building with SDL
-###
-############################################################################
+# license:BSD-3-Clause
+# copyright-holders:MAMEdev Team
 
-if (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
-    find_package(SDL2 REQUIRED)
-    set(EXTLIB_SDL2_LIBRARY SDL2::SDL2)
-else()
-    set(EXTLIB_SDL2_LIBRARY SDL2)
-endif()
-macro(maintargetosdoptions _projectname)
-	osdmodulestargetconf(${_projectname})
+##########################################################################
+##
+##   sdl.lua
+##
+##   Rules for the building with SDL
+##
+##########################################################################
 
-#	if _OPTIONS["USE_DISPATCH_GL"]~="1" and _OPTIONS["MESA_INSTALL_ROOT"] then
-#		libdirs {
-#			path.join(_OPTIONS["MESA_INSTALL_ROOT"],"lib"),
-#		}
-#		linkoptions {
-#			"-Wl,-rpath=" .. path.join(_OPTIONS["MESA_INSTALL_ROOT"],"lib"),
-#		}
-#	end
-#
-if(NOT NO_X11)
-    target_link_libraries(${_projectname} PRIVATE
-        X11
-        Xinerama
-    )
-else()
-    if((${CMAKE_SYSTEM_NAME} STREQUAL "Linux") OR (${CMAKE_SYSTEM_NAME} STREQUAL "NetBSD") OR (${CMAKE_SYSTEM_NAME} STREQUAL "OpenBSD"))
-        target_link_libraries(${_projectname} PRIVATE EGL)
-    endif()
-endif()
-if(NOT NO_USE_XINPUT)
-    target_link_libraries(${_projectname} PRIVATE
-        Xext
-        Xi
-    )
-endif()
-
-if((${BASE_TARGETOS} STREQUAL "unix") AND (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Darwin") AND (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Android") AND (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten"))
-        target_link_libraries(${_projectname} PRIVATE SDL2_ttf)
-        target_link_libraries(${_projectname} PRIVATE fontconfig freetype) # pkgconfig --libs fontconfig
-endif()
-
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-#	if _OPTIONS["targetos"]=="windows" then
-#		if _OPTIONS["with-bundled-sdl2"]~=nil then
-#			configuration { "mingw*"}
-#				links {
-#					"SDL2
-#					"imm32
-#					"version
-#					"ole32
-#					"oleaut32
-#				}
-#			configuration { "vs*" }
-#				links {
-#					"SDL2
-#					"imm32
-#					"version
-#				}
-#			configuration { }
-#		else
-#			if _OPTIONS["USE_LIBSDL"]~="1" then
-#				configuration { "mingw*"}
-#					links {
-#						"SDL2main
-#						"SDL2
-#					}
-#				configuration { "vs*" }
-#					links {
-#						"SDL2
-#						"imm32
-#						"version
-#					}
-#				configuration { }
-#			else
-#				local str = backtick(sdlconfigcmd() .. " --libs | sed 's/ -lSDLmain//'")
-#				addlibfromstring(str)
-#				addoptionsfromstring(str)
-#			end
-#			configuration { "x32 "vs*" }
-#				libdirs {
-#					path.join(_OPTIONS["SDL_INSTALL_ROOT"],"lib"x86")
-#				}
-#			configuration { "x64 "vs*" }
-#				libdirs {
-#					path.join(_OPTIONS["SDL_INSTALL_ROOT"],"lib"x64")
-#				}
-#			configuration { }
-#		end
-#		links {
-#			"psapi
-#		}
-endif()
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Haiku")
-#		links {
-#			"network
-#			"bsd
-#		}
-endif()
-#
-#	configuration { "mingw*" or "vs*" }
-#		targetprefix "sdl"
-#		links {
-#			"psapi
-#			"ole32
-#		}
-#	configuration { }
-#
-#	if _OPTIONS["targetos"]=="macosx" then
-#		if _OPTIONS["with-bundled-sdl2"]~=nil then
-#			links {
-#				"SDL2
-#target_link_libraries(${_projectname} PRIVATE SDL2)
-#			}
-#		end
-#	end
-#
-endmacro()
+########################
+#       OPTIONS
+########################
 
 set(SDL_INI_PATH "" CACHE STRING "Default search path for .ini files.")
 
@@ -149,6 +36,18 @@ option(SDL2_MULTIAPI "Use couriersud's multi-keyboard patch for SDL 2.1? (this A
 
 option(USE_LIBSDL "Use SDL library on OS (rather than framework/dll)" OFF)
 
+
+########################
+# Setup
+########################
+
+if (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
+    find_package(SDL2 REQUIRED)
+    set(EXTLIB_SDL2_LIBRARY SDL2::SDL2)
+else()
+    set(EXTLIB_SDL2_LIBRARY SDL2)
+endif()
+
 set(BASE_TARGETOS "unix")
 set(SDLOS_TARGETOS "unix")
 
@@ -159,99 +58,45 @@ elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
     set(SDLOS_TARGETOS "macosx")
 endif()
 
-#if _OPTIONS["with-bundled-sdl2"]~=nil then
-#	includedirs {
-#		GEN_DIR .. "includes
-#	}
-#end
-
 if (${BASE_TARGETOS} STREQUAL "unix")
-    if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-#		local os_version = str_to_version(backtick("sw_vers -productVersion"))
-#
-#		links {
-#			"Cocoa.framework
-#		}
-#		linkoptions {
-#			"-framework QuartzCore
-#			"-framework OpenGL
-#		}
-#
-#
-#		if os_version>=101100 then
-#			linkoptions {
-#				"-weak_framework Metal
-#			}
-#		end
-#		if _OPTIONS["with-bundled-sdl2"]~=nil then
-#			linkoptions {
-#				"-framework AudioToolbox
-#				"-framework AudioUnit
-#				"-framework CoreAudio
-#				"-framework Carbon
-#				"-framework ForceFeedback
-#				"-framework IOKit
-#				"-framework CoreVideo
-#			}
-#		else
-#			if _OPTIONS["USE_LIBSDL"]~="1" then
-#				linkoptions {
-#					"-F" .. _OPTIONS["SDL_FRAMEWORK_PATH"],
-#				}
-#				links {
-#					"SDL2.framework
-#				}
-#			else
-#				local str = backtick(sdlconfigcmd() .. " --libs --static | sed 's/-lSDLmain//'")
-#				addlibfromstring(str)
-#				addoptionsfromstring(str)
-#			end
-#		end
-    else()
+    if (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
         if (NO_X11)
             set_option(USE_QTDEBUG OFF)
-        else()
-#			libdirs {
-#				"/usr/X11/lib
-#				"/usr/X11R6/lib
-#				"/usr/openwin/lib
-#			}
 		endif()
-#		if _OPTIONS["with-bundled-sdl2"]~=nil then
-#			if _OPTIONS["targetos"]~="android" then
-#				links {
-#					"SDL2
-#				}
-#			end
-#		else
-#			local str = backtick(sdlconfigcmd() .. " --libs")
-#			addlibfromstring(str)
-#			addoptionsfromstring(str)
-#		end
-#
-#		if _OPTIONS["targetos"]~="haiku" and _OPTIONS["targetos"]~="android" then
-#			links {
-#				"m
-#				"pthread
-#			}
-#			if _OPTIONS["targetos"]=="solaris" then
-#				links {
-#					"socket
-#					"nsl
-#				}
-#			elseif _OPTIONS["targetos"]~="asmjs" then
-#				links {
-#					"util
-#				}
-#			end
-#		end
     endif()
 endif()
+
+########################
+# qtdbg_sdl library
+########################
 
 qtdebuggerbuild(qtdbg_${OSD})
 osd_cfg(qtdbg_${OSD})
 
-set(OSD_SRCS
+########################
+# osd_sdl library
+########################
+
+add_library(osd_${OSD} ${LIBTYPE})
+
+osdmodulesbuild(osd_${OSD})
+osd_cfg(osd_${OSD})
+
+target_include_directories(osd_${OSD} PRIVATE 
+    ${MAME_DIR}/src/emu
+    ${MAME_DIR}/src/devices # accessing imagedev from debugger
+    ${MAME_DIR}/src/osd
+    ${MAME_DIR}/src/lib
+    ${MAME_DIR}/src/lib/util
+    ${MAME_DIR}/src/osd/modules/file
+    ${MAME_DIR}/src/osd/modules/render
+    ${MAME_DIR}/3rdparty
+    ${MAME_DIR}/src/osd/sdl
+)
+
+target_link_libraries(osd_${OSD} PRIVATE ${EXTLIB_SDL2_LIBRARY})
+
+target_sources(osd_${OSD} PRIVATE
     ${MAME_DIR}/src/osd/sdl/osdsdl.h
     ${MAME_DIR}/src/osd/sdl/sdlprefix.h
     ${MAME_DIR}/src/osd/sdl/sdlmain.cpp
@@ -267,11 +112,11 @@ set(OSD_SRCS
 )
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    list(APPEND OSD_SRCS ${MAME_DIR}/src/osd/windows/main.cpp)
+    target_sources(osd_${OSD} PRIVATE ${MAME_DIR}/src/osd/windows/main.cpp)
 endif()
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-    list(APPEND OSD_SRCS 
+    target_sources(osd_${OSD} PRIVATE
         ${MAME_DIR}/src/osd/modules/debugger/debugosx.mm
         ${MAME_DIR}/src/osd/modules/debugger/osx/breakpointsview.mm
         ${MAME_DIR}/src/osd/modules/debugger/osx/breakpointsview.h
@@ -310,61 +155,12 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
         ${MAME_DIR}/src/osd/modules/debugger/osx/debugosx.h
     )
 endif()
-osdmodulesbuild(osd_${OSD} "${OSD_SRCS}")
 
-target_include_directories(osd_${OSD} PRIVATE 
-    ${MAME_DIR}/src/emu
-    ${MAME_DIR}/src/devices # accessing imagedev from debugger
-    ${MAME_DIR}/src/osd
-    ${MAME_DIR}/src/lib
-    ${MAME_DIR}/src/lib/util
-    ${MAME_DIR}/src/osd/modules/file
-    ${MAME_DIR}/src/osd/modules/render
-    ${MAME_DIR}/3rdparty
-    ${MAME_DIR}/src/osd/sdl
-)
-osd_cfg(osd_${OSD})
-target_link_libraries(osd_${OSD} PRIVATE ${EXTLIB_SDL2_LIBRARY})
+########################
+# ocore_sdl library
+########################
 
-set(OCORE_SRCS
-    ${MAME_DIR}/src/osd/osdcore.cpp
-    ${MAME_DIR}/src/osd/osdcore.h
-    ${MAME_DIR}/src/osd/osdfile.h
-    ${MAME_DIR}/src/osd/strconv.cpp
-    ${MAME_DIR}/src/osd/strconv.h
-    ${MAME_DIR}/src/osd/osdsync.cpp
-    ${MAME_DIR}/src/osd/osdsync.h
-    ${MAME_DIR}/src/osd/modules/osdmodule.cpp
-    ${MAME_DIR}/src/osd/modules/osdmodule.h
-    ${MAME_DIR}/src/osd/modules/lib/osdlib_${SDLOS_TARGETOS}.cpp
-    ${MAME_DIR}/src/osd/modules/lib/osdlib.h
-)
-
-if(${BASE_TARGETOS} STREQUAL "unix") 
-    list(APPEND OCORE_SRCS
-        ${MAME_DIR}/src/osd/modules/file/posixdir.cpp
-        ${MAME_DIR}/src/osd/modules/file/posixdomain.cpp
-        ${MAME_DIR}/src/osd/modules/file/posixfile.cpp
-        ${MAME_DIR}/src/osd/modules/file/posixfile.h
-        ${MAME_DIR}/src/osd/modules/file/posixptty.cpp
-        ${MAME_DIR}/src/osd/modules/file/posixsocket.cpp
-    )
-elseif(${BASE_TARGETOS} STREQUAL "win32")
-    list(APPEND OCORE_SRCS
-        ${MAME_DIR}/src/osd/modules/file/windir.cpp
-        ${MAME_DIR}/src/osd/modules/file/winfile.cpp
-        ${MAME_DIR}/src/osd/modules/file/winfile.h
-        ${MAME_DIR}/src/osd/modules/file/winptty.cpp
-        ${MAME_DIR}/src/osd/modules/file/winsocket.cpp
-        ${MAME_DIR}/src/osd/windows/winutil.cpp # FIXME put the necessary functions somewhere more appropriate
-    )
-else()
-    list(APPEND OCORE_SRCS
-        ${MAME_DIR}/src/osd/modules/file/stdfile.cpp
-    )
-endif()
-
-add_library(ocore_${OSD} ${LIBTYPE} ${OCORE_SRCS})
+add_library(ocore_${OSD} ${LIBTYPE})
 
 osd_cfg(ocore_${OSD})
 
@@ -409,6 +205,77 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
         ws2_32
     )
 endif()
+
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
     target_link_libraries(ocore_${OSD} PUBLIC "-framework Carbon")
 endif()
+
+target_sources(ocore_${OSD} PRIVATE
+    ${MAME_DIR}/src/osd/osdcore.cpp
+    ${MAME_DIR}/src/osd/osdcore.h
+    ${MAME_DIR}/src/osd/osdfile.h
+    ${MAME_DIR}/src/osd/strconv.cpp
+    ${MAME_DIR}/src/osd/strconv.h
+    ${MAME_DIR}/src/osd/osdsync.cpp
+    ${MAME_DIR}/src/osd/osdsync.h
+    ${MAME_DIR}/src/osd/modules/osdmodule.cpp
+    ${MAME_DIR}/src/osd/modules/osdmodule.h
+    ${MAME_DIR}/src/osd/modules/lib/osdlib_${SDLOS_TARGETOS}.cpp
+    ${MAME_DIR}/src/osd/modules/lib/osdlib.h
+)
+
+if(${BASE_TARGETOS} STREQUAL "unix") 
+    target_sources(ocore_${OSD} PRIVATE
+        ${MAME_DIR}/src/osd/modules/file/posixdir.cpp
+        ${MAME_DIR}/src/osd/modules/file/posixdomain.cpp
+        ${MAME_DIR}/src/osd/modules/file/posixfile.cpp
+        ${MAME_DIR}/src/osd/modules/file/posixfile.h
+        ${MAME_DIR}/src/osd/modules/file/posixptty.cpp
+        ${MAME_DIR}/src/osd/modules/file/posixsocket.cpp
+    )
+elseif(${BASE_TARGETOS} STREQUAL "win32")
+    target_sources(ocore_${OSD} PRIVATE
+        ${MAME_DIR}/src/osd/modules/file/windir.cpp
+        ${MAME_DIR}/src/osd/modules/file/winfile.cpp
+        ${MAME_DIR}/src/osd/modules/file/winfile.h
+        ${MAME_DIR}/src/osd/modules/file/winptty.cpp
+        ${MAME_DIR}/src/osd/modules/file/winsocket.cpp
+        ${MAME_DIR}/src/osd/windows/winutil.cpp # FIXME put the necessary functions somewhere more appropriate
+    )
+else()
+    target_sources(ocore_${OSD} PRIVATE
+        ${MAME_DIR}/src/osd/modules/file/stdfile.cpp
+    )
+endif()
+
+########################
+# maintargetosdoptions
+########################
+
+macro(maintargetosdoptions _projectname)
+	osdmodulestargetconf(${_projectname})
+
+    if(NOT NO_X11)
+        target_link_libraries(${_projectname} PRIVATE
+            X11
+            Xinerama
+        )
+    else()
+        if((${CMAKE_SYSTEM_NAME} STREQUAL "Linux") OR (${CMAKE_SYSTEM_NAME} STREQUAL "NetBSD") OR (${CMAKE_SYSTEM_NAME} STREQUAL "OpenBSD"))
+            target_link_libraries(${_projectname} PRIVATE EGL)
+        endif()
+    endif()
+
+    if(NOT NO_USE_XINPUT)
+        target_link_libraries(${_projectname} PRIVATE
+            Xext
+            Xi
+        )
+    endif()
+
+    if((${BASE_TARGETOS} STREQUAL "unix") AND (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Darwin") AND (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Android") AND (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten"))
+            target_link_libraries(${_projectname} PRIVATE SDL2_ttf)
+            target_link_libraries(${_projectname} PRIVATE fontconfig freetype) # pkgconfig --libs fontconfig
+    endif()
+endmacro()
+

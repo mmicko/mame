@@ -9,14 +9,55 @@
 ##
 ##########################################################################
 
+########################
+#       OPTIONS
+########################
+
 set(DIRECTINPUT "8" CACHE STRING "inimum DirectInput version to support.")
 
 option(USE_SDL "Enable SDL sound output." OFF)
 
+########################
+# qtdbg_sdl library
+########################
+
 qtdebuggerbuild(qtdbg_${OSD})
 osd_cfg(qtdbg_${OSD})
 
-set(OSD_SRCS
+########################
+# osd_windows library
+########################
+
+add_library(osd_${OSD} ${LIBTYPE})
+
+osdmodulesbuild(osd_${OSD})
+osd_cfg(osd_${OSD})
+
+target_include_directories(osd_${OSD} PRIVATE 
+		${MAME_DIR}/src/emu
+		${MAME_DIR}/src/devices # accessing imagedev from debugger
+		${MAME_DIR}/src/osd
+		${MAME_DIR}/src/lib
+		${MAME_DIR}/src/lib/util
+		${MAME_DIR}/src/osd/modules/file
+		${MAME_DIR}/src/osd/modules/render
+		${MAME_DIR}/3rdparty
+    	${MAME_DIR}/src/osd/windows
+)
+
+if(MSVC)
+	target_include_directories(osd_${OSD} PRIVATE ${MAME_DIR}/3rdparty/dxsdk/Include)
+endif()
+
+target_compile_definitions(osd_${OSD} PRIVATE DIRECT3D_VERSION=0x0900)
+
+if(DIRECTINPUT STREQUAL "8")
+    target_compile_definitions(osd_${OSD} PRIVATE DIRECTINPUT_VERSION=0x0800)
+else()
+    target_compile_definitions(osd_${OSD} PRIVATE DIRECTINPUT_VERSION=0x0700)
+endif()
+
+target_sources(osd_${OSD} PRIVATE
     ${MAME_DIR}/src/osd/modules/render/d3d/d3dhlsl.cpp
     ${MAME_DIR}/src/osd/modules/render/d3d/d3dcomm.h
     ${MAME_DIR}/src/osd/modules/render/d3d/d3dhlsl.h
@@ -66,33 +107,37 @@ set(OSD_SRCS
     ${MAME_DIR}/src/osd/modules/debugger/win/uimetrics.h
     ${MAME_DIR}/src/osd/modules/debugger/win/debugwin.h
 )
-osdmodulesbuild(osd_${OSD} "${OSD_SRCS}")
-osd_cfg(osd_${OSD})
 
-target_include_directories(osd_${OSD} PRIVATE 
-		${MAME_DIR}/src/emu
-		${MAME_DIR}/src/devices # accessing imagedev from debugger
-		${MAME_DIR}/src/osd
-		${MAME_DIR}/src/lib
-		${MAME_DIR}/src/lib/util
-		${MAME_DIR}/src/osd/modules/file
-		${MAME_DIR}/src/osd/modules/render
-		${MAME_DIR}/3rdparty
-    	${MAME_DIR}/src/osd/windows
+########################
+# ocore_windows library
+########################
+
+add_library(ocore_${OSD} ${LIBTYPE})
+osd_cfg(ocore_${OSD})
+
+target_include_directories(ocore_${OSD} PRIVATE 
+	${MAME_DIR}/3rdparty
+	${MAME_DIR}/src/emu
+	${MAME_DIR}/src/osd
+	${MAME_DIR}/src/osd/modules/file
+	${MAME_DIR}/src/lib
+	${MAME_DIR}/src/lib/util
+	
+	${MAME_DIR}/src/osd/windows
 )
-if(MSVC)
-	target_include_directories(osd_${OSD} PRIVATE ${MAME_DIR}/3rdparty/dxsdk/Include)
-endif()
 
-target_compile_definitions(osd_${OSD} PRIVATE DIRECT3D_VERSION=0x0900)
+target_link_libraries(ocore_${OSD} PRIVATE utils)
+target_link_libraries(ocore_${OSD} PUBLIC 
+	comctl32
+	comdlg32
+	psapi
+	ole32
+	shlwapi
+	wsock32
+	ws2_32
+)
 
-if(DIRECTINPUT STREQUAL "8")
-    target_compile_definitions(osd_${OSD} PRIVATE DIRECTINPUT_VERSION=0x0800)
-else()
-    target_compile_definitions(osd_${OSD} PRIVATE DIRECTINPUT_VERSION=0x0700)
-endif()
-
-set(OCORE_SRCS
+target_sources(ocore_${OSD} PRIVATE
     ${MAME_DIR}/src/osd/eigccppc.h
     ${MAME_DIR}/src/osd/eigccx86.h
     ${MAME_DIR}/src/osd/eivc.h
@@ -120,49 +165,27 @@ set(OCORE_SRCS
     ${MAME_DIR}/src/osd/modules/file/winsocket.cpp
     ${MAME_DIR}/src/osd/modules/lib/osdlib_win32.cpp
 )
-add_library(ocore_${OSD} ${LIBTYPE} ${OCORE_SRCS})
-osd_cfg(ocore_${OSD})
 
-target_include_directories(ocore_${OSD} PRIVATE 
-	${MAME_DIR}/3rdparty
-	${MAME_DIR}/src/emu
-	${MAME_DIR}/src/osd
-	${MAME_DIR}/src/osd/modules/file
-	${MAME_DIR}/src/lib
-	${MAME_DIR}/src/lib/util
-	
-	${MAME_DIR}/src/osd/windows
-)
-
-target_link_libraries(ocore_${OSD} PRIVATE utils)
-target_link_libraries(ocore_${OSD} PUBLIC 
-	comctl32
-	comdlg32
-	psapi
-	ole32
-	shlwapi
-)
-target_link_libraries(ocore_${OSD} PUBLIC 
-	wsock32
-	ws2_32
-)
+########################
+# maintargetosdoptions
+########################
 
 macro(maintargetosdoptions _projectname)
 	osdmodulestargetconf(${_projectname})
 
-if (NOT MSVC)
-	target_link_libraries(${_projectname} PUBLIC mingw32)
-endif()
+    if (NOT MSVC)
+        target_link_libraries(${_projectname} PUBLIC mingw32)
+    endif()
 
-if(DIRECTINPUT STREQUAL "8")
-    target_link_libraries(${_projectname} PUBLIC dinput8)
-else()
-    target_link_libraries(${_projectname} PUBLIC dinput)
-endif()
+    if(DIRECTINPUT STREQUAL "8")
+        target_link_libraries(${_projectname} PUBLIC dinput8)
+    else()
+        target_link_libraries(${_projectname} PUBLIC dinput)
+    endif()
 
-if(USE_SDL)
-    find_package(SDL2 REQUIRED)
-    target_link_libraries(${_projectname} PUBLIC SDL2::SDL2)
-endif()
+    if(USE_SDL)
+        find_package(SDL2 REQUIRED)
+        target_link_libraries(${_projectname} PUBLIC SDL2::SDL2)
+    endif()
 
 endmacro()
