@@ -7,22 +7,16 @@
 
 add_executable(aueffectutil)
 
-#linkoptions {
-#    "-sectcreate __TEXT __info_plist " .. _MAKE.esc(MAME_DIR) .. "src/tools/aueffectutil-Info.plist",
-#}
-#
-#dependency {
-#    { "aueffectutil",  MAME_DIR .. "src/tools/aueffectutil-Info.plist", true  },
-#}
-
-
 target_link_libraries(aueffectutil PRIVATE 
     "-framework AudioUnit"
     "-framework AudioToolbox"
     "-framework CoreAudio"
     "-framework CoreAudioKit"
     "-framework CoreServices"
+    "-framework AppKit"
 )
+
+target_link_options(aueffectutil PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,${MAME_DIR}/src/tools/aueffectutil-Info.plist)
 
 target_sources(aueffectutil PRIVATE
 	${MAME_DIR}/src/tools/aueffectutil.mm
