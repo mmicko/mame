@@ -91,7 +91,7 @@ endmacro()
 function(dump_mame_options)
     get_cmake_property(_variableNames VARIABLES)
     list (SORT _variableNames)
-	message(STATUS "Compile parameters:")
+	message(STATUS "Building ${projectname} version ${${projectname}_VERSION}")
 	message(STATUS "===========================================================")
 	if(CMAKE_SIZEOF_VOID_P EQUAL 8)
 	message(STATUS "OS                  : ${CMAKE_SYSTEM_NAME} (64 bit)")
@@ -179,5 +179,19 @@ endmacro()
 macro(precompiledheaders_novs _project)
 	if(NOT MSVC)
 		precompiledheaders(${_project})
+	endif()
+endmacro()
+
+macro(set_git_version)
+	find_package(Git REQUIRED)
+
+	execute_process(COMMAND ${GIT_EXECUTABLE} describe --dirty
+					OUTPUT_VARIABLE NEW_GIT_VERSION
+					ERROR_QUIET)
+
+	string(STRIP "${NEW_GIT_VERSION}" NEW_GIT_VERSION)
+
+	if ("${NEW_GIT_VERSION}" STREQUAL "")
+		set(NEW_GIT_VERSION "unknown")
 	endif()
 endmacro()

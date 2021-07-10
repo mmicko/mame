@@ -15,7 +15,7 @@ else()
     set(projectname ${TARGET}${SUBTARGET})
 endif()
 
-project(${projectname} CXX C)
+project(${projectname} VERSION 0.233 LANGUAGES CXX C)
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
   enable_language(OBJCXX)
 endif()
@@ -652,10 +652,8 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	add_compile_options(/wd4996) # warning C4996: 'function': was declared deprecated
 endif()
 
-add_custom_command(
-    OUTPUT ${GEN_DIR}/version.cpp
-    COMMAND ${CMAKE_COMMAND} -DGEN_DIR=${GEN_DIR} -P ${MAME_DIR}/scripts/cmake/version.cmake
-)
+set_git_version()
+configure_file(${MAME_DIR}/scripts/resources/version.cpp.in ${GEN_DIR}/version.cpp)
 
 if(NOT EXISTS ${MAME_DIR}/scripts/cmake/osd/${OSD}/osd.cmake)
   message(FATAL_ERROR "Unsupported value '${OSD}' for OSD")
