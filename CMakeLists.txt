@@ -653,7 +653,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif()
 
 set_git_version()
-configure_file(${MAME_DIR}/scripts/resources/version.cpp.in ${GEN_DIR}/version.cpp)
+configure_file(${MAME_DIR}/scripts/resources/version.cpp.in ${GEN_DIR}/version.cpp @ONLY)
 
 if(NOT EXISTS ${MAME_DIR}/scripts/cmake/osd/${OSD}/osd.cmake)
   message(FATAL_ERROR "Unsupported value '${OSD}' for OSD")
