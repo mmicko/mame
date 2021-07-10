@@ -133,8 +133,8 @@ if(PROFILE)
   set_option(SYMBOLS ON)
 endif()
 
-# dofile ("extlib.lua")
-# 
+include(scripts/cmake/extlib.cmake)
+ 
 if(SHLIB)
   set(LIBTYPE SHARED)
 else()
@@ -178,6 +178,24 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED on)
 set(CMAKE_C_EXTENSIONS ON)
+
+#if(DEFINED ENV{MINGW})
+#  message(STATUS "MinGW setting AR to $ENV{MINGW}/bin/llvm-ar.exe")
+#  set(CMAKE_AR $ENV{MINGW}/bin/llvm-ar.exe CACHE FILEPATH INTERNAL FORCE)
+#  message(STATUS "MinGW setting RUNLIB to $ENV{MINGW}/bin/llvm-ranlib.exe")
+#  set(CMAKE_RANLIB $ENV{MINGW}/bin/llvm-ranlib.exe CACHE FILEPATH INTERNAL FORCE)
+#  message(STATUS "MinGW setting -fuse-ld=lld")
+#  set(CMAKE_EXE_LINKER_FLAGS "-fuse-ld=lld" CACHE STRING INTERNAL FORCE)
+#endif()
+
+#if(DEFINED ENV{MINGW_PREFIX})
+#  message(STATUS "MinGW setting AR to $ENV{MINGW_PREFIX}/bin/llvm-ar.exe")
+#  set(CMAKE_AR $ENV{MINGW_PREFIX}/bin/llvm-ar.exe CACHE FILEPATH INTERNAL FORCE)
+#  message(STATUS "MinGW setting RUNLIB to $ENV{MINGW_PREFIX}/bin/llvm-ranlib.exe")
+#  set(CMAKE_RANLIB $ENV{MINGW_PREFIX}/bin/llvm-ranlib.exe CACHE FILEPATH INTERNAL FORCE)
+#  message(STATUS "MinGW setting -fuse-ld=lld")
+#  set(CMAKE_EXE_LINKER_FLAGS "-fuse-ld=lld" CACHE STRING INTERNAL FORCE)
+#endif()
 
 # configuration { "vs20*" }
 # 	buildoptions {
@@ -335,30 +353,7 @@ else()
     endif()
   endif()
 endif()
-# 
-# if _OPTIONS["with-system-jpeg"]~=nil then
-# 	defines {
-# 		"XMD_H",
-# 	}
-# end
-# 
-# if not _OPTIONS["with-system-flac"]~=nil then
-# 	defines {
-# 		"FLAC__NO_DLL",
-# 	}
-# end
-# 
-# if not _OPTIONS["with-system-pugixml"] then
-# 	defines {
-# 		"PUGIXML_HEADER_ONLY",
-# 	}
-add_compile_definitions(PUGIXML_HEADER_ONLY)
-# else
-# 	links {
-# 		ext_lib("pugixml"),
-# 	}
-# end
-# 
+
 if (NOASM)
   add_compile_definitions(MAME_NOASM)
 endif()

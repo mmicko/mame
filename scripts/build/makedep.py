@@ -723,11 +723,11 @@ def write_project(options, f, mappings, sources):
 	        '        ${MAME_DIR}/src/lib/util\n' \
             '        ${MAME_DIR}/src/lib/netlist\n' \
 	        '        ${MAME_DIR}/3rdparty\n' \
-            '        ${MAME_DIR}/3rdparty/libflac/include\n' \
-            '        ${MAME_DIR}/3rdparty/glm\n' \
-            '        ${MAME_DIR}/3rdparty/libjpeg\n' \
-            '        ${MAME_DIR}/3rdparty/rapidjson/include\n' \
-            '        ${MAME_DIR}/3rdparty/zlib\n' \
+            '        ${EXT_INCLUDEDIR_FLAC}\n' \
+            '        ${EXT_INCLUDEDIR_GLM}\n' \
+            '        ${EXT_INCLUDEDIR_JPEG}\n' \
+            '        ${EXT_INCLUDEDIR_RAPIDJSON}\n' \
+            '        ${EXT_INCLUDEDIR_ZLIB}\n' \
 	        '        ${GEN_DIR}/mame/layout\n' \
 	        ')\n' \
             'endmacro()\n' \

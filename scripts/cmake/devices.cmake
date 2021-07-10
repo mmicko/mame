@@ -30,9 +30,9 @@ target_include_directories(optional PRIVATE
 	${MAME_DIR}/3rdparty
 	${GEN_DIR}/emu
 	${GEN_DIR}/emu/layout
-	${MAME_DIR}/3rdparty/asio/include
-	${MAME_DIR}/3rdparty/expat/lib
-	${MAME_DIR}/3rdparty/libflac/include
+	${EXT_INCLUDEDIR_ASIO}
+	${EXT_INCLUDEDIR_EXPAT}
+	${EXT_INCLUDEDIR_FLAC}
 )
 
 add_library(dasm ${LIBTYPE} ${DASM_SRCS})
@@ -48,6 +48,6 @@ target_include_directories(dasm PRIVATE
 	${MAME_DIR}/src/lib/util
 	${MAME_DIR}/3rdparty
 	${GEN_DIR}/emu
-	${MAME_DIR}/3rdparty/asio/include
-	${MAME_DIR}/3rdparty/expat/lib
+	${EXT_INCLUDEDIR_ASIO}
+	${EXT_INCLUDEDIR_EXPAT}
 )

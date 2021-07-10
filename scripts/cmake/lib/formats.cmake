@@ -2076,7 +2076,7 @@ target_include_directories(formats PRIVATE
 	${MAME_DIR}/src/lib
 	${MAME_DIR}/src/lib/util
 	${GEN_DIR}
-	${MAME_DIR}/3rdparty/zlib
+	${EXT_INCLUDEDIR_ZLIB}
 )
 
 target_link_libraries(formats PUBLIC 

@@ -12,7 +12,7 @@ target_include_directories(imgtool PRIVATE
 	${MAME_DIR}/src/lib
 	${MAME_DIR}/src/lib/util
 	${MAME_DIR}/src/tools/imgtool
-	${MAME_DIR}/3rdparty/zlib
+	${EXT_INCLUDEDIR_ZLIB}
 )
 
 target_link_libraries(imgtool PRIVATE ocore_${OSD} formats)

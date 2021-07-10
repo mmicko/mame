@@ -244,7 +244,7 @@ macro(osdmodulesbuild _project)
 		)
 	endif()
 
-	target_include_directories(${_project} PRIVATE ${MAME_DIR}/3rdparty/asio/include)
+	target_include_directories(${_project} PRIVATE ${EXT_INCLUDEDIR_ASIO})
 
 	if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 		target_include_directories(${_project} PRIVATE 
@@ -276,15 +276,14 @@ macro(osdmodulesbuild _project)
 		${MAME_DIR}/3rdparty/bgfx/3rdparty
 		${MAME_DIR}/3rdparty/bgfx/3rdparty/khronos
 		${MAME_DIR}/3rdparty/bx/include
-		#ext_includedir("rapidjson")
-		${MAME_DIR}/3rdparty/rapidjson/include
+		
 	)
+	target_include_directories(${_project} PRIVATE ${EXT_INCLUDEDIR_RAPIDJSON})
 
 	if(NO_USE_PORTAUDIO)
 		target_compile_definitions(${_project} PRIVATE NO_USE_PORTAUDIO)
 	else()
-	#	ext_includedir("portaudio"),
-		target_include_directories(${_project} PRIVATE ${MAME_DIR}/3rdparty/portaudio/include)
+		target_include_directories(${_project} PRIVATE ${EXT_INCLUDEDIR_PORTAUDIO})
 	endif()
 
 	if(NO_USE_PULSEAUDIO)
@@ -294,8 +293,7 @@ macro(osdmodulesbuild _project)
 	if(NO_USE_MIDI)
 		target_compile_definitions(${_project} PRIVATE NO_USE_MIDI)
 	else()
-	#	ext_includedir("portmidi"),
-		target_include_directories(${_project} PRIVATE ${MAME_DIR}/3rdparty/portmidi/pm_common)
+		target_include_directories(${_project} PRIVATE ${EXT_INCLUDEDIR_PORTMIDI})
 	endif()
 
 	if(USE_QTDEBUG)

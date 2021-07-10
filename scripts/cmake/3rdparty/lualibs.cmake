@@ -14,11 +14,10 @@ endif()
 target_link_libraries(lualibs PUBLIC lua sqlite3 linenoise zlib)
 
 target_include_directories(lualibs PRIVATE
-	${MAME_DIR}/3rdparty
-	${MAME_DIR}/3rdparty/linenoise   
-    ${MAME_DIR}/3rdparty/lua/src
-    ${MAME_DIR}/3rdparty/zlib
-    ${MAME_DIR}/3rdparty/sqlite3
+    ${MAME_DIR}/3rdparty
+    ${EXT_INCLUDEDIR_LUA}
+    ${EXT_INCLUDEDIR_ZLIB}
+    ${EXT_INCLUDEDIR_SQLITE3}
 )
 
 target_sources(lualibs PRIVATE
@@ -30,5 +29,6 @@ target_sources(lualibs PRIVATE
 if (${OSD} STREQUAL "uwp")
     target_sources(lualibs PRIVATE ${MAME_DIR}/3rdparty/lua-linenoise/linenoise_none.c)
 else()
+    target_include_directories(lualibs PRIVATE ${MAME_DIR}/3rdparty/linenoise)
     target_sources(lualibs PRIVATE ${MAME_DIR}/3rdparty/lua-linenoise/linenoise.c)
 endif()

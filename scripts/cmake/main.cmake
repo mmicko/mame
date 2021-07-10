@@ -130,24 +130,14 @@ if("NETLIST" IN_LIST MACHINES)
     target_link_libraries(${projectname} PRIVATE netlist)
 endif()
 
-#	links {
-#		"utils",
-#		ext_lib("expat"),
-#		"softfloat",
-#		"softfloat3",
-#		"wdlfft",
-#		"ymfm",
-#		ext_lib("jpeg"),
-#		"7z",
-#	}
 target_link_libraries(${projectname} PRIVATE
 	utils
-	expat
+	${EXT_LIB_EXPAT}
 	softfloat
     softfloat3
     wdlfft
 	ymfm
-	jpeg
+	${EXT_LIB_JPEG}
 	7z
 )
 
@@ -155,35 +145,31 @@ if(NOT FORCE_DRC_C_BACKEND)
     target_link_libraries(${projectname} PRIVATE asmjit)
 endif()
 if(NOT STANDALONE)
-#	links {
-#		ext_lib("lua"),
-#		"lualibs",
-#	}
-    target_link_libraries(${projectname} PRIVATE lua lualibs)
+    target_link_libraries(${projectname} PRIVATE 
+        ${EXT_LIB_LUA} 
+        lualibs
+    )
     if(NOT ${OSD} STREQUAL "uwp")
         target_link_libraries(${projectname} PRIVATE linenoise)
     endif()
 endif()
-#	links {
-#		ext_lib("zlib"),
-#		ext_lib("flac"),
-#		ext_lib("utf8proc"),
-#	}
-target_link_libraries(${projectname} PRIVATE zlib flac utf8proc)
+
+target_link_libraries(${projectname} PRIVATE 
+    ${EXT_LIB_ZLIB}
+    ${EXT_LIB_FLAC} 
+    ${EXT_LIB_UTF8PROC}
+)
 
 if(NOT STANDALONE)
-#		ext_lib("sqlite3"),
-    target_link_libraries(${projectname} PRIVATE sqlite3)
+    target_link_libraries(${projectname} PRIVATE ${EXT_LIB_SQLITE3})
 endif()
 
 if(NOT NO_USE_PORTAUDIO)
-#			ext_lib("portaudio"),
-    target_link_libraries(${projectname} PRIVATE portaudio)
+    target_link_libraries(${projectname} PRIVATE ${EXT_LIB_PORTAUDIO})
 endif()
 
 if(NOT NO_USE_MIDI)
-#			ext_lib("portmidi"),
-    target_link_libraries(${projectname} PRIVATE portmidi)
+    target_link_libraries(${projectname} PRIVATE ${EXT_LIB_PORTMIDI})
 endif()
 
 target_link_libraries(${projectname} PRIVATE
@@ -207,8 +193,6 @@ target_include_directories(${projectname} PRIVATE
         ${MAME_DIR}/3rdparty
 		${GEN_DIR}/${_target}/layout
 		${GEN_DIR}/resource
-#		ext_includedir("zlib"),
-#		ext_includedir("flac"),
 )
 
 #

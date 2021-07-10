@@ -99,19 +99,19 @@ target_include_directories(utils PRIVATE
 	${MAME_DIR}/src/osd
 	${MAME_DIR}/src/lib/util
 	${MAME_DIR}/3rdparty
-	${MAME_DIR}/3rdparty/expat/lib
-	${MAME_DIR}/3rdparty/zlib
-	${MAME_DIR}/3rdparty/libflac/include
-	${MAME_DIR}/3rdparty/utf8proc
+	${EXT_INCLUDEDIR_EXPAT}
+	${EXT_INCLUDEDIR_ZLIB}
+	${EXT_INCLUDEDIR_FLAC}
+	${EXT_INCLUDEDIR_UTF8PROC}
 )
 
 target_link_libraries(utils PUBLIC
 	ocore_${OSD}
-	expat
-	zlib
-	flac
+	${EXT_LIB_EXPAT}
+	${EXT_LIB_ZLIB}
+	${EXT_LIB_FLAC}
 	7z
-	utf8proc
+	${EXT_LIB_UTF8PROC}
 )
 
 if ((NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows") AND (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten"))

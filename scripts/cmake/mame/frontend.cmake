@@ -166,18 +166,12 @@ target_include_directories(frontend PRIVATE
 	${GEN_DIR}/emu
 	${GEN_DIR}/emu/layout
 
-#	ext_includedir("asio"),
-#	ext_includedir("expat"),
-#	ext_includedir("lua"),
-#	ext_includedir("zlib"),
-#	ext_includedir("flac"),
-#	ext_includedir("rapidjson")
-	${MAME_DIR}/3rdparty/asio/include
-	${MAME_DIR}/3rdparty/expat/lib
-	${MAME_DIR}/3rdparty/lua/src
-	${MAME_DIR}/3rdparty/zlib
-	${MAME_DIR}/3rdparty/libflac/include
-	${MAME_DIR}/3rdparty/rapidjson/include
+	${EXT_INCLUDEDIR_ASIO}
+	${EXT_INCLUDEDIR_EXPAT}
+	${EXT_INCLUDEDIR_LUA}
+	${EXT_INCLUDEDIR_ZLIB}
+	${EXT_INCLUDEDIR_FLAC}
+	${EXT_INCLUDEDIR_RAPIDJSON}
 )
 
 target_link_libraries(frontend PUBLIC lua)

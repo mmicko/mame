@@ -1,16 +1,5 @@
-option(WITH_SYSTEM_ASIO "Use system Asio library" OFF)
-option(WITH_SYSTEM_EXPAT "Use system Expat library" OFF)
-option(WITH_SYSTEM_ZLIB "Use system Zlib library" OFF)
-option(WITH_SYSTEM_JPEG "Use system JPEG library" OFF)
-option(WITH_SYSTEM_FLAC "Use system FLAC library" OFF)
-option(WITH_SYSTEM_SQLITE3 "Use system SQLite library" OFF)
-option(WITH_SYSTEM_PORTMIDI "Use system PortMidi library" OFF)
-option(WITH_SYSTEM_PORTAUDIO "Use system PortAudio library" OFF)
-option(WITH_SYSTEM_LUA "Use system LUA library" OFF)
-option(WITH_SYSTEM_UTF8PROC "Use system utf8proc library" OFF)
-option(WITH_SYSTEM_GLM "Use system glm library" OFF)
-option(WITH_SYSTEM_RAPIDJSON "Use system rapidjson library" OFF)
-option(WITH_SYSTEM_PUGIXML "Use system pugixml library" OFF)
+# license:BSD-3-Clause
+# copyright-holders:MAMEdev Team
 
 if(NOT WITH_SYSTEM_EXPAT)
     add_project_to_group_and_include(3rdparty expat scripts/cmake/3rdparty/expat.cmake)

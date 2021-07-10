@@ -10,7 +10,7 @@ add_executable(ldverify)
 target_include_directories(ldverify PRIVATE 
 	${MAME_DIR}/src/osd
 	${MAME_DIR}/src/lib/util
-	${MAME_DIR}/3rdparty/libflac/include
+	${EXT_INCLUDEDIR_FLAC}
 )
 
 target_link_libraries(ldverify PRIVATE utils)

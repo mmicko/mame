@@ -281,13 +281,13 @@ target_include_directories(emu PRIVATE
 	${GEN_DIR}/emu
 	${GEN_DIR}/emu/layout
 
-	${MAME_DIR}/3rdparty/asio/include
-	${MAME_DIR}/3rdparty/expat/lib
-	${MAME_DIR}/3rdparty/zlib
-	${MAME_DIR}/3rdparty/libflac/include
-	${MAME_DIR}/3rdparty/libjpeg
-	${MAME_DIR}/3rdparty/rapidjson/include
-	${MAME_DIR}/3rdparty/pugixml/src
+	${EXT_INCLUDEDIR_ASIO}
+	${EXT_INCLUDEDIR_EXPAT}
+	${EXT_INCLUDEDIR_ZLIB}
+	${EXT_INCLUDEDIR_FLAC}
+	${EXT_INCLUDEDIR_JPEG}
+	${EXT_INCLUDEDIR_RAPIDJSON}
+	${EXT_INCLUDEDIR_PUGIXML}
 )
 
 add_custom_command(
@@ -313,3 +313,9 @@ layoutbuildtask("emu/layout" "dualhuov")
 layoutbuildtask("emu/layout" "triphsxs")
 layoutbuildtask("emu/layout" "quadhsxs")
 layoutbuildtask("emu/layout" "noscreens")
+
+if (NOT WITH_SYSTEM_PUGIXML)
+	target_compile_definitions(emu PRIVATE PUGIXML_HEADER_ONLY)
+else()
+	target_link_libraries(emu PRIVATE EXT_LIB_PUGIXML)
+endif()
