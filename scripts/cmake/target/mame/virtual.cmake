@@ -99,8 +99,7 @@ macro(linkProjects_mame_virtual _target _subtarget _projectname)
     target_link_libraries(${_projectname} PRIVATE virtual)
 endmacro()
 
-
-macro(createVirtualProjects _target  _subtarget _name)
+function(createVirtualProjects _target  _subtarget _name)
 	add_library(${_name} ${LIBTYPE})
 	addprojectflags(${_name})
 	precompiledheaders_novs(${_name})
@@ -118,11 +117,14 @@ macro(createVirtualProjects _target  _subtarget _name)
 		${EXT_INCLUDEDIR_ZLIB}
 		${EXT_INCLUDEDIR_FLAC}
 	)
-endmacro()
+	set(SOURCE_LIST ${ARGV})
+	list(REMOVE_AT SOURCE_LIST 0 1 2)	
+	target_sources(${_name} PRIVATE ${SOURCE_LIST})
+	add_project_to_group(drivers ${_name})
+endfunction()
 
 macro(createProjects_mame_virtual _target  _subtarget)
-	createVirtualProjects(_target _subtarget "virtual")
-	target_sources(virtual PRIVATE
+	createVirtualProjects(_target _subtarget "virtual"
 		${MAME_DIR}/src/mame/drivers/vgmplay.cpp
 		${MAME_DIR}/src/mame/drivers/wavesynth.cpp
 		${MAME_DIR}/src/mame/drivers/ldplayer.cpp

@@ -1444,7 +1444,7 @@ macro(linkProjects_mame_mess _target, _subtarget _projectname)
 endmacro()
 
 
-macro(createMESSProjects _target  _subtarget _name)
+function(createMESSProjects _target  _subtarget _name)
 	add_library(${_name} ${LIBTYPE})
 	addprojectflags(${_name})
 	precompiledheaders_novs(${_name})
@@ -1461,7 +1461,11 @@ macro(createMESSProjects _target  _subtarget _name)
 		${GEN_DIR}/mame/layout
 		${EXT_INCLUDEDIR_ZLIB}
 	)
-endmacro()
+	set(SOURCE_LIST ${ARGV})
+	list(REMOVE_AT SOURCE_LIST 0 1 2)	
+	target_sources(${_name} PRIVATE ${SOURCE_LIST})
+	add_project_to_group(drivers ${_name})
+endfunction()
 
 macro(createProjects_mame_mess _target _subtarget)
 ##################################################
@@ -1488,8 +1492,7 @@ macro(createProjects_mame_mess _target _subtarget)
 ## cps1.c (MESS + MAME)
 ##################################################
 if (_subtarget STREQUAL "mess")
-createMESSProjects(_target _subtarget "mameshared")
-target_sources(mameshared PRIVATE
+createMESSProjects(_target _subtarget "mameshared"
 	${MAME_DIR}/src/mame/machine/amiga.cpp
 	${MAME_DIR}/src/mame/video/amiga.cpp
 	${MAME_DIR}/src/mame/video/amigaaga.cpp
@@ -1612,8 +1615,7 @@ endif()
 ## the following files are general components and
 ## shared across a number of drivers
 ##################################################
-createMESSProjects(_target _subtarget "messshared")
-target_sources(messshared PRIVATE
+createMESSProjects(_target _subtarget "messshared"
 	${MAME_DIR}/src/mame/machine/teleprinter.cpp
 	${MAME_DIR}/src/mame/machine/teleprinter.h
 	${MAME_DIR}/src/mame/machine/z80bin.cpp
@@ -1623,21 +1625,18 @@ target_sources(messshared PRIVATE
 ## manufacturer-specific groupings for drivers
 ##################################################
 
-createMESSProjects(_target _subtarget "access")
-target_sources(access PRIVATE
+createMESSProjects(_target _subtarget "access"
 	${MAME_DIR}/src/mame/drivers/acvirus.cpp
 )
 
-createMESSProjects(_target _subtarget "aci")
-target_sources(aci PRIVATE
+createMESSProjects(_target _subtarget "aci"
 	${MAME_DIR}/src/mame/drivers/aci_boris.cpp
 	${MAME_DIR}/src/mame/drivers/aci_borisdpl.cpp
 	${MAME_DIR}/src/mame/drivers/aci_ggm.cpp
 	${MAME_DIR}/src/mame/drivers/aci_prodigy.cpp
 )
 
-createMESSProjects(_target _subtarget "acorn")
-target_sources(acorn PRIVATE
+createMESSProjects(_target _subtarget "acorn"
 	${MAME_DIR}/src/mame/drivers/aa310.cpp
 	${MAME_DIR}/src/mame/machine/archimedes_keyb.cpp
 	${MAME_DIR}/src/mame/machine/archimedes_keyb.h
@@ -1663,8 +1662,7 @@ target_sources(acorn PRIVATE
 	${MAME_DIR}/src/mame/video/z88.cpp
 )
 
-createMESSProjects(_target _subtarget "act")
-target_sources(act PRIVATE
+createMESSProjects(_target _subtarget "act"
 	${MAME_DIR}/src/mame/drivers/apricot.cpp
 	${MAME_DIR}/src/mame/drivers/apricotf.cpp
 	${MAME_DIR}/src/mame/drivers/apricotp.cpp
@@ -1677,15 +1675,13 @@ target_sources(act PRIVATE
 	${MAME_DIR}/src/mame/machine/victor9k_fdc.h
 )
 
-createMESSProjects(_target _subtarget "adc")
-target_sources(adc PRIVATE
+createMESSProjects(_target _subtarget "adc"
 	${MAME_DIR}/src/mame/drivers/super6.cpp
 	${MAME_DIR}/src/mame/includes/super6.h
 	${MAME_DIR}/src/mame/drivers/superslave.cpp
 )
 
-createMESSProjects(_target _subtarget "agat")
-target_sources(agat PRIVATE
+createMESSProjects(_target _subtarget "agat"
 	${MAME_DIR}/src/mame/drivers/agat.cpp
 	${MAME_DIR}/src/mame/machine/agatkeyb.cpp
 	${MAME_DIR}/src/mame/machine/agatkeyb.h
@@ -1695,24 +1691,21 @@ target_sources(agat PRIVATE
 	${MAME_DIR}/src/mame/video/agat9.h
 )
 
-createMESSProjects(_target _subtarget "akai")
-target_sources(akai PRIVATE
+createMESSProjects(_target _subtarget "akai"
 	${MAME_DIR}/src/mame/drivers/akaiax80.cpp
 	${MAME_DIR}/src/mame/drivers/akaivx600.cpp
 	${MAME_DIR}/src/mame/drivers/mpc3000.cpp
 	${MAME_DIR}/src/mame/drivers/mpc60.cpp
 )
 
-createMESSProjects(_target _subtarget "alesis")
-target_sources(alesis PRIVATE
+createMESSProjects(_target _subtarget "alesis"
 	${MAME_DIR}/src/mame/drivers/alesis.cpp
 	${MAME_DIR}/src/mame/includes/alesis.h
 	${MAME_DIR}/src/mame/audio/alesis.cpp
 	${MAME_DIR}/src/mame/video/alesis.cpp
 )
 
-createMESSProjects(_target _subtarget "altos")
-target_sources(altos PRIVATE
+createMESSProjects(_target _subtarget "altos"
 	${MAME_DIR}/src/mame/drivers/altos2.cpp
 	${MAME_DIR}/src/mame/drivers/altos5.cpp
 	${MAME_DIR}/src/mame/drivers/altos486.cpp
@@ -1720,31 +1713,26 @@ target_sources(altos PRIVATE
 	${MAME_DIR}/src/mame/machine/acs8600_ics.cpp
 )
 
-createMESSProjects(_target _subtarget "ami")
-target_sources(ami PRIVATE
+createMESSProjects(_target _subtarget "ami"
 	${MAME_DIR}/src/mame/drivers/hh_amis2k.cpp
 )
 
-createMESSProjects(_target _subtarget "amirix")
-target_sources(amirix PRIVATE
+createMESSProjects(_target _subtarget "amirix"
 	${MAME_DIR}/src/mame/drivers/wxstar4000.cpp
 )
 
-createMESSProjects(_target _subtarget "amiga")
-target_sources(amiga PRIVATE
+createMESSProjects(_target _subtarget "amiga"
 	${MAME_DIR}/src/mame/drivers/amiga.cpp
 	${MAME_DIR}/src/mame/includes/amiga.h
 )
 
-createMESSProjects(_target _subtarget "ampro")
-target_sources(ampro PRIVATE
+createMESSProjects(_target _subtarget "ampro"
 	${MAME_DIR}/src/mame/drivers/ampro.cpp
 	${MAME_DIR}/src/mame/drivers/lb186.cpp
 	${MAME_DIR}/src/mame/drivers/lbpc.cpp
 )
 
-createMESSProjects(_target _subtarget "amstrad")
-target_sources(amstrad PRIVATE
+createMESSProjects(_target _subtarget "amstrad"
 	${MAME_DIR}/src/mame/drivers/amstrad.cpp
 	${MAME_DIR}/src/mame/includes/amstrad.h
 	${MAME_DIR}/src/mame/machine/amstrad.cpp
@@ -1768,13 +1756,11 @@ target_sources(amstrad PRIVATE
 	${MAME_DIR}/src/mame/drivers/pda600.cpp
 )
 
-createMESSProjects(_target _subtarget "apf")
-target_sources(apf PRIVATE
+createMESSProjects(_target _subtarget "apf"
 	${MAME_DIR}/src/mame/drivers/apf.cpp
 )
 
-createMESSProjects(_target _subtarget "apollo")
-target_sources(apollo PRIVATE
+createMESSProjects(_target _subtarget "apollo"
 	${MAME_DIR}/src/mame/drivers/apollo.cpp
 	${MAME_DIR}/src/mame/includes/apollo.h
 	${MAME_DIR}/src/mame/machine/apollo.cpp
@@ -1783,8 +1769,7 @@ target_sources(apollo PRIVATE
 	${MAME_DIR}/src/mame/video/apollo.cpp
 )
 
-createMESSProjects(_target _subtarget "apple")
-target_sources(apple PRIVATE
+createMESSProjects(_target _subtarget "apple"
 	${MAME_DIR}/src/mame/drivers/apple1.cpp
 	${MAME_DIR}/src/mame/drivers/apple2.cpp
 	${MAME_DIR}/src/mame/drivers/apple2e.cpp
@@ -1831,16 +1816,14 @@ target_sources(apple PRIVATE
 	${MAME_DIR}/src/mame/drivers/superga2.cpp
 )
 
-createMESSProjects(_target _subtarget "applied")
-target_sources(applied PRIVATE
+createMESSProjects(_target _subtarget "applied"
 	${MAME_DIR}/src/mame/drivers/mbee.cpp
 	${MAME_DIR}/src/mame/includes/mbee.h
 	${MAME_DIR}/src/mame/machine/mbee.cpp
 	${MAME_DIR}/src/mame/video/mbee.cpp
 )
 
-createMESSProjects(_target _subtarget "arcadia")
-target_sources(arcadia PRIVATE
+createMESSProjects(_target _subtarget "arcadia"
 	${MAME_DIR}/src/mame/drivers/arcadia.cpp
 	${MAME_DIR}/src/mame/includes/arcadia.h
 	${MAME_DIR}/src/mame/audio/arcadia.cpp
@@ -1848,8 +1831,7 @@ target_sources(arcadia PRIVATE
 	${MAME_DIR}/src/mame/video/arcadia.cpp
 )
 
-createMESSProjects(_target _subtarget "ascii")
-target_sources(ascii PRIVATE
+createMESSProjects(_target _subtarget "ascii"
 	${MAME_DIR}/src/mame/drivers/msx.cpp
 	${MAME_DIR}/src/mame/includes/msx.h
 	${MAME_DIR}/src/mame/machine/msx.cpp
@@ -1862,8 +1844,7 @@ target_sources(ascii PRIVATE
 	${MAME_DIR}/src/mame/machine/msx_systemflags.h
 )
 
-createMESSProjects(_target _subtarget "at")
-target_sources(at PRIVATE
+createMESSProjects(_target _subtarget "at"
 	${MAME_DIR}/src/mame/drivers/at.cpp
 	${MAME_DIR}/src/mame/drivers/atpci.cpp
 	${MAME_DIR}/src/mame/drivers/ps2.cpp
@@ -1872,8 +1853,7 @@ target_sources(at PRIVATE
 	${MAME_DIR}/src/mame/drivers/ct486.cpp
 )
 
-createMESSProjects(_target _subtarget "atari")
-target_sources(atari PRIVATE
+createMESSProjects(_target _subtarget "atari"
 	${MAME_DIR}/src/mame/includes/a2600.h
 	${MAME_DIR}/src/mame/drivers/a2600.cpp
 	${MAME_DIR}/src/mame/drivers/a7800.cpp
@@ -1897,8 +1877,7 @@ target_sources(atari PRIVATE
 	${MAME_DIR}/src/mame/drivers/tvboy.cpp
 )
 
-createMESSProjects(_target _subtarget "att")
-target_sources(att PRIVATE
+createMESSProjects(_target _subtarget "att"
 	${MAME_DIR}/src/mame/drivers/att3b2.cpp
 	${MAME_DIR}/src/mame/drivers/att4425.cpp
 	${MAME_DIR}/src/mame/drivers/att610.cpp
@@ -1906,28 +1885,23 @@ target_sources(att PRIVATE
 	${MAME_DIR}/src/mame/drivers/unixpc.cpp
 )
 
-createMESSProjects(_target _subtarget "ave")
-target_sources(ave PRIVATE
+createMESSProjects(_target _subtarget "ave"
 	${MAME_DIR}/src/mame/drivers/ave_arb.cpp
 )
 
-createMESSProjects(_target _subtarget "aviion")
-target_sources(aviion PRIVATE
+createMESSProjects(_target _subtarget "aviion"
 	${MAME_DIR}/src/mame/drivers/aviion88k.cpp
 )
 
-createMESSProjects(_target _subtarget "bally")
-target_sources(bally PRIVATE
+createMESSProjects(_target _subtarget "bally"
 	${MAME_DIR}/src/mame/drivers/astrohome.cpp
 )
 
-createMESSProjects(_target _subtarget "banctec")
-target_sources(banctec PRIVATE
+createMESSProjects(_target _subtarget "banctec"
 	${MAME_DIR}/src/mame/drivers/banctec.cpp
 )
 
-createMESSProjects(_target _subtarget "bandai")
-target_sources(bandai PRIVATE
+createMESSProjects(_target _subtarget "bandai"
 	${MAME_DIR}/src/mame/drivers/sv8000.cpp
 	${MAME_DIR}/src/mame/drivers/rx78.cpp
 	${MAME_DIR}/src/mame/drivers/tamag1.cpp
@@ -1939,42 +1913,36 @@ target_sources(bandai PRIVATE
 	${MAME_DIR}/src/mame/drivers/bandai_design_master.cpp
 )
 
-createMESSProjects(_target _subtarget "be")
-target_sources(be PRIVATE
+createMESSProjects(_target _subtarget "be"
 	${MAME_DIR}/src/mame/drivers/bebox.cpp
 	${MAME_DIR}/src/mame/includes/bebox.h
 	${MAME_DIR}/src/mame/machine/bebox.cpp
 )
 
-createMESSProjects(_target _subtarget "beehive")
-target_sources(beehive PRIVATE
+createMESSProjects(_target _subtarget "beehive"
 	${MAME_DIR}/src/mame/drivers/microb.cpp
 )
 
-createMESSProjects(_target _subtarget "bitcorp")
-target_sources(bitcorp PRIVATE
+createMESSProjects(_target _subtarget "bitcorp"
 	${MAME_DIR}/src/mame/drivers/gamate.cpp
 	${MAME_DIR}/src/mame/video/gamate.cpp
 	${MAME_DIR}/src/mame/video/gamate.h
 )
 
-createMESSProjects(_target _subtarget "bnpo")
-target_sources(bnpo PRIVATE
+createMESSProjects(_target _subtarget "bnpo"
 	${MAME_DIR}/src/mame/drivers/b2m.cpp
 	${MAME_DIR}/src/mame/includes/b2m.h
 	${MAME_DIR}/src/mame/machine/b2m.cpp
 )
 
-createMESSProjects(_target _subtarget "bondwell")
-target_sources(bondwell PRIVATE
+createMESSProjects(_target _subtarget "bondwell"
 	${MAME_DIR}/src/mame/drivers/bw12.cpp
 	${MAME_DIR}/src/mame/includes/bw12.h
 	${MAME_DIR}/src/mame/drivers/bw2.cpp
 	${MAME_DIR}/src/mame/includes/bw2.h
 )
 
-createMESSProjects(_target _subtarget "booth")
-target_sources(booth PRIVATE
+createMESSProjects(_target _subtarget "booth"
 	${MAME_DIR}/src/mame/drivers/apexc.cpp
 	${MAME_DIR}/src/mame/includes/apexc.h
 	${MAME_DIR}/src/mame/machine/apexc.h
@@ -1982,26 +1950,22 @@ target_sources(booth PRIVATE
 	${MAME_DIR}/src/mame/video/apexc.cpp
 )
 
-createMESSProjects(_target _subtarget "camputers")
-target_sources(camputers PRIVATE
+createMESSProjects(_target _subtarget "camputers"
 	${MAME_DIR}/src/mame/drivers/camplynx.cpp
 )
 
-createMESSProjects(_target _subtarget "canon")
-target_sources(canon PRIVATE
+createMESSProjects(_target _subtarget "canon"
 	${MAME_DIR}/src/mame/drivers/cat.cpp
 	${MAME_DIR}/src/mame/drivers/x07.cpp
 	${MAME_DIR}/src/mame/includes/x07.h
 	${MAME_DIR}/src/mame/drivers/canon_s80.cpp
 )
 
-createMESSProjects(_target _subtarget "cantab")
-target_sources(cantab PRIVATE
+createMESSProjects(_target _subtarget "cantab"
 	${MAME_DIR}/src/mame/drivers/jupace.cpp
 )
 
-createMESSProjects(_target _subtarget "casio")
-target_sources(casio PRIVATE
+createMESSProjects(_target _subtarget "casio"
 	${MAME_DIR}/src/mame/drivers/casloopy.cpp
 	${MAME_DIR}/src/mame/drivers/cfx9850.cpp
 	${MAME_DIR}/src/mame/drivers/cz101.cpp
@@ -2019,8 +1983,7 @@ target_sources(casio PRIVATE
 	${MAME_DIR}/src/mame/drivers/casio_rompack.cpp
 )
 
-createMESSProjects(_target _subtarget "cbm")
-target_sources(cbm PRIVATE
+createMESSProjects(_target _subtarget "cbm"
 	${MAME_DIR}/src/mame/drivers/c128.cpp
 	${MAME_DIR}/src/mame/drivers/c64.cpp
 	${MAME_DIR}/src/mame/drivers/c64dtv.cpp
@@ -2039,8 +2002,7 @@ target_sources(cbm PRIVATE
 	${MAME_DIR}/src/mame/drivers/mps1230.cpp
 )
 
-createMESSProjects(_target _subtarget "cccp")
-target_sources(cccp PRIVATE
+createMESSProjects(_target _subtarget "cccp"
 	${MAME_DIR}/src/mame/drivers/argo.cpp
 	${MAME_DIR}/src/mame/drivers/cm1800.cpp
 	${MAME_DIR}/src/mame/drivers/debut.cpp
@@ -2076,40 +2038,33 @@ target_sources(cccp PRIVATE
 	${MAME_DIR}/src/mame/drivers/vta2000.cpp
 )
 
-createMESSProjects(_target _subtarget "cce")
-target_sources(cce PRIVATE
+createMESSProjects(_target _subtarget "cce"
 	${MAME_DIR}/src/mame/drivers/mc1000.cpp
 )
 
-createMESSProjects(_target _subtarget "ccs")
-target_sources(ccs PRIVATE
+createMESSProjects(_target _subtarget "ccs"
 	${MAME_DIR}/src/mame/drivers/ccs2810.cpp
 )
 
-createMESSProjects(_target _subtarget "ceres")
-target_sources(ceres PRIVATE
+createMESSProjects(_target _subtarget "ceres"
 	${MAME_DIR}/src/mame/drivers/ceres.cpp
 )
 
-createMESSProjects(_target _subtarget "chessking")
-target_sources(chessking PRIVATE
+createMESSProjects(_target _subtarget "chessking"
 	${MAME_DIR}/src/mame/drivers/cking_master.cpp
 )
 
-createMESSProjects(_target _subtarget "chromatics")
-target_sources(chromatics PRIVATE
+createMESSProjects(_target _subtarget "chromatics"
 	${MAME_DIR}/src/mame/drivers/cgc7900.cpp
 	${MAME_DIR}/src/mame/includes/cgc7900.h
 	${MAME_DIR}/src/mame/video/cgc7900.cpp
 )
 
-createMESSProjects(_target _subtarget "chrysler")
-target_sources(chrysler PRIVATE
+createMESSProjects(_target _subtarget "chrysler"
 	${MAME_DIR}/src/mame/drivers/eva.cpp
 )
 
-createMESSProjects(_target _subtarget "citoh")
-target_sources(citoh PRIVATE
+createMESSProjects(_target _subtarget "citoh"
 	${MAME_DIR}/src/mame/drivers/cit101.cpp
 	${MAME_DIR}/src/mame/machine/cit101_kbd.cpp
 	${MAME_DIR}/src/mame/machine/cit101_kbd.h
@@ -2119,8 +2074,7 @@ target_sources(citoh PRIVATE
 	${MAME_DIR}/src/mame/machine/cit220_kbd.h
 )
 
-createMESSProjects(_target _subtarget "coleco")
-target_sources(coleco PRIVATE
+createMESSProjects(_target _subtarget "coleco"
 	${MAME_DIR}/src/mame/drivers/adam.cpp
 	${MAME_DIR}/src/mame/includes/adam.h
 	${MAME_DIR}/src/mame/drivers/coleco.cpp
@@ -2130,43 +2084,36 @@ target_sources(coleco PRIVATE
 	${MAME_DIR}/src/mame/drivers/wrinkles.cpp
 )
 
-createMESSProjects(_target _subtarget "compugraphic")
-target_sources(compugraphic PRIVATE
+createMESSProjects(_target _subtarget "compugraphic"
 	${MAME_DIR}/src/mame/drivers/pwrview.cpp
 )
 
-createMESSProjects(_target _subtarget "conic")
-target_sources(conic PRIVATE
+createMESSProjects(_target _subtarget "conic"
 	${MAME_DIR}/src/mame/drivers/conic_cchess2.cpp
 )
 
-createMESSProjects(_target _subtarget "consumenta")
-target_sources(consumenta PRIVATE
+createMESSProjects(_target _subtarget "consumenta"
 	${MAME_DIR}/src/mame/drivers/conchess.cpp
 )
 
-createMESSProjects(_target _subtarget "cromemco")
-target_sources(cromemco PRIVATE
+createMESSProjects(_target _subtarget "cromemco"
 	${MAME_DIR}/src/mame/drivers/c10.cpp
 	${MAME_DIR}/src/mame/drivers/mcb216.cpp
 )
 
-createMESSProjects(_target _subtarget "comx")
-target_sources(comx PRIVATE
+createMESSProjects(_target _subtarget "comx"
 	${MAME_DIR}/src/mame/drivers/comx35.cpp
 	${MAME_DIR}/src/mame/includes/comx35.h
 	${MAME_DIR}/src/mame/video/comx35.cpp
 )
 
-createMESSProjects(_target _subtarget "concept")
-target_sources(concept PRIVATE
+createMESSProjects(_target _subtarget "concept"
 	${MAME_DIR}/src/mame/drivers/concept.cpp
 	${MAME_DIR}/src/mame/includes/concept.h
 	${MAME_DIR}/src/mame/machine/concept.cpp
 )
 
-createMESSProjects(_target _subtarget "conitec")
-target_sources(conitec PRIVATE
+createMESSProjects(_target _subtarget "conitec"
 	${MAME_DIR}/src/mame/drivers/prof180x.cpp
 	${MAME_DIR}/src/mame/includes/prof180x.h
 	${MAME_DIR}/src/mame/drivers/prof80.cpp
@@ -2175,23 +2122,20 @@ target_sources(conitec PRIVATE
 	${MAME_DIR}/src/mame/machine/prof80mmu.h
 )
 
-createMESSProjects(_target _subtarget "cxg")
-target_sources(cxg PRIVATE
+createMESSProjects(_target _subtarget "cxg"
 	${MAME_DIR}/src/mame/drivers/cxg_ch2001.cpp
 	${MAME_DIR}/src/mame/drivers/cxg_dominator.cpp
 	${MAME_DIR}/src/mame/drivers/cxg_scptchess.cpp
 	${MAME_DIR}/src/mame/drivers/cxg_sphinx40.cpp
 )
 
-createMESSProjects(_target _subtarget "cybiko")
-target_sources(cybiko PRIVATE
+createMESSProjects(_target _subtarget "cybiko"
 	${MAME_DIR}/src/mame/drivers/cybiko.cpp
 	${MAME_DIR}/src/mame/includes/cybiko.h
 	${MAME_DIR}/src/mame/machine/cybiko.cpp
 )
 
-createMESSProjects(_target _subtarget "dai")
-target_sources(dai PRIVATE
+createMESSProjects(_target _subtarget "dai"
 	${MAME_DIR}/src/mame/drivers/dai.cpp
 	${MAME_DIR}/src/mame/includes/dai.h
 	${MAME_DIR}/src/mame/audio/dai_snd.cpp
@@ -2200,13 +2144,11 @@ target_sources(dai PRIVATE
 	${MAME_DIR}/src/mame/video/dai.cpp
 )
 
-createMESSProjects(_target _subtarget "dcs")
-target_sources(dcs PRIVATE
+createMESSProjects(_target _subtarget "dcs"
 	${MAME_DIR}/src/mame/drivers/compuchess.cpp
 )
 
-createMESSProjects(_target _subtarget "ddr")
-target_sources(ddr PRIVATE
+createMESSProjects(_target _subtarget "ddr"
 	${MAME_DIR}/src/mame/drivers/ac1.cpp
 	${MAME_DIR}/src/mame/drivers/bcs3.cpp
 	${MAME_DIR}/src/mame/drivers/c80.cpp
@@ -2224,8 +2166,7 @@ target_sources(ddr PRIVATE
 	${MAME_DIR}/src/mame/machine/k7659kb.h
 )
 
-createMESSProjects(_target _subtarget "dec")
-target_sources(dec PRIVATE
+createMESSProjects(_target _subtarget "dec"
 	${MAME_DIR}/src/mame/drivers/dct11em.cpp
 	${MAME_DIR}/src/mame/drivers/decmate2.cpp
 	${MAME_DIR}/src/mame/drivers/decstation.cpp
@@ -2257,54 +2198,46 @@ target_sources(dec PRIVATE
 	${MAME_DIR}/src/mame/video/vtvideo.h
 )
 
-createMESSProjects(_target _subtarget "dicksmth")
-target_sources(dicksmth PRIVATE
+createMESSProjects(_target _subtarget "dicksmth"
 	${MAME_DIR}/src/mame/drivers/super80.cpp
 	${MAME_DIR}/src/mame/includes/super80.h
 	${MAME_DIR}/src/mame/machine/super80.cpp
 	${MAME_DIR}/src/mame/video/super80.cpp
 )
 
-createMESSProjects(_target _subtarget "dms")
-target_sources(dms PRIVATE
+createMESSProjects(_target _subtarget "dms"
 	${MAME_DIR}/src/mame/drivers/dms5000.cpp
 	${MAME_DIR}/src/mame/drivers/dms86.cpp
 	${MAME_DIR}/src/mame/drivers/zsbc3.cpp
 )
 
-createMESSProjects(_target _subtarget "dragon")
-target_sources(dragon PRIVATE
+createMESSProjects(_target _subtarget "dragon"
 	${MAME_DIR}/src/mame/drivers/dgn_beta.cpp
 	${MAME_DIR}/src/mame/includes/dgn_beta.h
 	${MAME_DIR}/src/mame/machine/dgn_beta.cpp
 	${MAME_DIR}/src/mame/video/dgn_beta.cpp
 )
 
-createMESSProjects(_target _subtarget "drc")
-target_sources(drc PRIVATE
+createMESSProjects(_target _subtarget "drc"
 	${MAME_DIR}/src/mame/drivers/zrt80.cpp
 )
 
-createMESSProjects(_target _subtarget "dulmont")
-target_sources(dulmont PRIVATE
+createMESSProjects(_target _subtarget "dulmont"
 	${MAME_DIR}/src/mame/drivers/magnum.cpp
 )
 
-createMESSProjects(_target _subtarget "eaca")
-target_sources(eaca PRIVATE
+createMESSProjects(_target _subtarget "eaca"
 	${MAME_DIR}/src/mame/drivers/cgenie.cpp
 )
 
-createMESSProjects(_target _subtarget "einis")
-target_sources(einis PRIVATE
+createMESSProjects(_target _subtarget "einis"
 	${MAME_DIR}/src/mame/drivers/pecom.cpp
 	${MAME_DIR}/src/mame/includes/pecom.h
 	${MAME_DIR}/src/mame/machine/pecom.cpp
 	${MAME_DIR}/src/mame/video/pecom.cpp
 )
 
-createMESSProjects(_target _subtarget "elektrka")
-target_sources(elektrka PRIVATE
+createMESSProjects(_target _subtarget "elektrka"
 	${MAME_DIR}/src/mame/drivers/bk.cpp
 	${MAME_DIR}/src/mame/includes/bk.h
 	${MAME_DIR}/src/mame/machine/bk.cpp
@@ -2319,29 +2252,25 @@ target_sources(elektrka PRIVATE
 	${MAME_DIR}/src/mame/machine/kr1601rr1.h
 )
 
-createMESSProjects(_target _subtarget "elektor")
-target_sources(elektor PRIVATE
+createMESSProjects(_target _subtarget "elektor"
 	${MAME_DIR}/src/mame/drivers/avrmax.cpp
 	${MAME_DIR}/src/mame/drivers/ec65.cpp
 	${MAME_DIR}/src/mame/drivers/elekscmp.cpp
 	${MAME_DIR}/src/mame/drivers/junior.cpp
 )
 
-createMESSProjects(_target _subtarget "elektron")
-target_sources(elektron PRIVATE
+createMESSProjects(_target _subtarget "elektron"
 	${MAME_DIR}/src/mame/drivers/elektronmono.cpp
 )
 
-createMESSProjects(_target _subtarget "emusys")
-target_sources(emusys PRIVATE
+createMESSProjects(_target _subtarget "emusys"
 	${MAME_DIR}/src/mame/drivers/emax.cpp
 	${MAME_DIR}/src/mame/drivers/emu2.cpp
 	${MAME_DIR}/src/mame/drivers/emu3.cpp
 	${MAME_DIR}/src/mame/drivers/emu68k.cpp
 )
 
-createMESSProjects(_target _subtarget "ensoniq")
-target_sources(ensoniq PRIVATE
+createMESSProjects(_target _subtarget "ensoniq"
 	${MAME_DIR}/src/mame/drivers/esq1.cpp
 	${MAME_DIR}/src/mame/drivers/esq5505.cpp
 	${MAME_DIR}/src/mame/drivers/esqasr.cpp
@@ -2356,15 +2285,13 @@ target_sources(ensoniq PRIVATE
 	${MAME_DIR}/src/mame/machine/esqlcd.h
 )
 
-createMESSProjects(_target _subtarget "enterprise")
-target_sources(enterprise PRIVATE
+createMESSProjects(_target _subtarget "enterprise"
 	${MAME_DIR}/src/mame/drivers/ep64.cpp
 	${MAME_DIR}/src/mame/video/nick.cpp
 	${MAME_DIR}/src/mame/video/nick.h
 )
 
-createMESSProjects(_target _subtarget "entex")
-target_sources(entex PRIVATE
+createMESSProjects(_target _subtarget "entex"
 	${MAME_DIR}/src/mame/drivers/advision.cpp
 	${MAME_DIR}/src/mame/includes/advision.h
 	${MAME_DIR}/src/mame/machine/advision.cpp
@@ -2372,16 +2299,14 @@ target_sources(entex PRIVATE
 	${MAME_DIR}/src/mame/drivers/sag.cpp
 )
 
-createMESSProjects(_target _subtarget "epoch")
-target_sources(epoch PRIVATE
+createMESSProjects(_target _subtarget "epoch"
 	${MAME_DIR}/src/mame/drivers/gamepock.cpp
 	${MAME_DIR}/src/mame/includes/gamepock.h
 	${MAME_DIR}/src/mame/machine/gamepock.cpp
 	${MAME_DIR}/src/mame/drivers/scv.cpp
 )
 
-createMESSProjects(_target _subtarget "epson")
-target_sources(epson PRIVATE
+createMESSProjects(_target _subtarget "epson"
 	${MAME_DIR}/src/mame/drivers/hx20.cpp
 	${MAME_DIR}/src/mame/includes/hx20.h
 	${MAME_DIR}/src/mame/drivers/px4.cpp
@@ -2392,16 +2317,14 @@ target_sources(epson PRIVATE
 	${MAME_DIR}/src/mame/machine/qx10kbd.h
 )
 
-createMESSProjects(_target _subtarget "ericsson")
-target_sources(ericsson PRIVATE
+createMESSProjects(_target _subtarget "ericsson"
 	${MAME_DIR}/src/mame/drivers/e9161.cpp
 	${MAME_DIR}/src/mame/drivers/eispc.cpp
 	${MAME_DIR}/src/mame/machine/eispc_kb.cpp
 	${MAME_DIR}/src/mame/machine/eispc_kb.h
 )
 
-createMESSProjects(_target _subtarget "exidy")
-target_sources(exidy PRIVATE
+createMESSProjects(_target _subtarget "exidy"
 	${MAME_DIR}/src/mame/machine/sorcerer.cpp
 	${MAME_DIR}/src/mame/drivers/sorcerer.cpp
 	${MAME_DIR}/src/mame/includes/sorcerer.h
@@ -2409,13 +2332,11 @@ target_sources(exidy PRIVATE
 	${MAME_DIR}/src/mame/machine/micropolis.h
 )
 
-createMESSProjects(_target _subtarget "exorterm")
-target_sources(exorterm PRIVATE
+createMESSProjects(_target _subtarget "exorterm"
 	${MAME_DIR}/src/mame/drivers/exorterm.cpp
 )
 
-createMESSProjects(_target _subtarget "fairch")
-target_sources(fairch PRIVATE
+createMESSProjects(_target _subtarget "fairch"
 	${MAME_DIR}/src/mame/drivers/channelf.cpp
 	${MAME_DIR}/src/mame/includes/channelf.h
 	${MAME_DIR}/src/mame/audio/channelf.cpp
@@ -2423,8 +2344,7 @@ target_sources(fairch PRIVATE
 	${MAME_DIR}/src/mame/video/channelf.cpp
 )
 
-createMESSProjects(_target _subtarget "fairlight")
-target_sources(fairlight PRIVATE
+createMESSProjects(_target _subtarget "fairlight"
 	${MAME_DIR}/src/mame/drivers/cmi.cpp
 	${MAME_DIR}/src/mame/audio/cmi01a.cpp
 	${MAME_DIR}/src/mame/audio/cmi01a.h
@@ -2434,8 +2354,7 @@ target_sources(fairlight PRIVATE
 	${MAME_DIR}/src/mame/machine/cmi_mkbd.h
 )
 
-createMESSProjects(_target _subtarget "fidelity")
-target_sources(fidelity PRIVATE
+createMESSProjects(_target _subtarget "fidelity"
 	${MAME_DIR}/src/mame/machine/fidel_clockdiv.cpp
 	${MAME_DIR}/src/mame/machine/fidel_clockdiv.h
 	${MAME_DIR}/src/mame/drivers/fidel_as12.cpp
@@ -2460,21 +2379,18 @@ target_sources(fidelity PRIVATE
 	${MAME_DIR}/src/mame/drivers/fidel_vsc.cpp
 )
 
-createMESSProjects(_target _subtarget "force")
-target_sources(force PRIVATE
+createMESSProjects(_target _subtarget "force"
 	${MAME_DIR}/src/mame/drivers/miniforce.cpp
 	${MAME_DIR}/src/mame/drivers/fccpu20.cpp
 	${MAME_DIR}/src/mame/drivers/fccpu30.cpp
 	${MAME_DIR}/src/mame/drivers/force68k.cpp
 )
 
-createMESSProjects(_target _subtarget "francedr")
-target_sources(francedr PRIVATE
+createMESSProjects(_target _subtarget "francedr"
 	${MAME_DIR}/src/mame/drivers/regence.cpp
 )
 
-createMESSProjects(_target _subtarget "fujitsu")
-target_sources(fujitsu PRIVATE
+createMESSProjects(_target _subtarget "fujitsu"
 	${MAME_DIR}/src/mame/drivers/fmtowns.cpp
 	${MAME_DIR}/src/mame/includes/fmtowns.h
 	${MAME_DIR}/src/mame/video/fmtowns.cpp
@@ -2487,67 +2403,57 @@ target_sources(fujitsu PRIVATE
 	${MAME_DIR}/src/mame/video/fm7.cpp
 )
 
-createMESSProjects(_target _subtarget "funtech")
-target_sources(funtech PRIVATE
+createMESSProjects(_target _subtarget "funtech"
 	${MAME_DIR}/src/mame/drivers/supracan.cpp
 	${MAME_DIR}/src/mame/audio/acan.cpp
 	${MAME_DIR}/src/mame/audio/acan.h
 )
 
-createMESSProjects(_target _subtarget "galaxy")
-target_sources(galaxy PRIVATE
+createMESSProjects(_target _subtarget "galaxy"
 	${MAME_DIR}/src/mame/drivers/galaxy.cpp
 	${MAME_DIR}/src/mame/includes/galaxy.h
 	${MAME_DIR}/src/mame/machine/galaxy.cpp
 	${MAME_DIR}/src/mame/video/galaxy.cpp
 )
 
-createMESSProjects(_target _subtarget "gamepark")
-target_sources(gamepark PRIVATE
+createMESSProjects(_target _subtarget "gamepark"
 	${MAME_DIR}/src/mame/drivers/gp2x.cpp
 	${MAME_DIR}/src/mame/drivers/gp32.cpp
 	${MAME_DIR}/src/mame/includes/gp32.h
 )
 
-createMESSProjects(_target _subtarget "gi")
-target_sources(gi PRIVATE
+createMESSProjects(_target _subtarget "gi"
 	${MAME_DIR}/src/mame/drivers/hh_pic16.cpp
 )
 
-createMESSProjects(_target _subtarget "gridcomp")
-target_sources(gridcomp PRIVATE
+createMESSProjects(_target _subtarget "gridcomp"
 	${MAME_DIR}/src/mame/drivers/gridcomp.cpp
 	${MAME_DIR}/src/mame/machine/gridkeyb.cpp
 	${MAME_DIR}/src/mame/machine/gridkeyb.h
 )
 
-createMESSProjects(_target _subtarget "grundy")
-target_sources(grundy PRIVATE
+createMESSProjects(_target _subtarget "grundy"
 	${MAME_DIR}/src/mame/drivers/newbrain.cpp
 	${MAME_DIR}/src/mame/includes/newbrain.h
 	${MAME_DIR}/src/mame/video/newbrain.cpp
 )
 
-createMESSProjects(_target _subtarget "h01x")
-target_sources(h01x PRIVATE
+createMESSProjects(_target _subtarget "h01x"
 	${MAME_DIR}/src/mame/drivers/h01x.cpp
 )
 
-createMESSProjects(_target _subtarget "hartung")
-target_sources(hartung PRIVATE
+createMESSProjects(_target _subtarget "hartung"
 	${MAME_DIR}/src/mame/drivers/gmaster.cpp
 )
 
-createMESSProjects(_target _subtarget "heathkit")
-target_sources(heathkit PRIVATE
+createMESSProjects(_target _subtarget "heathkit"
 	${MAME_DIR}/src/mame/drivers/et3400.cpp
 	${MAME_DIR}/src/mame/drivers/h8.cpp
 	${MAME_DIR}/src/mame/drivers/h19.cpp
 	${MAME_DIR}/src/mame/drivers/h89.cpp
 )
 
-createMESSProjects(_target _subtarget "hegener")
-target_sources(hegener PRIVATE
+createMESSProjects(_target _subtarget "hegener"
 	${MAME_DIR}/src/mame/drivers/mephisto_academy.cpp
 	${MAME_DIR}/src/mame/drivers/mephisto_amsterdam.cpp
 	${MAME_DIR}/src/mame/drivers/mephisto_berlin.cpp
@@ -2574,16 +2480,14 @@ target_sources(hegener PRIVATE
 	${MAME_DIR}/src/mame/video/mmdisplay2.h
 )
 
-createMESSProjects(_target _subtarget "hitachi")
-target_sources(hitachi PRIVATE
+createMESSProjects(_target _subtarget "hitachi"
 	${MAME_DIR}/src/mame/drivers/b16.cpp
 	${MAME_DIR}/src/mame/drivers/bmjr.cpp
 	${MAME_DIR}/src/mame/drivers/bml3.cpp
 	${MAME_DIR}/src/mame/drivers/hh_hmcs40.cpp
 )
 
-createMESSProjects(_target _subtarget "homebrew")
-target_sources(homebrew PRIVATE
+createMESSProjects(_target _subtarget "homebrew"
 	${MAME_DIR}/src/mame/drivers/4004clk.cpp
 	${MAME_DIR}/src/mame/drivers/68ksbc.cpp
 	${MAME_DIR}/src/mame/drivers/lft_chiptune.cpp
@@ -2605,14 +2509,12 @@ target_sources(homebrew PRIVATE
 	${MAME_DIR}/src/mame/drivers/zexall.cpp
 )
 
-createMESSProjects(_target _subtarget "homelab")
-target_sources(homelab PRIVATE
+createMESSProjects(_target _subtarget "homelab"
 	${MAME_DIR}/src/mame/drivers/braiplus.cpp
 	${MAME_DIR}/src/mame/drivers/homelab.cpp
 )
 
-createMESSProjects(_target _subtarget "hp")
-target_sources(hp PRIVATE
+createMESSProjects(_target _subtarget "hp"
 	${MAME_DIR}/src/mame/drivers/hp16500.cpp
 	${MAME_DIR}/src/mame/drivers/hp48.cpp
 	${MAME_DIR}/src/mame/includes/hp48.h
@@ -2652,29 +2554,25 @@ target_sources(hp PRIVATE
 	${MAME_DIR}/src/mame/drivers/jornada.cpp
 )
 
-createMESSProjects(_target _subtarget "hec2hrp")
-target_sources(hec2hrp PRIVATE
+createMESSProjects(_target _subtarget "hec2hrp"
 	${MAME_DIR}/src/mame/drivers/hec2hrp.cpp
 	${MAME_DIR}/src/mame/includes/hec2hrp.h
 	${MAME_DIR}/src/mame/machine/hec2hrp.cpp
 	${MAME_DIR}/src/mame/video/hec2hrp.cpp
 )
 
-createMESSProjects(_target _subtarget "heurikon")
-target_sources(heurikon PRIVATE
+createMESSProjects(_target _subtarget "heurikon"
 	${MAME_DIR}/src/mame/drivers/hk68v10.cpp
 )
 
-createMESSProjects(_target _subtarget "husky")
-target_sources(husky PRIVATE
+createMESSProjects(_target _subtarget "husky"
 	${MAME_DIR}/src/mame/drivers/hawk.cpp
 	${MAME_DIR}/src/mame/drivers/hunter2.cpp
 	${MAME_DIR}/src/mame/drivers/hunter16.cpp
 	${MAME_DIR}/src/mame/drivers/husky.cpp
 )
 
-createMESSProjects(_target _subtarget "ibm6580")
-target_sources(ibm6580 PRIVATE
+createMESSProjects(_target _subtarget "ibm6580"
 	${MAME_DIR}/src/mame/drivers/ibm6580.cpp
 	${MAME_DIR}/src/mame/machine/ibm6580_kbd.cpp
 	${MAME_DIR}/src/mame/machine/ibm6580_kbd.h
@@ -2682,13 +2580,11 @@ target_sources(ibm6580 PRIVATE
 	${MAME_DIR}/src/mame/machine/ibm6580_fdc.h
 )
 
-createMESSProjects(_target _subtarget "ie15")
-target_sources(ie15 PRIVATE
+createMESSProjects(_target _subtarget "ie15"
 	${MAME_DIR}/src/mame/drivers/ie15.cpp
 )
 
-createMESSProjects(_target _subtarget "informer")
-target_sources(informer PRIVATE
+createMESSProjects(_target _subtarget "informer"
 	${MAME_DIR}/src/mame/drivers/informer_207_100.cpp
 	${MAME_DIR}/src/mame/drivers/informer_207_376.cpp
 	${MAME_DIR}/src/mame/drivers/informer_213.cpp
@@ -2698,8 +2594,7 @@ target_sources(informer PRIVATE
 	${MAME_DIR}/src/mame/machine/informer_213_kbd.h
 )
 
-createMESSProjects(_target _subtarget "intel")
-target_sources(intel PRIVATE
+createMESSProjects(_target _subtarget "intel"
 	${MAME_DIR}/src/mame/drivers/basic52.cpp
 	${MAME_DIR}/src/mame/drivers/imds2.cpp
 	${MAME_DIR}/src/mame/drivers/intellec4.cpp
@@ -2724,14 +2619,12 @@ target_sources(intel PRIVATE
 	${MAME_DIR}/src/mame/machine/imds2ioc.h
 )
 
-createMESSProjects(_target _subtarget "imp")
-target_sources(imp PRIVATE
+createMESSProjects(_target _subtarget "imp"
 	${MAME_DIR}/src/mame/drivers/tim011.cpp
 	${MAME_DIR}/src/mame/drivers/tim100.cpp
 )
 
-createMESSProjects(_target _subtarget "interpro")
-target_sources(interpro PRIVATE
+createMESSProjects(_target _subtarget "interpro"
 	${MAME_DIR}/src/mame/drivers/interpro.cpp
 	${MAME_DIR}/src/mame/machine/cammu.h
 	${MAME_DIR}/src/mame/machine/cammu.cpp
@@ -2745,8 +2638,7 @@ target_sources(interpro PRIVATE
 	${MAME_DIR}/src/mame/machine/interpro_arbga.cpp
 )
 
-createMESSProjects(_target _subtarget "interton")
-target_sources(interton PRIVATE
+createMESSProjects(_target _subtarget "interton"
 	${MAME_DIR}/src/mame/drivers/vc4000.cpp
 	${MAME_DIR}/src/mame/includes/vc4000.h
 	${MAME_DIR}/src/mame/audio/vc4000.cpp
@@ -2754,8 +2646,7 @@ target_sources(interton PRIVATE
 	${MAME_DIR}/src/mame/video/vc4000.cpp
 )
 
-createMESSProjects(_target _subtarget "intv")
-target_sources(intv PRIVATE
+createMESSProjects(_target _subtarget "intv"
 	${MAME_DIR}/src/mame/drivers/intv.cpp
 	${MAME_DIR}/src/mame/includes/intv.h
 	${MAME_DIR}/src/mame/machine/intv.cpp
@@ -2764,20 +2655,17 @@ target_sources(intv PRIVATE
 	${MAME_DIR}/src/mame/video/stic.h
 )
 
-createMESSProjects(_target _subtarget "isc")
-target_sources(isc PRIVATE
+createMESSProjects(_target _subtarget "isc"
 	${MAME_DIR}/src/mame/drivers/compucolor.cpp
 )
 
-createMESSProjects(_target _subtarget "jazz")
-target_sources(jazz PRIVATE
+createMESSProjects(_target _subtarget "jazz"
 	${MAME_DIR}/src/mame/drivers/jazz.cpp
 	${MAME_DIR}/src/mame/machine/mct_adr.cpp
 	${MAME_DIR}/src/mame/machine/mct_adr.h
 )
 
-createMESSProjects(_target _subtarget "kawai")
-target_sources(kawai PRIVATE
+createMESSProjects(_target _subtarget "kawai"
 	${MAME_DIR}/src/mame/drivers/kawai_k1.cpp
 	${MAME_DIR}/src/mame/drivers/kawai_k4.cpp
 	${MAME_DIR}/src/mame/drivers/kawai_k5.cpp
@@ -2786,8 +2674,7 @@ target_sources(kawai PRIVATE
 	${MAME_DIR}/src/mame/drivers/kawai_sx240.cpp
 )
 
-createMESSProjects(_target _subtarget "kaypro")
-target_sources(kaypro PRIVATE
+createMESSProjects(_target _subtarget "kaypro"
 	${MAME_DIR}/src/mame/drivers/kaypro.cpp
 	${MAME_DIR}/src/mame/includes/kaypro.h
 	${MAME_DIR}/src/mame/machine/kaypro.cpp
@@ -2796,18 +2683,15 @@ target_sources(kaypro PRIVATE
 	${MAME_DIR}/src/mame/video/kaypro.cpp
 )
 
-createMESSProjects(_target _subtarget "koei")
-target_sources(koei PRIVATE
+createMESSProjects(_target _subtarget "koei"
 	${MAME_DIR}/src/mame/drivers/pasogo.cpp
 )
 
-createMESSProjects(_target _subtarget "kontron")
-target_sources(kontron PRIVATE
+createMESSProjects(_target _subtarget "kontron"
 	${MAME_DIR}/src/mame/drivers/kdt6.cpp
 )
 
-createMESSProjects(_target _subtarget "korg")
-target_sources(korg PRIVATE
+createMESSProjects(_target _subtarget "korg"
 	${MAME_DIR}/src/mame/drivers/korgds8.cpp
 	${MAME_DIR}/src/mame/drivers/korgdss1.cpp
 	${MAME_DIR}/src/mame/drivers/korgdvp1.cpp
@@ -2820,49 +2704,42 @@ target_sources(korg PRIVATE
 	${MAME_DIR}/src/mame/drivers/polysix.cpp
 )
 
-createMESSProjects(_target _subtarget "kurzweil")
-target_sources(kurzweil PRIVATE
+createMESSProjects(_target _subtarget "kurzweil"
 	${MAME_DIR}/src/mame/drivers/krz2000.cpp
 )
 
-createMESSProjects(_target _subtarget "kyber")
-target_sources(kyber PRIVATE
+createMESSProjects(_target _subtarget "kyber"
 	${MAME_DIR}/src/mame/drivers/kminus.cpp
 )
 
-createMESSProjects(_target _subtarget "kyocera")
-target_sources(kyocera PRIVATE
+createMESSProjects(_target _subtarget "kyocera"
 	${MAME_DIR}/src/mame/drivers/kyocera.cpp
 	${MAME_DIR}/src/mame/includes/kyocera.h
 	${MAME_DIR}/src/mame/video/kyocera.cpp
 )
 
-createMESSProjects(_target _subtarget "leapfrog")
-target_sources(leapfrog PRIVATE
+createMESSProjects(_target _subtarget "leapfrog"
 	${MAME_DIR}/src/mame/drivers/leapster.cpp
 	${MAME_DIR}/src/mame/drivers/leapfrog_leappad.cpp
 	${MAME_DIR}/src/mame/drivers/leapfrog_leapster_explorer.cpp
 	${MAME_DIR}/src/mame/drivers/leapfrog_iquest.cpp
 )
 
-createMESSProjects(_target _subtarget "learsiegler")
-target_sources(learsiegler PRIVATE
+createMESSProjects(_target _subtarget "learsiegler"
 	${MAME_DIR}/src/mame/drivers/adm11.cpp
 	${MAME_DIR}/src/mame/drivers/adm23.cpp
 	${MAME_DIR}/src/mame/drivers/adm31.cpp
 	${MAME_DIR}/src/mame/drivers/adm36.cpp
 )
 
-createMESSProjects(_target _subtarget "lsi")
-target_sources(lsi PRIVATE
+createMESSProjects(_target _subtarget "lsi"
 	${MAME_DIR}/src/mame/drivers/m3.cpp
 	${MAME_DIR}/src/mame/drivers/octopus.cpp
 	${MAME_DIR}/src/mame/machine/octo_kbd.cpp
 	${MAME_DIR}/src/mame/machine/octo_kbd.h
 )
 
-createMESSProjects(_target _subtarget "luxor")
-target_sources(luxor PRIVATE
+createMESSProjects(_target _subtarget "luxor"
 	${MAME_DIR}/src/mame/drivers/abc80.cpp
 	${MAME_DIR}/src/mame/includes/abc80.h
 	${MAME_DIR}/src/mame/machine/abc80kb.cpp
@@ -2881,18 +2758,15 @@ target_sources(luxor PRIVATE
 	${MAME_DIR}/src/mame/video/abc1600.h
 )
 
-createMESSProjects(_target _subtarget "magnavox")
-target_sources(magnavox PRIVATE
+createMESSProjects(_target _subtarget "magnavox"
 	${MAME_DIR}/src/mame/drivers/odyssey2.cpp
 )
 
-createMESSProjects(_target _subtarget "makerbot")
-target_sources(makerbot PRIVATE
+createMESSProjects(_target _subtarget "makerbot"
 	${MAME_DIR}/src/mame/drivers/replicator.cpp
 )
 
-createMESSProjects(_target _subtarget "mattel")
-target_sources(mattel PRIVATE
+createMESSProjects(_target _subtarget "mattel"
 	${MAME_DIR}/src/mame/drivers/aquarius.cpp
 	${MAME_DIR}/src/mame/includes/aquarius.h
 	${MAME_DIR}/src/mame/video/aquarius.cpp
@@ -2900,34 +2774,29 @@ target_sources(mattel PRIVATE
 	${MAME_DIR}/src/mame/drivers/mattelchess.cpp
 )
 
-createMESSProjects(_target _subtarget "matsushi")
-target_sources(matsushi PRIVATE
+createMESSProjects(_target _subtarget "matsushi"
 	${MAME_DIR}/src/mame/drivers/jr100.cpp
 	${MAME_DIR}/src/mame/drivers/jr200.cpp
 	${MAME_DIR}/src/mame/drivers/myb3k.cpp
 	${MAME_DIR}/src/mame/drivers/duet16.cpp
 )
 
-createMESSProjects(_target _subtarget "mb")
-target_sources(mb PRIVATE
+createMESSProjects(_target _subtarget "mb"
 	${MAME_DIR}/src/mame/drivers/microvsn.cpp
 	${MAME_DIR}/src/mame/drivers/milton6805.cpp
 )
 
-createMESSProjects(_target _subtarget "mchester")
-target_sources(mchester PRIVATE
+createMESSProjects(_target _subtarget "mchester"
 	${MAME_DIR}/src/mame/drivers/ssem.cpp
 )
 
-createMESSProjects(_target _subtarget "memotech")
-target_sources(memotech PRIVATE
+createMESSProjects(_target _subtarget "memotech"
 	${MAME_DIR}/src/mame/drivers/mtx.cpp
 	${MAME_DIR}/src/mame/includes/mtx.h
 	${MAME_DIR}/src/mame/machine/mtx.cpp
 )
 
-createMESSProjects(_target _subtarget "mera")
-target_sources(mera PRIVATE
+createMESSProjects(_target _subtarget "mera"
 	${MAME_DIR}/src/mame/drivers/ec7915.cpp
 	${MAME_DIR}/src/mame/drivers/konin.cpp
 	${MAME_DIR}/src/mame/drivers/m79152pc.cpp
@@ -2935,48 +2804,41 @@ target_sources(mera PRIVATE
 	${MAME_DIR}/src/mame/drivers/vdm7932x.cpp
 )
 
-createMESSProjects(_target _subtarget "mg1")
-target_sources(mg1 PRIVATE
+createMESSProjects(_target _subtarget "mg1"
 	${MAME_DIR}/src/mame/drivers/mg1.cpp
 )
 
-createMESSProjects(_target _subtarget "mgu")
-target_sources(mgu PRIVATE
+createMESSProjects(_target _subtarget "mgu"
 	${MAME_DIR}/src/mame/drivers/irisha.cpp
 )
 
-createMESSProjects(_target _subtarget "microkey")
-target_sources(microkey PRIVATE
+createMESSProjects(_target _subtarget "microkey"
 	${MAME_DIR}/src/mame/drivers/primo.cpp
 	${MAME_DIR}/src/mame/includes/primo.h
 	${MAME_DIR}/src/mame/machine/primo.cpp
 )
 
-createMESSProjects(_target _subtarget "microsoft")
-target_sources(microsoft PRIVATE
+createMESSProjects(_target _subtarget "microsoft"
 	${MAME_DIR}/src/mame/drivers/xbox.cpp
 	${MAME_DIR}/src/mame/includes/xbox.h
 	${MAME_DIR}/src/mame/includes/xbox_usb.h
 	${MAME_DIR}/src/mame/includes/xbox_pci.h
 )
 
-createMESSProjects(_target _subtarget "microterm")
-target_sources(microterm PRIVATE
+createMESSProjects(_target _subtarget "microterm"
 	${MAME_DIR}/src/mame/drivers/ergo201.cpp
 	${MAME_DIR}/src/mame/drivers/microterm_f8.cpp
 	${MAME_DIR}/src/mame/drivers/mt420.cpp
 	${MAME_DIR}/src/mame/drivers/mt5510.cpp
 )
 
-createMESSProjects(_target _subtarget "mips")
-target_sources(mips PRIVATE
+createMESSProjects(_target _subtarget "mips"
 	${MAME_DIR}/src/mame/drivers/mips.cpp
 	${MAME_DIR}/src/mame/machine/mips_rambo.h
 	${MAME_DIR}/src/mame/machine/mips_rambo.cpp
 )
 
-createMESSProjects(_target _subtarget "mit")
-target_sources(mit PRIVATE
+createMESSProjects(_target _subtarget "mit"
 	${MAME_DIR}/src/mame/drivers/tx0.cpp
 	${MAME_DIR}/src/mame/includes/tx0.h
 	${MAME_DIR}/src/mame/video/crt.cpp
@@ -2984,39 +2846,33 @@ target_sources(mit PRIVATE
 	${MAME_DIR}/src/mame/video/tx0.cpp
 )
 
-createMESSProjects(_target _subtarget "mits")
-target_sources(mits PRIVATE
+createMESSProjects(_target _subtarget "mits"
 	${MAME_DIR}/src/mame/drivers/altair.cpp
 	${MAME_DIR}/src/mame/drivers/mits680b.cpp
 )
 
-createMESSProjects(_target _subtarget "mitsubishi")
-target_sources(mitsubishi PRIVATE
+createMESSProjects(_target _subtarget "mitsubishi"
 	${MAME_DIR}/src/mame/drivers/hh_melps4.cpp
 	${MAME_DIR}/src/mame/drivers/multi8.cpp
 	${MAME_DIR}/src/mame/drivers/multi16.cpp
 )
 
-createMESSProjects(_target _subtarget "mizar")
-target_sources(mizar PRIVATE
+createMESSProjects(_target _subtarget "mizar"
 	${MAME_DIR}/src/mame/drivers/mzr8105.cpp
 )
 
-createMESSProjects(_target _subtarget "morrow")
-target_sources(morrow PRIVATE
+createMESSProjects(_target _subtarget "morrow"
 	${MAME_DIR}/src/mame/drivers/microdec.cpp
 	${MAME_DIR}/src/mame/drivers/mpz80.cpp
 	${MAME_DIR}/src/mame/includes/mpz80.h
 	${MAME_DIR}/src/mame/drivers/tricep.cpp
 )
 
-createMESSProjects(_target _subtarget "mos")
-target_sources(mos PRIVATE
+createMESSProjects(_target _subtarget "mos"
 	${MAME_DIR}/src/mame/drivers/kim1.cpp
 )
 
-createMESSProjects(_target _subtarget "motorola")
-target_sources(motorola PRIVATE
+createMESSProjects(_target _subtarget "motorola"
 	${MAME_DIR}/src/mame/drivers/exorciser.cpp
 	${MAME_DIR}/src/mame/drivers/m6805evs.cpp
 	${MAME_DIR}/src/mame/drivers/m68705prg.cpp
@@ -3030,38 +2886,32 @@ target_sources(motorola PRIVATE
 	${MAME_DIR}/src/mame/drivers/uchroma68.cpp
 )
 
-createMESSProjects(_target _subtarget "multitch")
-target_sources(multitch PRIVATE
+createMESSProjects(_target _subtarget "multitch"
 	${MAME_DIR}/src/mame/drivers/mkit09.cpp
 	${MAME_DIR}/src/mame/drivers/mpf1.cpp
 	${MAME_DIR}/src/mame/includes/mpf1.h
 )
 
-createMESSProjects(_target _subtarget "mupid")
-target_sources(mupid PRIVATE
+createMESSProjects(_target _subtarget "mupid"
 	${MAME_DIR}/src/mame/drivers/mdisk.cpp
 	${MAME_DIR}/src/mame/drivers/mupid2.cpp
 )
 
-createMESSProjects(_target _subtarget "nakajima")
-target_sources(nakajima PRIVATE
+createMESSProjects(_target _subtarget "nakajima"
 	${MAME_DIR}/src/mame/drivers/nakajies.cpp
 )
 
-createMESSProjects(_target _subtarget "nascom")
-target_sources(nascom PRIVATE
+createMESSProjects(_target _subtarget "nascom"
 	${MAME_DIR}/src/mame/drivers/nascom1.cpp
 )
 
-createMESSProjects(_target _subtarget "natsemi")
-target_sources(natsemi PRIVATE
+createMESSProjects(_target _subtarget "natsemi"
 	${MAME_DIR}/src/mame/drivers/hh_cop400.cpp
 	${MAME_DIR}/src/mame/drivers/hh_cops1.cpp
 	${MAME_DIR}/src/mame/drivers/ns5652.cpp
 )
 
-createMESSProjects(_target _subtarget "ncd")
-target_sources(ncd PRIVATE
+createMESSProjects(_target _subtarget "ncd"
 	${MAME_DIR}/src/mame/drivers/ncd68k.cpp
 	${MAME_DIR}/src/mame/drivers/ncd88k.cpp
 	${MAME_DIR}/src/mame/drivers/ncdmips.cpp
@@ -3069,15 +2919,13 @@ target_sources(ncd PRIVATE
 	${MAME_DIR}/src/mame/machine/bert.cpp
 )
 
-createMESSProjects(_target _subtarget "ne")
-target_sources(ne PRIVATE
+createMESSProjects(_target _subtarget "ne"
 	${MAME_DIR}/src/mame/drivers/z80ne.cpp
 	${MAME_DIR}/src/mame/includes/z80ne.h
 	${MAME_DIR}/src/mame/machine/z80ne.cpp
 )
 
-createMESSProjects(_target _subtarget "nec")
-target_sources(nec PRIVATE
+createMESSProjects(_target _subtarget "nec"
 	${MAME_DIR}/src/mame/drivers/apc.cpp
 	${MAME_DIR}/src/mame/drivers/ews4800.cpp
 	${MAME_DIR}/src/mame/drivers/hh_ucom4.cpp
@@ -3112,16 +2960,14 @@ target_sources(nec PRIVATE
 	${MAME_DIR}/src/mame/drivers/tk80bs.cpp
 )
 
-createMESSProjects(_target _subtarget "netronic")
-target_sources(netronic PRIVATE
+createMESSProjects(_target _subtarget "netronic"
 	${MAME_DIR}/src/mame/drivers/elf.cpp
 	${MAME_DIR}/src/mame/includes/elf.h
 	${MAME_DIR}/src/mame/drivers/exp85.cpp
 	${MAME_DIR}/src/mame/includes/exp85.h
 )
 
-createMESSProjects(_target _subtarget "next")
-target_sources(next PRIVATE
+createMESSProjects(_target _subtarget "next"
 	${MAME_DIR}/src/mame/drivers/next.cpp
 	${MAME_DIR}/src/mame/includes/next.h
 	${MAME_DIR}/src/mame/machine/nextkbd.cpp
@@ -3130,8 +2976,7 @@ target_sources(next PRIVATE
 	${MAME_DIR}/src/mame/machine/nextmo.h
 )
 
-createMESSProjects(_target _subtarget "nintendo")
-target_sources(nintendo PRIVATE
+createMESSProjects(_target _subtarget "nintendo"
 	${MAME_DIR}/src/mame/drivers/gb.cpp
 	${MAME_DIR}/src/mame/includes/gb.h
 	${MAME_DIR}/src/mame/machine/gb.cpp
@@ -3191,8 +3036,7 @@ target_sources(nintendo PRIVATE
 	${MAME_DIR}/src/mame/drivers/compmahj.cpp
 )
 
-createMESSProjects(_target _subtarget "nokia")
-target_sources(nokia PRIVATE
+createMESSProjects(_target _subtarget "nokia"
 	${MAME_DIR}/src/mame/drivers/dbox.cpp
 	${MAME_DIR}/src/mame/drivers/mikromik.cpp
 	${MAME_DIR}/src/mame/includes/mikromik.h
@@ -3202,13 +3046,11 @@ target_sources(nokia PRIVATE
 	${MAME_DIR}/src/mame/drivers/nokia_3310.cpp
 )
 
-createMESSProjects(_target _subtarget "northstar")
-target_sources(northstar PRIVATE
+createMESSProjects(_target _subtarget "northstar"
 	${MAME_DIR}/src/mame/drivers/horizon.cpp
 )
 
-createMESSProjects(_target _subtarget "novag")
-target_sources(novag PRIVATE
+createMESSProjects(_target _subtarget "novag"
 	${MAME_DIR}/src/mame/drivers/novag_cexpert.cpp
 	${MAME_DIR}/src/mame/drivers/novag_cforte.cpp
 	${MAME_DIR}/src/mame/drivers/novag_const.cpp
@@ -3220,14 +3062,12 @@ target_sources(novag PRIVATE
 	${MAME_DIR}/src/mame/drivers/novag_snova.cpp
 )
 
-createMESSProjects(_target _subtarget "novation")
-target_sources(novation PRIVATE
+createMESSProjects(_target _subtarget "novation"
 	${MAME_DIR}/src/mame/drivers/basssta.cpp
 	${MAME_DIR}/src/mame/drivers/drumsta.cpp
 )
 
-createMESSProjects(_target _subtarget "olivetti")
-target_sources(olivetti PRIVATE
+createMESSProjects(_target _subtarget "olivetti"
 	${MAME_DIR}/src/mame/drivers/m20.cpp
 	${MAME_DIR}/src/mame/machine/m20_kbd.cpp
 	${MAME_DIR}/src/mame/machine/m20_kbd.h
@@ -3241,35 +3081,30 @@ target_sources(olivetti PRIVATE
 	${MAME_DIR}/src/mame/drivers/olivpc1.cpp
 )
 
-createMESSProjects(_target _subtarget "olympia")
-target_sources(olympia PRIVATE
+createMESSProjects(_target _subtarget "olympia"
 	${MAME_DIR}/src/mame/drivers/olyboss.cpp
 	${MAME_DIR}/src/mame/drivers/olytext.cpp
 	${MAME_DIR}/src/mame/drivers/peoplepc.cpp
 )
 
-createMESSProjects(_target _subtarget "omnibyte")
-target_sources(omnibyte PRIVATE
+createMESSProjects(_target _subtarget "omnibyte"
 	${MAME_DIR}/src/mame/drivers/msbc1.cpp
 	${MAME_DIR}/src/mame/drivers/ob68k1a.cpp
 	${MAME_DIR}/src/mame/includes/ob68k1a.h
 )
 
-createMESSProjects(_target _subtarget "openuni")
-target_sources(openuni PRIVATE
+createMESSProjects(_target _subtarget "openuni"
 	${MAME_DIR}/src/mame/drivers/hektor.cpp
 )
 
-createMESSProjects(_target _subtarget "orion")
-target_sources(orion PRIVATE
+createMESSProjects(_target _subtarget "orion"
 	${MAME_DIR}/src/mame/drivers/orion.cpp
 	${MAME_DIR}/src/mame/includes/orion.h
 	${MAME_DIR}/src/mame/machine/orion.cpp
 	${MAME_DIR}/src/mame/video/orion.cpp
 )
 
-createMESSProjects(_target _subtarget "osborne")
-target_sources(osborne PRIVATE
+createMESSProjects(_target _subtarget "osborne"
 	${MAME_DIR}/src/mame/drivers/osborne1.cpp
 	${MAME_DIR}/src/mame/includes/osborne1.h
 	${MAME_DIR}/src/mame/machine/osborne1.cpp
@@ -3278,33 +3113,28 @@ target_sources(osborne PRIVATE
 	${MAME_DIR}/src/mame/includes/vixen.h
 )
 
-createMESSProjects(_target _subtarget "osi")
-target_sources(osi PRIVATE
+createMESSProjects(_target _subtarget "osi"
 	${MAME_DIR}/src/mame/drivers/osi.cpp
 	${MAME_DIR}/src/mame/includes/osi.h
 	${MAME_DIR}/src/mame/video/osi.cpp
 )
 
-createMESSProjects(_target _subtarget "palm")
-target_sources(palm PRIVATE
+createMESSProjects(_target _subtarget "palm"
 	${MAME_DIR}/src/mame/drivers/palm.cpp
 	${MAME_DIR}/src/mame/drivers/palm_dbg.hxx
 	${MAME_DIR}/src/mame/drivers/palmz22.cpp
 )
 
-createMESSProjects(_target _subtarget "parker")
-target_sources(parker PRIVATE
+createMESSProjects(_target _subtarget "parker"
 	${MAME_DIR}/src/mame/drivers/talkingbb.cpp
 	${MAME_DIR}/src/mame/drivers/talkingfb.cpp
 )
 
-createMESSProjects(_target _subtarget "pitronic")
-target_sources(pitronic PRIVATE
+createMESSProjects(_target _subtarget "pitronic"
 	${MAME_DIR}/src/mame/drivers/beta.cpp
 )
 
-createMESSProjects(_target _subtarget "pc")
-target_sources(pc PRIVATE
+createMESSProjects(_target _subtarget "pc"
 	${MAME_DIR}/src/mame/drivers/asst128.cpp
 	${MAME_DIR}/src/mame/drivers/europc.cpp
 	${MAME_DIR}/src/mame/drivers/genpc.cpp
@@ -3322,21 +3152,18 @@ target_sources(pc PRIVATE
 	${MAME_DIR}/src/mame/video/pc_t1t.h
 )
 
-createMESSProjects(_target _subtarget "pdp1")
-target_sources(pdp1 PRIVATE
+createMESSProjects(_target _subtarget "pdp1"
 	${MAME_DIR}/src/mame/drivers/pdp1.cpp
 	${MAME_DIR}/src/mame/includes/pdp1.h
 	${MAME_DIR}/src/mame/video/pdp1.cpp
 )
 
-createMESSProjects(_target _subtarget "pel")
-target_sources(pel PRIVATE
+createMESSProjects(_target _subtarget "pel"
 	${MAME_DIR}/src/mame/drivers/galeb.cpp
 	${MAME_DIR}/src/mame/drivers/orao.cpp
 )
 
-createMESSProjects(_target _subtarget "philips")
-target_sources(philips PRIVATE
+createMESSProjects(_target _subtarget "philips"
 	${MAME_DIR}/src/mame/drivers/p2000t.cpp
 	${MAME_DIR}/src/mame/includes/p2000t.h
 	${MAME_DIR}/src/mame/machine/p2000t.cpp
@@ -3346,23 +3173,20 @@ target_sources(philips PRIVATE
 	${MAME_DIR}/src/mame/drivers/yes.cpp
 )
 
-createMESSProjects(_target _subtarget "poly")
-target_sources(poly PRIVATE
+createMESSProjects(_target _subtarget "poly"
 	${MAME_DIR}/src/mame/drivers/poly.cpp
 	${MAME_DIR}/src/mame/includes/poly.h
 	${MAME_DIR}/src/mame/machine/poly.cpp
 	${MAME_DIR}/src/mame/drivers/proteus.cpp
 )
 
-createMESSProjects(_target _subtarget "poly88")
-target_sources(poly88 PRIVATE
+createMESSProjects(_target _subtarget "poly88"
 	${MAME_DIR}/src/mame/drivers/poly88.cpp
 	${MAME_DIR}/src/mame/includes/poly88.h
 	${MAME_DIR}/src/mame/machine/poly88.cpp
 )
 
-createMESSProjects(_target _subtarget "psion")
-target_sources(psion PRIVATE
+createMESSProjects(_target _subtarget "psion"
 	${MAME_DIR}/src/mame/drivers/psion.cpp
 	${MAME_DIR}/src/mame/includes/psion.h
 	${MAME_DIR}/src/mame/drivers/psion5.cpp
@@ -3373,14 +3197,12 @@ target_sources(psion PRIVATE
 	${MAME_DIR}/src/mame/machine/psion_pack.h
 )
 
-createMESSProjects(_target _subtarget "quantel")
-target_sources(quantel PRIVATE
+createMESSProjects(_target _subtarget "quantel"
 	${MAME_DIR}/src/mame/drivers/dpb7000.cpp
 	${MAME_DIR}/src/mame/drivers/harriet.cpp
 )
 
-createMESSProjects(_target _subtarget "qume")
-target_sources(qume PRIVATE
+createMESSProjects(_target _subtarget "qume"
 	${MAME_DIR}/src/mame/drivers/qvt70.cpp
 	${MAME_DIR}/src/mame/drivers/qvt102.cpp
 	${MAME_DIR}/src/mame/drivers/qvt103.cpp
@@ -3388,8 +3210,7 @@ target_sources(qume PRIVATE
 	${MAME_DIR}/src/mame/drivers/qvt201.cpp
 )
 
-createMESSProjects(_target _subtarget "radio")
-target_sources(radio PRIVATE
+createMESSProjects(_target _subtarget "radio"
 	${MAME_DIR}/src/mame/drivers/apogee.cpp
 	${MAME_DIR}/src/mame/drivers/mikrosha.cpp
 	${MAME_DIR}/src/mame/drivers/partner.cpp
@@ -3400,29 +3221,25 @@ target_sources(radio PRIVATE
 	${MAME_DIR}/src/mame/machine/radio86.cpp
 )
 
-createMESSProjects(_target _subtarget "rca")
-target_sources(rca PRIVATE
+createMESSProjects(_target _subtarget "rca"
 	${MAME_DIR}/src/mame/drivers/microkit.cpp
 	${MAME_DIR}/src/mame/drivers/studio2.cpp
 	${MAME_DIR}/src/mame/drivers/vip.cpp
 	${MAME_DIR}/src/mame/includes/vip.h
 )
 
-createMESSProjects(_target _subtarget "regnecentralen")
-target_sources(regnecentralen PRIVATE
+createMESSProjects(_target _subtarget "regnecentralen"
 	${MAME_DIR}/src/mame/drivers/rc702.cpp
 	${MAME_DIR}/src/mame/drivers/rc759.cpp
 	${MAME_DIR}/src/mame/machine/rc759_kbd.cpp
 	${MAME_DIR}/src/mame/machine/rc759_kbd.h
 )
 
-createMESSProjects(_target _subtarget "ritam")
-target_sources(ritam PRIVATE
+createMESSProjects(_target _subtarget "ritam"
 	${MAME_DIR}/src/mame/drivers/monty.cpp
 )
 
-createMESSProjects(_target _subtarget "rm")
-target_sources(rm PRIVATE
+createMESSProjects(_target _subtarget "rm"
 	${MAME_DIR}/src/mame/drivers/rm380z.cpp
 	${MAME_DIR}/src/mame/includes/rm380z.h
 	${MAME_DIR}/src/mame/machine/rm380z.cpp
@@ -3435,8 +3252,7 @@ target_sources(rm PRIVATE
 	${MAME_DIR}/src/mame/machine/rmnkbd.h
 )
 
-createMESSProjects(_target _subtarget "robotron")
-target_sources(robotron PRIVATE
+createMESSProjects(_target _subtarget "robotron"
 	${MAME_DIR}/src/mame/drivers/a5105.cpp
 	${MAME_DIR}/src/mame/drivers/a51xx.cpp
 	${MAME_DIR}/src/mame/drivers/a7150.cpp
@@ -3447,8 +3263,7 @@ target_sources(robotron PRIVATE
 	${MAME_DIR}/src/mame/drivers/z9001.cpp
 )
 
-createMESSProjects(_target _subtarget "roland")
-target_sources(roland PRIVATE
+createMESSProjects(_target _subtarget "roland"
 	${MAME_DIR}/src/mame/drivers/alphajuno.cpp
 	${MAME_DIR}/src/mame/drivers/boss_se70.cpp
 	${MAME_DIR}/src/mame/drivers/boss_sx700.cpp
@@ -3494,13 +3309,11 @@ target_sources(roland PRIVATE
 	${MAME_DIR}/src/mame/machine/pg200.h
 )
 
-createMESSProjects(_target _subtarget "rolm")
-target_sources(rolm PRIVATE
+createMESSProjects(_target _subtarget "rolm"
 	${MAME_DIR}/src/mame/drivers/r9751.cpp
 )
 
-createMESSProjects(_target _subtarget "rockwell")
-target_sources(rockwell PRIVATE
+createMESSProjects(_target _subtarget "rockwell"
 	${MAME_DIR}/src/mame/drivers/aim65.cpp
 	${MAME_DIR}/src/mame/includes/aim65.h
 	${MAME_DIR}/src/mame/machine/aim65.cpp
@@ -3508,8 +3321,7 @@ target_sources(rockwell PRIVATE
 	${MAME_DIR}/src/mame/drivers/hh_pps41.cpp
 )
 
-createMESSProjects(_target _subtarget "rtpc")
-target_sources(rtpc PRIVATE
+createMESSProjects(_target _subtarget "rtpc"
 	${MAME_DIR}/src/mame/drivers/rtpc.cpp
 	${MAME_DIR}/src/mame/machine/rosetta.cpp
 	${MAME_DIR}/src/mame/machine/rosetta.h
@@ -3517,14 +3329,12 @@ target_sources(rtpc PRIVATE
 	${MAME_DIR}/src/mame/machine/rtpc_iocc.h
 )
 
-createMESSProjects(_target _subtarget "sage")
-target_sources(sage PRIVATE
+createMESSProjects(_target _subtarget "sage"
 	${MAME_DIR}/src/mame/drivers/sage2.cpp
 	${MAME_DIR}/src/mame/includes/sage2.h
 )
 
-createMESSProjects(_target _subtarget "saitek")
-target_sources(saitek PRIVATE
+createMESSProjects(_target _subtarget "saitek"
 	${MAME_DIR}/src/mame/drivers/saitek_ccompan.cpp
 	${MAME_DIR}/src/mame/drivers/saitek_chesstrv.cpp
 	${MAME_DIR}/src/mame/drivers/saitek_cp2000.cpp
@@ -3546,19 +3356,16 @@ target_sources(saitek PRIVATE
 	${MAME_DIR}/src/mame/drivers/saitek_superstar.cpp
 )
 
-createMESSProjects(_target _subtarget "samcoupe")
-target_sources(samcoupe PRIVATE
+createMESSProjects(_target _subtarget "samcoupe"
 	${MAME_DIR}/src/mame/drivers/samcoupe.cpp
 )
 
-createMESSProjects(_target _subtarget "samsung")
-target_sources(samsung PRIVATE
+createMESSProjects(_target _subtarget "samsung"
 	${MAME_DIR}/src/mame/drivers/spc1000.cpp
 	${MAME_DIR}/src/mame/drivers/spc1500.cpp
 )
 
-createMESSProjects(_target _subtarget "sanyo")
-target_sources(sanyo PRIVATE
+createMESSProjects(_target _subtarget "sanyo"
 	${MAME_DIR}/src/mame/drivers/mbc200.cpp
 	${MAME_DIR}/src/mame/drivers/mbc55x.cpp
 	${MAME_DIR}/src/mame/includes/mbc55x.h
@@ -3569,8 +3376,7 @@ target_sources(sanyo PRIVATE
 	${MAME_DIR}/src/mame/machine/mbc55x_kbd.h
 )
 
-createMESSProjects(_target _subtarget "saturn")
-target_sources(saturn PRIVATE
+createMESSProjects(_target _subtarget "saturn"
 	${MAME_DIR}/src/mame/drivers/st17xx.cpp
 )
 
@@ -3578,8 +3384,7 @@ target_sources(saturn PRIVATE
 ## and merges with it, which ends up with libsega.a linked after
 ## libshared.a.  The link then fails on linux because SEGAM1AUDIO and RAX
 ## are in shared while model* and stv are in sega.
-createMESSProjects(_target _subtarget "segacons")
-target_sources(segacons PRIVATE
+createMESSProjects(_target _subtarget "segacons"
 	${MAME_DIR}/src/mame/drivers/dccons.cpp
 	${MAME_DIR}/src/mame/includes/dccons.h
 	${MAME_DIR}/src/mame/machine/dccons.cpp
@@ -3609,13 +3414,11 @@ target_sources(segacons PRIVATE
 	${MAME_DIR}/src/mame/machine/megacdcd.h
 )
 
-createMESSProjects(_target _subtarget "sequential")
-target_sources(sequential PRIVATE
+createMESSProjects(_target _subtarget "sequential"
 	${MAME_DIR}/src/mame/drivers/prophet600.cpp
 )
 
-createMESSProjects(_target _subtarget "sgi")
-target_sources(sgi PRIVATE
+createMESSProjects(_target _subtarget "sgi"
 	${MAME_DIR}/src/mame/drivers/iris_power.cpp
 	${MAME_DIR}/src/mame/drivers/crimson.cpp
 	${MAME_DIR}/src/mame/drivers/o2.cpp
@@ -3654,8 +3457,7 @@ target_sources(sgi PRIVATE
 	${MAME_DIR}/src/mame/video/sgi_xmap2.h
 )
 
-createMESSProjects(_target _subtarget "sharp")
-target_sources(sharp PRIVATE
+createMESSProjects(_target _subtarget "sharp"
 	${MAME_DIR}/src/mame/drivers/hh_sm510.cpp
 	${MAME_DIR}/src/mame/includes/hh_sm510.h
 	${MAME_DIR}/src/mame/drivers/rzone.cpp ## subdriver of hh_sm510
@@ -3711,8 +3513,7 @@ target_sources(sharp PRIVATE
 	${MAME_DIR}/src/mame/drivers/fontwriter.cpp
 )
 
-createMESSProjects(_target _subtarget "sinclair")
-target_sources(sinclair PRIVATE
+createMESSProjects(_target _subtarget "sinclair"
 	${MAME_DIR}/src/mame/video/spectrum.cpp
 	${MAME_DIR}/src/mame/video/timex.cpp
 	${MAME_DIR}/src/mame/video/zx.cpp
@@ -3743,8 +3544,7 @@ target_sources(sinclair PRIVATE
 	${MAME_DIR}/src/mame/machine/zx8302.h
 )
 
-createMESSProjects(_target _subtarget "siemens")
-target_sources(siemens PRIVATE
+createMESSProjects(_target _subtarget "siemens"
 	${MAME_DIR}/src/mame/drivers/bitel.cpp
 	${MAME_DIR}/src/mame/drivers/pcd.cpp
 	${MAME_DIR}/src/mame/machine/pcd_kbd.cpp
@@ -3754,21 +3554,18 @@ target_sources(siemens PRIVATE
 	${MAME_DIR}/src/mame/drivers/pg685.cpp
 )
 
-createMESSProjects(_target _subtarget "slicer")
-target_sources(slicer PRIVATE
+createMESSProjects(_target _subtarget "slicer"
 	${MAME_DIR}/src/mame/drivers/slicer.cpp
 )
 
-createMESSProjects(_target _subtarget "snk")
-target_sources(snk PRIVATE
+createMESSProjects(_target _subtarget "snk"
 	${MAME_DIR}/src/mame/drivers/neogeocd.cpp
 	${MAME_DIR}/src/mame/drivers/ngp.cpp
 	${MAME_DIR}/src/mame/video/k1ge.cpp
 	${MAME_DIR}/src/mame/video/k1ge.h
 )
 
-createMESSProjects(_target _subtarget "sony")
-target_sources(sony PRIVATE
+createMESSProjects(_target _subtarget "sony"
 	${MAME_DIR}/src/mame/drivers/betacam.cpp
 	${MAME_DIR}/src/mame/drivers/bvm.cpp
 	${MAME_DIR}/src/mame/drivers/dfs500.cpp
@@ -3782,8 +3579,7 @@ target_sources(sony PRIVATE
 	${MAME_DIR}/src/mame/drivers/umatic.cpp
 )
 
-createMESSProjects(_target _subtarget "sony_news")
-target_sources(sony_news PRIVATE
+createMESSProjects(_target _subtarget "sony_news"
 	${MAME_DIR}/src/mame/drivers/news_68k.cpp
 	${MAME_DIR}/src/mame/drivers/news_r3k.cpp
 	${MAME_DIR}/src/mame/drivers/news_38xx.cpp
@@ -3795,13 +3591,11 @@ target_sources(sony_news PRIVATE
 	${MAME_DIR}/src/mame/machine/news_hid.h
 )
 
-createMESSProjects(_target _subtarget "sord")
-target_sources(sord PRIVATE
+createMESSProjects(_target _subtarget "sord"
 	${MAME_DIR}/src/mame/drivers/m5.cpp
 )
 
-createMESSProjects(_target _subtarget "special")
-target_sources(special PRIVATE
+createMESSProjects(_target _subtarget "special"
 	${MAME_DIR}/src/mame/drivers/special.cpp
 	${MAME_DIR}/src/mame/includes/special.h
 	${MAME_DIR}/src/mame/audio/special.cpp
@@ -3810,13 +3604,11 @@ target_sources(special PRIVATE
 	${MAME_DIR}/src/mame/video/special.cpp
 )
 
-createMESSProjects(_target _subtarget "stm")
-target_sources(stm PRIVATE
+createMESSProjects(_target _subtarget "stm"
 	${MAME_DIR}/src/mame/drivers/pp.cpp
 )
 
-createMESSProjects(_target _subtarget "sun")
-target_sources(sun PRIVATE
+createMESSProjects(_target _subtarget "sun"
 	${MAME_DIR}/src/mame/drivers/sun1.cpp
 	${MAME_DIR}/src/mame/drivers/sun2.cpp
 	${MAME_DIR}/src/mame/drivers/sun3.cpp
@@ -3824,21 +3616,18 @@ target_sources(sun PRIVATE
 	${MAME_DIR}/src/mame/drivers/sun4.cpp
 )
 
-createMESSProjects(_target _subtarget "svi")
-target_sources(svi PRIVATE
+createMESSProjects(_target _subtarget "svi"
 	${MAME_DIR}/src/mame/drivers/svi318.cpp
 )
 
-createMESSProjects(_target _subtarget "svision")
-target_sources(svision PRIVATE
+createMESSProjects(_target _subtarget "svision"
 	${MAME_DIR}/src/mame/drivers/svision.cpp
 	${MAME_DIR}/src/mame/includes/svision.h
 	${MAME_DIR}/src/mame/audio/svis_snd.cpp
 	${MAME_DIR}/src/mame/audio/svis_snd.h
 )
 
-createMESSProjects(_target _subtarget "swtpc")
-target_sources(swtpc PRIVATE
+createMESSProjects(_target _subtarget "swtpc"
 	${MAME_DIR}/src/mame/drivers/swtpc.cpp
 	${MAME_DIR}/src/mame/drivers/swtpc09.cpp
 	${MAME_DIR}/src/mame/includes/swtpc09.h
@@ -3846,35 +3635,30 @@ target_sources(swtpc PRIVATE
 	${MAME_DIR}/src/mame/drivers/swtpc8212.cpp
 )
 
-createMESSProjects(_target _subtarget "synertek")
-target_sources(synertek PRIVATE
+createMESSProjects(_target _subtarget "synertek"
 	${MAME_DIR}/src/mame/drivers/ktm3.cpp
 	${MAME_DIR}/src/mame/drivers/mbc020.cpp
 	${MAME_DIR}/src/mame/drivers/sym1.cpp
 )
 
-createMESSProjects(_target _subtarget "ta")
-target_sources(ta PRIVATE
+createMESSProjects(_target _subtarget "ta"
 	${MAME_DIR}/src/mame/drivers/alphatpx.cpp
 	${MAME_DIR}/src/mame/drivers/alphatpc16.cpp
 	${MAME_DIR}/src/mame/drivers/alphatro.cpp
 )
 
-createMESSProjects(_target _subtarget "tab")
-target_sources(tab PRIVATE
+createMESSProjects(_target _subtarget "tab"
 	${MAME_DIR}/src/mame/drivers/tabe22.cpp
 	${MAME_DIR}/src/mame/machine/e22_kbd.cpp
 	${MAME_DIR}/src/mame/machine/e22_kbd.h
 )
 
-createMESSProjects(_target _subtarget "tandberg")
-target_sources(tandberg PRIVATE
+createMESSProjects(_target _subtarget "tandberg"
 	${MAME_DIR}/src/mame/drivers/tdv2324.cpp
 	${MAME_DIR}/src/mame/includes/tdv2324.h
 )
 
-createMESSProjects(_target _subtarget "tangerin")
-target_sources(tangerin PRIVATE
+createMESSProjects(_target _subtarget "tangerin"
 	${MAME_DIR}/src/mame/drivers/alphatan.cpp
 	${MAME_DIR}/src/mame/drivers/hhtiger.cpp
 	${MAME_DIR}/src/mame/drivers/microtan.cpp
@@ -3884,30 +3668,25 @@ target_sources(tangerin PRIVATE
 	${MAME_DIR}/src/mame/drivers/oric.cpp
 )
 
-createMESSProjects(_target _subtarget "tasc")
-target_sources(tasc PRIVATE
+createMESSProjects(_target _subtarget "tasc"
 	${MAME_DIR}/src/mame/drivers/tasc.cpp
 )
 
-createMESSProjects(_target _subtarget "tatung")
-target_sources(tatung PRIVATE
+createMESSProjects(_target _subtarget "tatung"
 	${MAME_DIR}/src/mame/drivers/einstein.cpp
 )
 
-createMESSProjects(_target _subtarget "teamconc")
-target_sources(teamconc PRIVATE
+createMESSProjects(_target _subtarget "teamconc"
 	${MAME_DIR}/src/mame/drivers/comquest.cpp
 	${MAME_DIR}/src/mame/includes/comquest.h
 	${MAME_DIR}/src/mame/video/comquest.cpp
 )
 
-createMESSProjects(_target _subtarget "tectoy")
-target_sources(tectoy PRIVATE
+createMESSProjects(_target _subtarget "tectoy"
 	${MAME_DIR}/src/mame/drivers/pensebem.cpp
 )
 
-createMESSProjects(_target _subtarget "tektroni")
-target_sources(tektroni PRIVATE
+createMESSProjects(_target _subtarget "tektroni"
 	${MAME_DIR}/src/mame/drivers/tek405x.cpp
 	${MAME_DIR}/src/mame/includes/tek405x.h
 	${MAME_DIR}/src/mame/drivers/tek410x.cpp
@@ -3918,15 +3697,13 @@ target_sources(tektroni PRIVATE
 	${MAME_DIR}/src/mame/machine/tek410x_kbd.h
 )
 
-createMESSProjects(_target _subtarget "telenova")
-target_sources(telenova PRIVATE
+createMESSProjects(_target _subtarget "telenova"
 	${MAME_DIR}/src/mame/drivers/compis.cpp
 	${MAME_DIR}/src/mame/machine/compiskb.cpp
 	${MAME_DIR}/src/mame/machine/compiskb.h
 )
 
-createMESSProjects(_target _subtarget "telercas")
-target_sources(telercas PRIVATE
+createMESSProjects(_target _subtarget "telercas"
 	${MAME_DIR}/src/mame/drivers/tmc1800.cpp
 	${MAME_DIR}/src/mame/includes/tmc1800.h
 	${MAME_DIR}/src/mame/video/tmc1800.cpp
@@ -3937,8 +3714,7 @@ target_sources(telercas PRIVATE
 	${MAME_DIR}/src/mame/includes/tmc2000e.h
 )
 
-createMESSProjects(_target _subtarget "televideo")
-target_sources(televideo PRIVATE
+createMESSProjects(_target _subtarget "televideo"
 	${MAME_DIR}/src/mame/drivers/ts802.cpp
 	${MAME_DIR}/src/mame/drivers/ts803.cpp
 	${MAME_DIR}/src/mame/drivers/ts816.cpp
@@ -3956,8 +3732,7 @@ target_sources(televideo PRIVATE
 	${MAME_DIR}/src/mame/machine/tv955kb.h
 )
 
-createMESSProjects(_target _subtarget "tesla")
-target_sources(tesla PRIVATE
+createMESSProjects(_target _subtarget "tesla"
 	${MAME_DIR}/src/mame/drivers/ondra.cpp
 	${MAME_DIR}/src/mame/includes/ondra.h
 	${MAME_DIR}/src/mame/machine/ondra.cpp
@@ -3968,16 +3743,14 @@ target_sources(tesla PRIVATE
 	${MAME_DIR}/src/mame/drivers/sapi1.cpp
 )
 
-createMESSProjects(_target _subtarget "thomson")
-target_sources(thomson PRIVATE
+createMESSProjects(_target _subtarget "thomson"
 	${MAME_DIR}/src/mame/drivers/thomson.cpp
 	${MAME_DIR}/src/mame/includes/thomson.h
 	${MAME_DIR}/src/mame/machine/thomson.cpp
 	${MAME_DIR}/src/mame/video/thomson.cpp
 )
 
-createMESSProjects(_target _subtarget "ti")
-target_sources(ti PRIVATE
+createMESSProjects(_target _subtarget "ti"
 	${MAME_DIR}/src/mame/drivers/avigo.cpp
 	${MAME_DIR}/src/mame/includes/avigo.h
 	${MAME_DIR}/src/mame/video/avigo.cpp
@@ -4012,8 +3785,7 @@ target_sources(ti PRIVATE
 	${MAME_DIR}/src/mame/video/911_key.h
 )
 
-createMESSProjects(_target _subtarget "tiger")
-target_sources(tiger PRIVATE
+createMESSProjects(_target _subtarget "tiger"
 	${MAME_DIR}/src/mame/drivers/gamecom.cpp
 	${MAME_DIR}/src/mame/includes/gamecom.h
 	${MAME_DIR}/src/mame/machine/gamecom.cpp
@@ -4021,34 +3793,29 @@ target_sources(tiger PRIVATE
 	${MAME_DIR}/src/mame/drivers/k28.cpp
 )
 
-createMESSProjects(_target _subtarget "tigertel")
-target_sources(tigertel PRIVATE
+createMESSProjects(_target _subtarget "tigertel"
 	${MAME_DIR}/src/mame/drivers/gizmondo.cpp
 	${MAME_DIR}/src/mame/machine/docg3.cpp
 	${MAME_DIR}/src/mame/machine/docg3.h
 )
 
-createMESSProjects(_target _subtarget "tiki")
-target_sources(tiki PRIVATE
+createMESSProjects(_target _subtarget "tiki"
 	${MAME_DIR}/src/mame/drivers/tiki100.cpp
 	${MAME_DIR}/src/mame/includes/tiki100.h
 )
 
-createMESSProjects(_target _subtarget "tomy")
-target_sources(tomy PRIVATE
+createMESSProjects(_target _subtarget "tomy"
 	${MAME_DIR}/src/mame/drivers/tutor.cpp
 	${MAME_DIR}/src/mame/drivers/tomy_princ.cpp
 )
 
-createMESSProjects(_target _subtarget "toshiba")
-target_sources(toshiba PRIVATE
+createMESSProjects(_target _subtarget "toshiba"
 	${MAME_DIR}/src/mame/drivers/pasopia.cpp
 	${MAME_DIR}/src/mame/drivers/pasopia7.cpp
 	${MAME_DIR}/src/mame/drivers/paso1600.cpp
 )
 
-createMESSProjects(_target _subtarget "trainer")
-target_sources(trainer PRIVATE
+createMESSProjects(_target _subtarget "trainer"
 	${MAME_DIR}/src/mame/drivers/amico2k.cpp
 	${MAME_DIR}/src/mame/drivers/babbage.cpp
 	${MAME_DIR}/src/mame/drivers/bob85.cpp
@@ -4067,8 +3834,7 @@ target_sources(trainer PRIVATE
 	${MAME_DIR}/src/mame/drivers/zapcomputer.cpp
 )
 
-createMESSProjects(_target _subtarget "trs")
-target_sources(trs PRIVATE
+createMESSProjects(_target _subtarget "trs"
 	${MAME_DIR}/src/mame/drivers/coco12.cpp
 	${MAME_DIR}/src/mame/includes/coco12.h
 	${MAME_DIR}/src/mame/drivers/coco3.cpp
@@ -4111,8 +3877,7 @@ target_sources(trs PRIVATE
 	${MAME_DIR}/src/mame/drivers/vis.cpp
 )
 
-createMESSProjects(_target _subtarget "tvgames")
-target_sources(tvgames PRIVATE
+createMESSProjects(_target _subtarget "tvgames"
 	${MAME_DIR}/src/mame/drivers/elan_ep3a19a.cpp
 	${MAME_DIR}/src/mame/drivers/elan_eu3a14.cpp
 	${MAME_DIR}/src/mame/drivers/elan_eu3a05.cpp
@@ -4217,41 +3982,34 @@ target_sources(tvgames PRIVATE
 	${MAME_DIR}/src/mame/drivers/monkey_king_3b.cpp
 )
 
-createMESSProjects(_target _subtarget "ultimachine")
-target_sources(ultimachine PRIVATE
+createMESSProjects(_target _subtarget "ultimachine"
 	${MAME_DIR}/src/mame/drivers/rambo.cpp
 )
 
-createMESSProjects(_target _subtarget "ultratec")
-target_sources(ultratec PRIVATE
+createMESSProjects(_target _subtarget "ultratec"
 	${MAME_DIR}/src/mame/drivers/minicom.cpp
 )
 
-createMESSProjects(_target _subtarget "unicard")
-target_sources(unicard PRIVATE
+createMESSProjects(_target _subtarget "unicard"
 	${MAME_DIR}/src/mame/drivers/bbcbc.cpp
 )
 
-createMESSProjects(_target _subtarget "unisonic")
-target_sources(unisonic PRIVATE
+createMESSProjects(_target _subtarget "unisonic"
 	${MAME_DIR}/src/mame/drivers/unichamp.cpp
 	${MAME_DIR}/src/mame/video/gic.cpp
 	${MAME_DIR}/src/mame/video/gic.h
 )
 
-createMESSProjects(_target _subtarget "unisys")
-target_sources(unisys PRIVATE
+createMESSProjects(_target _subtarget "unisys"
 	${MAME_DIR}/src/mame/drivers/univac.cpp
 )
 
-createMESSProjects(_target _subtarget "usp")
-target_sources(usp PRIVATE
+createMESSProjects(_target _subtarget "usp"
 	${MAME_DIR}/src/mame/drivers/patinho_feio.cpp
 	${MAME_DIR}/src/mame/includes/patinhofeio.h
 )
 
-createMESSProjects(_target _subtarget "veb")
-target_sources(veb PRIVATE
+createMESSProjects(_target _subtarget "veb"
 	${MAME_DIR}/src/mame/drivers/chessmst.cpp
 	${MAME_DIR}/src/mame/drivers/chessmstdm.cpp
 	${MAME_DIR}/src/mame/drivers/kc.cpp
@@ -4267,29 +4025,25 @@ target_sources(veb PRIVATE
 	${MAME_DIR}/src/mame/drivers/sc2.cpp
 )
 
-createMESSProjects(_target _subtarget "verifone")
-target_sources(verifone PRIVATE
+createMESSProjects(_target _subtarget "verifone"
 	${MAME_DIR}/src/mame/drivers/tranz330.cpp
 	${MAME_DIR}/src/mame/includes/tranz330.h
 )
 
-createMESSProjects(_target _subtarget "vidbrain")
-target_sources(vidbrain PRIVATE
+createMESSProjects(_target _subtarget "vidbrain"
 	${MAME_DIR}/src/mame/drivers/vidbrain.cpp
 	${MAME_DIR}/src/mame/includes/vidbrain.h
 	${MAME_DIR}/src/mame/video/uv201.cpp
 	${MAME_DIR}/src/mame/video/uv201.h
 )
 
-createMESSProjects(_target _subtarget "videoton")
-target_sources(videoton PRIVATE
+createMESSProjects(_target _subtarget "videoton"
 	${MAME_DIR}/src/mame/drivers/tvc.cpp
 	${MAME_DIR}/src/mame/audio/tvc.cpp
 	${MAME_DIR}/src/mame/audio/tvc.h
 )
 
-createMESSProjects(_target _subtarget "visual")
-target_sources(visual PRIVATE
+createMESSProjects(_target _subtarget "visual"
 	${MAME_DIR}/src/mame/drivers/v100.cpp
 	${MAME_DIR}/src/mame/drivers/v102.cpp
 	${MAME_DIR}/src/mame/machine/v102_kbd.cpp
@@ -4302,15 +4056,13 @@ target_sources(visual PRIVATE
 	${MAME_DIR}/src/mame/video/v1050.cpp
 )
 
-createMESSProjects(_target _subtarget "votrax")
-target_sources(votrax PRIVATE
+createMESSProjects(_target _subtarget "votrax"
 	${MAME_DIR}/src/mame/drivers/votrhv.cpp
 	${MAME_DIR}/src/mame/drivers/votrpss.cpp
 	${MAME_DIR}/src/mame/drivers/votrtnt.cpp
 )
 
-createMESSProjects(_target _subtarget "vtech")
-target_sources(vtech PRIVATE
+createMESSProjects(_target _subtarget "vtech"
 	${MAME_DIR}/src/mame/drivers/clickstart.cpp
 	${MAME_DIR}/src/mame/drivers/crvision.cpp
 	${MAME_DIR}/src/mame/includes/crvision.h
@@ -4347,28 +4099,24 @@ target_sources(vtech PRIVATE
 	${MAME_DIR}/src/mame/drivers/vtech_innotab.cpp
 )
 
-createMESSProjects(_target _subtarget "wang")
-target_sources(wang PRIVATE
+createMESSProjects(_target _subtarget "wang"
 	${MAME_DIR}/src/mame/drivers/wangpc.cpp
 	${MAME_DIR}/src/devices/bus/wangpc/wangpc.h
 	${MAME_DIR}/src/mame/machine/wangpckb.cpp
 	${MAME_DIR}/src/mame/machine/wangpckb.h
 )
 
-createMESSProjects(_target _subtarget "westinghouse")
-target_sources(westinghouse PRIVATE
+createMESSProjects(_target _subtarget "westinghouse"
 	${MAME_DIR}/src/mame/drivers/testconsole.cpp
 )
 
-createMESSProjects(_target _subtarget "wavemate")
-target_sources(wavemate PRIVATE
+createMESSProjects(_target _subtarget "wavemate"
 	${MAME_DIR}/src/mame/drivers/bullet.cpp
 	${MAME_DIR}/src/mame/includes/bullet.h
 	${MAME_DIR}/src/mame/drivers/jupiter.cpp
 )
 
-createMESSProjects(_target _subtarget "wyse")
-target_sources(wyse PRIVATE
+createMESSProjects(_target _subtarget "wyse"
 	${MAME_DIR}/src/mame/drivers/wy100.cpp
 	${MAME_DIR}/src/mame/drivers/wy150.cpp
 	${MAME_DIR}/src/mame/drivers/wy30p.cpp
@@ -4380,8 +4128,7 @@ target_sources(wyse PRIVATE
 	${MAME_DIR}/src/mame/machine/wy50kb.h
 )
 
-createMESSProjects(_target _subtarget "xerox")
-target_sources(xerox PRIVATE
+createMESSProjects(_target _subtarget "xerox"
 	${MAME_DIR}/src/mame/drivers/xerox820.cpp
 	${MAME_DIR}/src/mame/includes/xerox820.h
 	${MAME_DIR}/src/mame/machine/x820kb.cpp
@@ -4391,8 +4138,7 @@ target_sources(xerox PRIVATE
 	${MAME_DIR}/src/mame/drivers/alto2.cpp
 )
 
-createMESSProjects(_target _subtarget "xussrpc")
-target_sources(xussrpc PRIVATE
+createMESSProjects(_target _subtarget "xussrpc"
 	${MAME_DIR}/src/mame/drivers/ec184x.cpp
 	${MAME_DIR}/src/mame/drivers/iskr103x.cpp
 	${MAME_DIR}/src/mame/drivers/mc1502.cpp
@@ -4402,8 +4148,7 @@ target_sources(xussrpc PRIVATE
 	${MAME_DIR}/src/mame/machine/kb_poisk1.h
 )
 
-createMESSProjects(_target _subtarget "yamaha")
-target_sources(yamaha PRIVATE
+createMESSProjects(_target _subtarget "yamaha"
 	${MAME_DIR}/src/mame/machine/mulcd.cpp
 	${MAME_DIR}/src/mame/drivers/yman1x.cpp
 	${MAME_DIR}/src/mame/drivers/ymdx100.cpp
@@ -4421,29 +4166,25 @@ target_sources(yamaha PRIVATE
 	${MAME_DIR}/src/mame/drivers/tg100.cpp
 )
 
-createMESSProjects(_target _subtarget "zenith")
-target_sources(zenith PRIVATE
+createMESSProjects(_target _subtarget "zenith"
 	${MAME_DIR}/src/mame/drivers/mdt60.cpp
 	${MAME_DIR}/src/mame/drivers/z100.cpp
 	${MAME_DIR}/src/mame/drivers/z22.cpp
 	${MAME_DIR}/src/mame/drivers/z29.cpp
 )
 
-createMESSProjects(_target _subtarget "zpa")
-target_sources(zpa PRIVATE
+createMESSProjects(_target _subtarget "zpa"
 	${MAME_DIR}/src/mame/drivers/iq151.cpp
 )
 
-createMESSProjects(_target _subtarget "zvt")
-target_sources(zvt PRIVATE
+createMESSProjects(_target _subtarget "zvt"
 	${MAME_DIR}/src/mame/drivers/pp01.cpp
 	${MAME_DIR}/src/mame/includes/pp01.h
 	${MAME_DIR}/src/mame/machine/pp01.cpp
 	${MAME_DIR}/src/mame/video/pp01.cpp
 )
 
-createMESSProjects(_target _subtarget "skeleton")
-target_sources(skeleton PRIVATE
+createMESSProjects(_target _subtarget "skeleton"
 	${MAME_DIR}/src/mame/drivers/aaa.cpp
 	${MAME_DIR}/src/mame/drivers/acd.cpp
 	${MAME_DIR}/src/mame/drivers/aceex.cpp

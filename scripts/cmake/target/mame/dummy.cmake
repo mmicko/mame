@@ -35,6 +35,7 @@ macro(createProjects_mame_dummy _target  _subtarget)
 		${MAME_DIR}/src/mame/machine/coleco.cpp
 		${MAME_DIR}/src/mame/machine/coleco.h
 	)
+	add_project_to_group(drivers mame_dummy)
 endmacro()
 
 macro(linkProjects_mame_dummy _target _subtarget _projectname)

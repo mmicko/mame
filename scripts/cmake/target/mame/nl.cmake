@@ -409,7 +409,7 @@ macro(createProjects_mame_nl _target  _subtarget)
 		${MAME_DIR}/src/mame/drivers/usbilliards.cpp
 	)
 
-
+	add_project_to_group(drivers mame_netlist)
 endmacro()
 
 macro(linkProjects_mame_nl _target _subtarget _projectname)

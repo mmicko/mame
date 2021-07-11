@@ -181,6 +181,7 @@ macro(createProjects_mame_ci _target  _subtarget)
 		${MAME_DIR}/src/mame/audio/dcs.h
 		${MAME_DIR}/src/mame/drivers/akkaarrh.cpp
 	)
+	add_project_to_group(drivers mame_ci)
 endmacro()
 
 macro(linkProjects_mame_ci _target _subtarget _projectname)
