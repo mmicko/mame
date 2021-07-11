@@ -22,3 +22,5 @@ endif()
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
     add_project_to_group_and_include(tools aueffectutil scripts/cmake/tools/aueffectutil.cmake)
 endif()
+
+add_project_to_group_and_include(tools shaderc scripts/cmake/tools/shaderc.cmake)
