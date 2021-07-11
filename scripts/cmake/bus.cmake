@@ -2454,6 +2454,8 @@ if("A2BUS" IN_LIST BUSES)
 		${MAME_DIR}/src/devices/bus/a2bus/ezcgi.h
 		${MAME_DIR}/src/devices/bus/a2bus/grappler.cpp
 		${MAME_DIR}/src/devices/bus/a2bus/grappler.h
+		${MAME_DIR}/src/devices/bus/a2bus/lancegs.cpp
+		${MAME_DIR}/src/devices/bus/a2bus/lancegs.h
 		${MAME_DIR}/src/devices/bus/a2bus/laser128.cpp
 		${MAME_DIR}/src/devices/bus/a2bus/laser128.h
 		${MAME_DIR}/src/devices/bus/a2bus/mouse.cpp
@@ -2821,8 +2823,10 @@ if("NES" IN_LIST BUSES)
 		${MAME_DIR}/src/devices/bus/nes/rexsoft.h
 		${MAME_DIR}/src/devices/bus/nes/sachen.cpp
 		${MAME_DIR}/src/devices/bus/nes/sachen.h
-		${MAME_DIR}/src/devices/bus/nes/somari.cpp
-		${MAME_DIR}/src/devices/bus/nes/somari.h
+		${MAME_DIR}/src/devices/bus/nes/sachen.cpp
+		${MAME_DIR}/src/devices/bus/nes/sachen.h
+		${MAME_DIR}/src/devices/bus/nes/sealie.cpp
+		${MAME_DIR}/src/devices/bus/nes/sealie.h
 		${MAME_DIR}/src/devices/bus/nes/subor.cpp
 		${MAME_DIR}/src/devices/bus/nes/subor.h
 		${MAME_DIR}/src/devices/bus/nes/sunsoft.cpp

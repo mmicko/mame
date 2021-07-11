@@ -1200,6 +1200,18 @@ endif()
 
 ###################################################
 ##
+##@src/devices/machine/ds6417.h,list(APPEND MACHINES DS6417)
+###################################################
+
+if("DS6417" IN_LIST MACHINES)
+	list(APPEND MACHINE_SRCS
+		${MAME_DIR}/src/devices/machine/ds6417.cpp
+		${MAME_DIR}/src/devices/machine/ds6417.h
+	)
+endif()
+
+###################################################
+##
 ##@src/devices/machine/ds75160a.h,list(APPEND MACHINES DS75160A)
 ###################################################
 

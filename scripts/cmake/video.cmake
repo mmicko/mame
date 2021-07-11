@@ -807,18 +807,6 @@ endif()
 
 ##################################################
 ##
-##@src/devices/video/polylgcy.h,list(APPEND VIDEOS POLY)
-##################################################
-
-if("POLY" IN_LIST VIDEOS)
-	list(APPEND VIDEO_SRCS
-		${MAME_DIR}/src/devices/video/polylgcy.cpp
-		${MAME_DIR}/src/devices/video/polylgcy.h
-	)
-endif()
-
-##################################################
-##
 ##@src/devices/video/psx.h,list(APPEND VIDEOS PSX)
 ##################################################
 
@@ -1156,8 +1144,13 @@ if("VOODOO" IN_LIST VIDEOS)
 	list(APPEND VIDEO_SRCS
 		${MAME_DIR}/src/devices/video/voodoo.cpp
 		${MAME_DIR}/src/devices/video/voodoo.h
-		${MAME_DIR}/src/devices/video/vooddefs.ipp
-		${MAME_DIR}/src/devices/video/voodoo_rast.ipp
+		${MAME_DIR}/src/devices/video/voodoo_2.cpp
+		${MAME_DIR}/src/devices/video/voodoo_2.h
+		${MAME_DIR}/src/devices/video/voodoo_banshee.cpp
+		${MAME_DIR}/src/devices/video/voodoo_banshee.h
+		${MAME_DIR}/src/devices/video/voodoo_regs.h
+		${MAME_DIR}/src/devices/video/voodoo_render.cpp
+		${MAME_DIR}/src/devices/video/voodoo_render.h
 	)
 endif()
 

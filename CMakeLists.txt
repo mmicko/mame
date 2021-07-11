@@ -645,6 +645,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	add_compile_options(/wd4457) # warning C4457: declaration of 'xxx' hides function parameter
 	add_compile_options(/wd4458) # warning C4458: declaration of 'xxx' hides class member
 	add_compile_options(/wd4459) # warning C4459: declaration of 'xxx' hides global declaration
+  add_compile_options(/wd4611) # warning C4611: interaction between '_setjmp' and C++ object destruction is non-portable
 	add_compile_options(/wd4702) # warning C4702: unreachable code
 	add_compile_options(/wd4706) # warning C4706: assignment within conditional expression
 	add_compile_options(/wd4804) # warning C4804: '>>': unsafe use of type 'bool' in operation
