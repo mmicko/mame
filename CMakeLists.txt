@@ -716,45 +716,30 @@ dump_mame_options()
 # Source cleanup
 #################################################
 
-
-#
-#.PHONY: cleansrc
-#
-## FIXME: make this work with SEPARATE_BIN
-#cleansrc:
-#	@echo Cleaning up tabs/spaces/end of lines....
-#ifeq (posix,$(SHELLTYPE))
-#	$(SILENT) find src -name \*.c -exec ./srcclean {} \; >&2
-#	$(SILENT) find src -name \*.cpp -exec ./srcclean {} \; >&2
-#	$(SILENT) find src -name \*.h -exec ./srcclean {} \; >&2
-#	$(SILENT) find src -name \*.hpp -exec ./srcclean {} \; >&2
-#	$(SILENT) find src -name \*.hxx -exec ./srcclean {} \; >&2
-#	$(SILENT) find src -name \*.ipp -exec ./srcclean {} \; >&2
-#	$(SILENT) find src -name \*.lay -exec ./srcclean {} \; >&2
-#	$(SILENT) find src -name \*.lst -exec ./srcclean {} \; >&2
-#	$(SILENT) find src -name \*.mak -exec ./srcclean {} \; >&2
-#	$(SILENT) find src -name \*.mm -exec ./srcclean {} \; >&2
-#	$(SILENT) find hash -name \*.hsi -exec ./srcclean {} \; >&2
-#	$(SILENT) find hash -name \*.xml -exec ./srcclean {} \; >&2
-#	$(SILENT) find plugins -name \*.lua -exec ./srcclean {} \; >&2
-#	$(SILENT) find scripts -name \*.lua -exec ./srcclean {} \; >&2
-#else
-#	$(shell for /r src %%i in (*.c) do srcclean %%i >&2 )
-#	$(shell for /r src %%i in (*.cpp) do srcclean %%i >&2 )
-#	$(shell for /r src %%i in (*.h) do srcclean %%i >&2 )
-#	$(shell for /r src %%i in (*.hpp) do srcclean %%i >&2 )
-#	$(shell for /r src %%i in (*.hxx) do srcclean %%i >&2 )
-#	$(shell for /r src %%i in (*.ipp) do srcclean %%i >&2 )
-#	$(shell for /r src %%i in (*.lay) do srcclean %%i >&2 )
-#	$(shell for /r src %%i in (*.lst) do srcclean %%i >&2 )
-#	$(shell for /r src %%i in (*.mak) do srcclean %%i >&2 )
-#	$(shell for /r src %%i in (*.mm) do srcclean %%i >&2 )
-#	$(shell for /r hash %%i in (*.hsi) do srcclean %%i >&2 )
-#	$(shell for /r hash %%i in (*.xml) do srcclean %%i >&2 )
-#	$(shell for /r plugins %%i in (*.lua) do srcclean %%i >&2 )
-#	$(shell for /r scripts %%i in (*.lua) do srcclean %%i >&2 )
-#endif
-#
+add_custom_target(cleansrc)
+file(GLOB_RECURSE CLEARSRC_FILES 
+  ${MAME_DIR}/src/*.c
+  ${MAME_DIR}/src/*.cpp
+  ${MAME_DIR}/src/*.h
+  ${MAME_DIR}/src/*.hpp
+  ${MAME_DIR}/src/*.hxx
+  ${MAME_DIR}/src/*.ipp
+  ${MAME_DIR}/src/*.lay
+  ${MAME_DIR}/src/*.lst
+  ${MAME_DIR}/src/*.mak
+  ${MAME_DIR}/src/*.mm
+  ${MAME_DIR}/hash/*.hsi
+  ${MAME_DIR}/hash/*.xml
+  ${MAME_DIR}/plugins/*.lua
+  ${MAME_DIR}/scripts/*.lua
+)
+foreach(cleansrc_file ${CLEARSRC_FILES})
+  add_custom_command(
+    TARGET cleansrc
+    COMMAND ${CMAKE_BINARY_DIR}/srcclean ${cleansrc_file}
+  )
+endforeach()
+add_dependencies(cleansrc srcclean)
 
 #################################################
 # BGFX shaders
@@ -789,16 +774,17 @@ add_project_to_group_and_include(shaderc shaderc scripts/cmake/tools/shaderc.cma
 #################################################
 
 add_custom_command(
-  COMMAND cd ${MAME_DIR} && find src -iname "*.cpp" -print0 | xargs -0 xgettext --from-code=UTF-8 -k_ -k__ -o ${GEN_DIR}/mame.pot
-  COMMAND cd ${MAME_DIR} && find plugins -iname "*.lua" -print0 | xargs -0 xgettext --from-code=UTF-8 -k_ -k__ -j -o ${GEN_DIR}/mame.pot
+  WORKING_DIRECTORY ${MAME_DIR}
+  COMMAND find src -iname "*.cpp" -print0 | xargs -0 xgettext --from-code=UTF-8 -k_ -k__ -o ${GEN_DIR}/mame.pot
+  COMMAND find plugins -iname "*.lua" -print0 | xargs -0 xgettext --from-code=UTF-8 -k_ -k__ -j -o ${GEN_DIR}/mame.pot
   OUTPUT ${GEN_DIR}/mamepot.flag
   COMMENT "Extracting translations..."
 )
 
 add_custom_command(
-  COMMAND cd ${MAME_DIR}
-  COMMAND find ${MAME_DIR}/language -name "*.po" -print0 | xargs -0 -n 1 -I %% msgmerge -U -N %% ${GEN_DIR}/mame.pot
-  COMMAND find ${MAME_DIR}/language -name "*.po" -print0 | xargs -0 -n 1 -I %% msgattrib --clear-fuzzy --empty %% -o %%
+  WORKING_DIRECTORY ${MAME_DIR}
+  COMMAND find language -name "*.po" -print0 | xargs -0 -n 1 -I %% msgmerge -U -N %% ${GEN_DIR}/mame.pot
+  COMMAND find language -name "*.po" -print0 | xargs -0 -n 1 -I %% msgattrib --clear-fuzzy --empty %% -o %%
   DEPENDS ${GEN_DIR}/mamepot.flag
   OUTPUT ${GEN_DIR}/translation.flag
   COMMENT "Updating translations..."
