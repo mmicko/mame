@@ -736,7 +736,8 @@ file(GLOB_RECURSE CLEARSRC_FILES
 foreach(cleansrc_file ${CLEARSRC_FILES})
   add_custom_command(
     TARGET cleansrc
-    COMMAND ${CMAKE_BINARY_DIR}/srcclean ${cleansrc_file}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMAND srcclean ${cleansrc_file}
   )
 endforeach()
 add_dependencies(cleansrc srcclean)
