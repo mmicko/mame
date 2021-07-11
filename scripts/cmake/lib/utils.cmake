@@ -1,4 +1,31 @@
-set(UTILS_SRCS
+add_library(utils ${LIBTYPE})
+
+addprojectflags(utils)
+
+target_include_directories(utils PRIVATE
+	${MAME_DIR}/src/osd
+	${MAME_DIR}/src/lib/util
+	${MAME_DIR}/3rdparty
+	${EXT_INCLUDEDIR_EXPAT}
+	${EXT_INCLUDEDIR_ZLIB}
+	${EXT_INCLUDEDIR_FLAC}
+	${EXT_INCLUDEDIR_UTF8PROC}
+)
+
+target_link_libraries(utils PUBLIC
+	ocore_${OSD}
+	${EXT_LIB_EXPAT}
+	${EXT_LIB_ZLIB}
+	${EXT_LIB_FLAC}
+	7z
+	${EXT_LIB_UTF8PROC}
+)
+
+if ((NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows") AND (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten"))
+	target_link_libraries(utils PUBLIC util)
+endif()
+
+target_sources(utils PRIVATE
 	${MAME_DIR}/src/lib/util/bitstream.h
 	${MAME_DIR}/src/lib/util/coretmpl.h
 	${MAME_DIR}/src/lib/util/lrucache.h
@@ -90,30 +117,3 @@ set(UTILS_SRCS
 	${MAME_DIR}/src/lib/util/zippath.cpp
 	${MAME_DIR}/src/lib/util/zippath.h
 )
-
-add_library(utils ${LIBTYPE} ${UTILS_SRCS})
-
-addprojectflags(utils)
-
-target_include_directories(utils PRIVATE
-	${MAME_DIR}/src/osd
-	${MAME_DIR}/src/lib/util
-	${MAME_DIR}/3rdparty
-	${EXT_INCLUDEDIR_EXPAT}
-	${EXT_INCLUDEDIR_ZLIB}
-	${EXT_INCLUDEDIR_FLAC}
-	${EXT_INCLUDEDIR_UTF8PROC}
-)
-
-target_link_libraries(utils PUBLIC
-	ocore_${OSD}
-	${EXT_LIB_EXPAT}
-	${EXT_LIB_ZLIB}
-	${EXT_LIB_FLAC}
-	7z
-	${EXT_LIB_UTF8PROC}
-)
-
-if ((NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows") AND (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten"))
-	target_link_libraries(utils PUBLIC util)
-endif()

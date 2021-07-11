@@ -9,7 +9,55 @@
 ##
 ###########################################################################
 
-set(FRONTEND_SRCS
+add_library(frontend ${LIBTYPE})
+
+addprojectflags(frontend)
+precompiledheaders(frontend)
+
+if((CMAKE_CXX_COMPILER_ID MATCHES "Clang") AND MSVC)
+	target_compile_options(frontend PRIVATE -Wno-clang-cl-pch)
+	target_compile_options(frontend PRIVATE -Wno-microsoft-cast)
+endif()
+
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+	target_compile_definitions(frontend PRIVATE UI_WINDOWS)
+endif()
+
+if (${OSD} STREQUAL "sdl")
+	target_compile_definitions(frontend PRIVATE UI_SDL)
+endif()
+
+target_include_directories(frontend PRIVATE
+	${MAME_DIR}/src/osd
+	${MAME_DIR}/src/emu
+	${MAME_DIR}/src/frontend/mame
+	${MAME_DIR}/src/devices ## till deps are fixed
+	${MAME_DIR}/src/lib
+	${MAME_DIR}/src/lib/util
+	${MAME_DIR}/3rdparty
+	${MAME_DIR}/3rdparty/sol2
+	${GEN_DIR}/emu
+	${GEN_DIR}/emu/layout
+
+	${EXT_INCLUDEDIR_ASIO}
+	${EXT_INCLUDEDIR_EXPAT}
+	${EXT_INCLUDEDIR_LUA}
+	${EXT_INCLUDEDIR_ZLIB}
+	${EXT_INCLUDEDIR_FLAC}
+	${EXT_INCLUDEDIR_RAPIDJSON}
+)
+
+target_link_libraries(frontend PUBLIC lua)
+
+add_custom_command(
+	COMMAND ${CMAKE_COMMAND} -E make_directory ${GEN_DIR}/emu
+	COMMAND ${PYTHON_EXECUTABLE} ${MAME_DIR}/scripts/build/file2lines.py ${MAME_DIR}/COPYING ${GEN_DIR}/emu/copying.ipp copying_text
+	DEPENDS ${MAME_DIR}/scripts/build/file2lines.py ${MAME_DIR}/COPYING
+	OUTPUT ${GEN_DIR}/emu/copying.ipp
+	COMMENT "Converting COPYING..."
+)
+
+target_sources(frontend PRIVATE
 	${MAME_DIR}/src/frontend/mame/audit.cpp
 	${MAME_DIR}/src/frontend/mame/audit.h
 	${MAME_DIR}/src/frontend/mame/cheat.cpp
@@ -134,52 +182,4 @@ set(FRONTEND_SRCS
 	${MAME_DIR}/src/frontend/mame/ui/widgets.cpp
 	${MAME_DIR}/src/frontend/mame/ui/widgets.h
 	${GEN_DIR}/emu/copying.ipp
-)
-
-add_library(frontend ${LIBTYPE} ${FRONTEND_SRCS})
-
-addprojectflags(frontend)
-precompiledheaders(frontend)
-
-if((CMAKE_CXX_COMPILER_ID MATCHES "Clang") AND MSVC)
-	target_compile_options(frontend PRIVATE -Wno-clang-cl-pch)
-	target_compile_options(frontend PRIVATE -Wno-microsoft-cast)
-endif()
-
-if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-	target_compile_definitions(frontend PRIVATE UI_WINDOWS)
-endif()
-
-if (${OSD} STREQUAL "sdl")
-	target_compile_definitions(frontend PRIVATE UI_SDL)
-endif()
-
-target_include_directories(frontend PRIVATE
-	${MAME_DIR}/src/osd
-	${MAME_DIR}/src/emu
-	${MAME_DIR}/src/frontend/mame
-	${MAME_DIR}/src/devices ## till deps are fixed
-	${MAME_DIR}/src/lib
-	${MAME_DIR}/src/lib/util
-	${MAME_DIR}/3rdparty
-	${MAME_DIR}/3rdparty/sol2
-	${GEN_DIR}/emu
-	${GEN_DIR}/emu/layout
-
-	${EXT_INCLUDEDIR_ASIO}
-	${EXT_INCLUDEDIR_EXPAT}
-	${EXT_INCLUDEDIR_LUA}
-	${EXT_INCLUDEDIR_ZLIB}
-	${EXT_INCLUDEDIR_FLAC}
-	${EXT_INCLUDEDIR_RAPIDJSON}
-)
-
-target_link_libraries(frontend PUBLIC lua)
-
-add_custom_command(
-	COMMAND ${CMAKE_COMMAND} -E make_directory ${GEN_DIR}/emu
-	COMMAND ${PYTHON_EXECUTABLE} ${MAME_DIR}/scripts/build/file2lines.py ${MAME_DIR}/COPYING ${GEN_DIR}/emu/copying.ipp copying_text
-	DEPENDS ${MAME_DIR}/scripts/build/file2lines.py ${MAME_DIR}/COPYING
-	OUTPUT ${GEN_DIR}/emu/copying.ipp
-	COMMENT "Converting COPYING..."
 )

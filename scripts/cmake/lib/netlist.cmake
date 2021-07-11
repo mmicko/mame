@@ -1,4 +1,29 @@
-set(NETLIST_SRCS
+add_library(netlist ${LIBTYPE})
+
+addprojectflags(netlist)
+
+target_include_directories(netlist PRIVATE
+	${MAME_DIR}/src/lib/netlist
+)
+
+target_compile_definitions(netlist PRIVATE 
+	__STDC_CONSTANT_MACROS
+	NL_USE_ACADEMIC_SOLVERS=0
+)
+
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+	target_compile_definitions(netlist PRIVATE 
+		UNICODE
+		_UNICODE
+		_WIN32_WINNT=0x0501
+		WIN32_LEAN_AND_MEAN
+		NOMINMAX
+	)
+else()
+	target_link_libraries(netlist PUBLIC ${CMAKE_DL_LIBS} pthread)
+endif()
+
+target_sources(netlist PRIVATE
 	${MAME_DIR}/src/lib/netlist/nl_base.cpp
 	${MAME_DIR}/src/lib/netlist/nl_base.h
 	${MAME_DIR}/src/lib/netlist/nl_config.h
@@ -185,29 +210,3 @@ set(NETLIST_SRCS
 	${MAME_DIR}/src/lib/netlist/generated/lib_entries.hxx
 	${MAME_DIR}/src/lib/netlist/generated/nlm_modules_lib.cpp
 )
-
-add_library(netlist ${LIBTYPE} ${NETLIST_SRCS})
-
-addprojectflags(netlist)
-
-target_include_directories(netlist PRIVATE
-	${MAME_DIR}/src/lib/netlist
-)
-
-target_compile_definitions(netlist PRIVATE 
-	__STDC_CONSTANT_MACROS
-	NL_USE_ACADEMIC_SOLVERS=0
-)
-
-if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-	target_compile_definitions(netlist PRIVATE 
-		UNICODE
-		_UNICODE
-		_WIN32_WINNT=0x0501
-		WIN32_LEAN_AND_MEAN
-		NOMINMAX
-	)
-else()
-	target_link_libraries(netlist PUBLIC ${CMAKE_DL_LIBS} pthread)
-endif()
-
