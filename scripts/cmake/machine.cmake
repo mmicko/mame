@@ -3171,8 +3171,8 @@ endif()
 ##
 ###################################################
 
-if(("ATA" IN_LIST BUSES) OR ("SCSI" IN_LIST BUSES) OR 
-	("T10" IN_LIST MACHINES))
+if(("ATA" IN_LIST BUSES) OR ("SCSI" IN_LIST BUSES))
+	list(APPEND MACHINES "T10")
 endif()
 
 if("T10" IN_LIST MACHINES)
