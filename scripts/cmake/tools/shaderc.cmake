@@ -127,14 +127,6 @@ target_sources(spirv-opt PRIVATE
 	${SPIRV_TOOLS}/source/val/validate_type.cpp
 	${SPIRV_TOOLS}/source/val/validation_state.cpp
 )
-#
-#	configuration { "vs*" }
-#		buildoptions {
-#			"/wd4127", -- warning C4127: conditional expression is constant
-#			"/wd4389", -- warning C4389: '==': signed/unsigned mismatch
-#			"/wd4702", -- warning C4702: unreachable code
-#			"/wd4706", -- warning C4706: assignment within conditional expression
-#		}
 
 if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
 	target_compile_options(spirv-opt PRIVATE 
@@ -142,19 +134,7 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Cla
 		-Wno-range-loop-construct
 	)
 endif()
-
-#	configuration { "mingw* or linux or osx" }
-#		buildoptions {
-#			"-Wno-switch",
-#		}
-#
-#	configuration { "mingw* or linux-gcc-*" }
-#		buildoptions {
-#			"-Wno-misleading-indentation",
-#		}
-#
-#	configuration {}
-#
+add_project_to_group(shaderc spirv-opt)
 
 add_library(spirv-cross STATIC EXCLUDE_FROM_ALL)
 target_compile_definitions(spirv-cross PRIVATE SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS)
@@ -190,17 +170,8 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
 		-Wno-overloaded-virtual
 	)
 endif()
-#
-#	configuration { "vs*" }
-#		buildoptions {
-#			"/wd4018", -- warning C4018: '<': signed/unsigned mismatch
-#			"/wd4245", -- warning C4245: 'return': conversion from 'int' to 'unsigned int', signed/unsigned mismatch
-#			"/wd4706", -- warning C4706: assignment within conditional expression
-#			"/wd4715", -- warning C4715: '': not all control paths return a value
-#		}
-#
-#	configuration {}
-#
+
+add_project_to_group(shaderc spirv-cross)
 
 add_library(glslang STATIC EXCLUDE_FROM_ALL)
 
@@ -234,55 +205,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 else()
 	target_sources(glslang PRIVATE ${GLSLANG}/glslang/OSDependent/Unix/ossource.cpp)
 endif()
-#	files {
-#		${GLSLANG}/glslang/**.cpp
-#		${GLSLANG}/glslang/**.h
-#
-#		${GLSLANG}/hlsl/**.cpp
-#		${GLSLANG}/hlsl/**.h
-#
-#		${GLSLANG}/SPIRV/**.cpp
-#		${GLSLANG}/SPIRV/**.h
-#
-#		${GLSLANG}/OGLCompilersDLL/**.cpp
-#		${GLSLANG}/OGLCompilersDLL/**.h
-#	}
-#
-#	removefiles {
-#		${GLSLANG}/glslang/OSDependent/Unix/main.cpp
-#		${GLSLANG}/glslang/OSDependent/Windows/main.cpp
-#	}
-#
-#	configuration { "windows" }
-#		removefiles {
-#			${GLSLANG}/glslang/OSDependent/Unix/**.cpp
-#			${GLSLANG}/glslang/OSDependent/Unix/**.h
-#		}
-#
-#	configuration { "not windows" }
-#		removefiles {
-#			${GLSLANG}/glslang/OSDependent/Windows/**.cpp
-#			${GLSLANG}/glslang/OSDependent/Windows/**.h
-#		}
-#
-#	configuration { "vs*" }
-#		buildoptions {
-#			"/wd4005", -- warning C4005: '_CRT_SECURE_NO_WARNINGS': macro redefinition
-#			"/wd4065", -- warning C4065: switch statement contains 'default' but no 'case' labels
-#			"/wd4100", -- warning C4100: 'inclusionDepth' : unreferenced formal parameter
-#			"/wd4127", -- warning C4127: conditional expression is constant
-#			"/wd4189", -- warning C4189: 'isFloat': local variable is initialized but not referenced
-#			"/wd4244", -- warning C4244: '=': conversion from 'int' to 'char', possible loss of data
-#			"/wd4310", -- warning C4310: cast truncates constant value
-#			"/wd4389", -- warning C4389: '==': signed/unsigned mismatch
-#			"/wd4456", -- warning C4456: declaration of 'feature' hides previous local declaration
-#			"/wd4457", -- warning C4457: declaration of 'token' hides function parameter
-#			"/wd4458", -- warning C4458: declaration of 'language' hides class member
-#			"/wd4702", -- warning C4702: unreachable code
-#			"/wd4715", -- warning C4715: 'spv::Builder::makeFpConstant': not all control paths return a value
-#			"/wd4838", -- warning C4838: conversion from 'spv::GroupOperation' to 'unsigned int' requires a narrowing conversion
-#		}
-#
+
 if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
 	target_compile_options(glslang PRIVATE 
 		-Wno-ignored-qualifiers
@@ -305,26 +228,8 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Cla
 		-Wno-pessimizing-move
 	)
 endif()
-#
-#	configuration { "osx" }
-#		buildoptions {
-#			"-Wno-c++11-extensions",
-#			"-Wno-unused-const-variable",
-#			"-Wno-deprecated-register",
-#		}
-#
-#	configuration { "linux-gcc-*" }
-#		buildoptions {
-#			"-Wno-unused-but-set-variable",
-#		}
-#
-#	configuration { "mingw* or linux or osx" }
-#		buildoptions {
-#			"
-#		}
-#
-#	configuration {}
-#
+
+add_project_to_group(shaderc glslang)
 
 add_library(glsl-optimizer STATIC EXCLUDE_FROM_ALL)
 
@@ -501,44 +406,15 @@ target_sources(glsl-optimizer PRIVATE
 	${GLSL_OPTIMIZER}/src/util/ralloc.h
 )
 
-#	configuration { "Release" }
-#		flags {
-#			"Optimize",
-#		}
-#
-#		removeflags {
-#			-- GCC 4.9 -O2 + -fno-strict-aliasing don't work together...
-#			"OptimizeSpeed",
-#		}
-#
-#	configuration { "vs*" }
-#		includedirs {
-#			${GLSL_OPTIMIZER}/src/glsl/msvc
-#		}
-#
-#		defines { -- glsl-optimizer
-#			"__STDC__",
-#			"__STDC_VERSION__=199901L",
-#			"strdup=_strdup",
-#			"alloca=_alloca",
-#			"isascii=__isascii",
-#		}
-#
-#		buildoptions {
-#			"/wd4100", -- error C4100: '' : unreferenced formal parameter
-#			"/wd4127", -- warning C4127: conditional expression is constant
-#			"/wd4132", -- warning C4132: 'deleted_key_value': const object should be initialized
-#			"/wd4189", -- warning C4189: 'interface_type': local variable is initialized but not referenced
-#			"/wd4204", -- warning C4204: nonstandard extension used: non-constant aggregate initializer
-#			"/wd4244", -- warning C4244: '=': conversion from 'const flex_int32_t' to 'YY_CHAR', possible loss of data
-#			"/wd4389", -- warning C4389: '!=': signed/unsigned mismatch
-#			"/wd4245", -- warning C4245: 'return': conversion from 'int' to 'unsigned int', signed/unsigned mismatch
-#			"/wd4701", -- warning C4701: potentially uninitialized local variable 'lower' used
-#			"/wd4702", -- warning C4702: unreachable code
-#			"/wd4706", -- warning C4706: assignment within conditional expression
-#			"/wd4996", -- warning C4996: 'strdup': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _strdup.
-#		}
-#
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+	target_compile_options(glsl-optimizer PRIVATE /wd4090) # warning C4090: 'function': different 'const' qualifiers
+	target_compile_options(glsl-optimizer PRIVATE /wd4132) # warning C4132: 'deleted_key_value': const object should be initialized
+	target_compile_options(glsl-optimizer PRIVATE /wd4189) # warning C4189: 'interface_type': local variable is initialized but not referenced
+	target_compile_options(glsl-optimizer PRIVATE /wd4291) # warning C4291: 'no matching operator delete found; memory will not be freed if initialization throws an exception
+	target_compile_options(glsl-optimizer PRIVATE /wd4701) # warning C4701: potentially uninitialized local variable 'lower' used
+	target_compile_options(glsl-optimizer PRIVATE /wd5033) # warning C5033: 'register' is no longer a supported storage class
+endif()
+
 if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
 	target_compile_options(glsl-optimizer PRIVATE 
 		-fno-strict-aliasing # glsl-optimizer has bugs if strict aliasing is used.
@@ -552,33 +428,8 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Cla
 		$<$<COMPILE_LANGUAGE:CXX>:-Wno-register>
 	)
 endif()
-#	configuration { "mingw* or linux or osx" }
-#		buildoptions {
-#			"-fno-strict-aliasing", -- glsl-optimizer has bugs if strict aliasing is used.
-#
-#			"-Wno-implicit-fallthrough",
-#			"-Wno-parentheses",
-#			"-Wno-sign-compare",
-#			"-Wno-unused-function",
-#			"-Wno-unused-parameter",
-#		}
-#
-#		removebuildoptions {
-#			"-Wshadow", -- glsl-optimizer is full of -Wshadow warnings ignore it.
-#		}
-#
-#	configuration { "osx" }
-#		buildoptions {
-#			"-Wno-deprecated-register",
-#		}
-#
-#	configuration { "mingw* or linux-gcc-*" }
-#		buildoptions {
-#			"-Wno-misleading-indentation",
-#		}
-#
-#	configuration {}
-#
+add_project_to_group(shaderc glsl-optimizer)
+
 add_library(fcpp STATIC EXCLUDE_FROM_ALL)
 
 target_compile_definitions(fcpp PRIVATE 
@@ -619,6 +470,8 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Cla
 		)
 	endif()
 endif()
+
+add_project_to_group(shaderc fcpp)
 
 add_executable(shaderc EXCLUDE_FROM_ALL)
 
@@ -663,24 +516,6 @@ target_sources(shaderc PRIVATE
 		${MAME_DIR}/3rdparty/bgfx/src/shader_spirv.cpp 
 )
 
-#	configuration { "mingw-*" }
-#		targetextension ".exe"
-#
-#	configuration { "osx" }
-#		links {
-#			"Cocoa.framework",
-#		}
-#
-#	configuration { "vs*" }
-#		includedirs {
-#			${GLSL_OPTIMIZER}/include/c99
-#		}
-#
-#	configuration { "vs20* or mingw*" }
-#		links {
-#			"psapi",
-#		}
-#
 if (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	target_link_libraries(shaderc PRIVATE pthread dl)
 endif()

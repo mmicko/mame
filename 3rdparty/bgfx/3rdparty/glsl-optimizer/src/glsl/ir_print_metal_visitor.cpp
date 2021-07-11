@@ -135,12 +135,12 @@ public:
 	ir_print_metal_visitor(metal_print_context& ctx_, string_buffer& buf, global_print_tracker_metal* globals_, PrintGlslMode mode_, const _mesa_glsl_parse_state* state_)
 		: ctx(ctx_)
 		, buffer(buf)
+		, mode_whole(mode_)
 		, loopstate(NULL)
 		, inside_loop_body(false)
 		, inside_lhs(false)
 		, skipped_this_ir(false)
 		, previous_skipped(false)
-		, mode_whole(mode_)
 	{
 		indentation = 0;
 		expression_depth = 0;

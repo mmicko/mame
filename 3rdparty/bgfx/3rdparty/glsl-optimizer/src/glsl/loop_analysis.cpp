@@ -300,9 +300,9 @@ public:
 
    int if_statement_depth;
 
-   bool first_pass;
-
    ir_assignment *current_assignment;
+
+   bool first_pass;
 
    exec_list state;
 };

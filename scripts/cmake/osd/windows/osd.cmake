@@ -23,6 +23,7 @@ option(USE_SDL "Enable SDL sound output." OFF)
 
 qtdebuggerbuild(qtdbg_${OSD})
 osd_cfg(qtdbg_${OSD})
+add_project_to_group(libs qtdbg_${OSD})
 
 ########################
 # osd_windows library
@@ -108,6 +109,8 @@ target_sources(osd_${OSD} PRIVATE
     ${MAME_DIR}/src/osd/modules/debugger/win/debugwin.h
 )
 
+add_project_to_group(libs osd_${OSD})
+
 ########################
 # ocore_windows library
 ########################
@@ -165,6 +168,8 @@ target_sources(ocore_${OSD} PRIVATE
     ${MAME_DIR}/src/osd/modules/file/winsocket.cpp
     ${MAME_DIR}/src/osd/modules/lib/osdlib_win32.cpp
 )
+
+add_project_to_group(libs ocore_${OSD})
 
 ########################
 # maintargetosdoptions

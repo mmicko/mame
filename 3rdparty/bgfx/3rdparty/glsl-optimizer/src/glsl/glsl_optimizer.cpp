@@ -140,16 +140,16 @@ struct glslopt_shader
 	}
 
 	glslopt_shader ()
-		: rawOutput(0)
-		, optimizedOutput(0)
-		, status(false)
-		, uniformCount(0)
+		: uniformCount(0)
 		, uniformsSize(0)
 		, inputCount(0)
 		, textureCount(0)
 		, statsMath(0)
 		, statsTex(0)
 		, statsFlow(0)
+		, rawOutput(0)
+		, optimizedOutput(0)
+		, status(false)
 	{
 		infoLog = "Shader not compiled yet";
 		

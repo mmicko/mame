@@ -2,8 +2,6 @@
 # copyright-holders:MAMEdev Team
 
 macro(osd_cfg _project)
-	add_project_to_group(libs ${_project})
-
     target_compile_definitions(${_project} PRIVATE
         WIN32
         _WIN32
