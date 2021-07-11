@@ -712,9 +712,11 @@ generate_has_header(FORMATS)
 
 dump_mame_options()
 
-##-------------------------------------------------
-## Source cleanup
-##-------------------------------------------------
+#################################################
+# Source cleanup
+#################################################
+
+
 #
 #.PHONY: cleansrc
 #
@@ -754,18 +756,20 @@ dump_mame_options()
 #endif
 #
 
-##-------------------------------------------------
-## BGFX shaders
-##
-## to build all just use : make shaders
-##
-## to build specific chain use for example : make shaders CHAIN=eagle
-## data for chain is taken from src/osd/modules/render/bgfx/shaders/chains/
-## subfolder named in CHAIN
-## NOTE: shaders can be only built on Windows for now
-## due to restrictions of way how hlsl shaders are compiled
-##-------------------------------------------------
+#################################################
+# BGFX shaders
 #
+# to build all just use : make shaders
+#
+# to build specific chain use for example : make shaders CHAIN=eagle
+# data for chain is taken from src/osd/modules/render/bgfx/shaders/chains/
+# subfolder named in CHAIN
+# NOTE: shaders can be only built on Windows for now
+# due to restrictions of way how hlsl shaders are compiled
+#################################################
+
+add_project_to_group_and_include(shaderc shaderc scripts/cmake/tools/shaderc.cmake)
+
 #.PHONY: shaders bgfx-tools
 #
 #bgfx-tools:
@@ -780,13 +784,12 @@ dump_mame_options()
 #	-$(call MKDIR,build/shaders/glsl)
 #	-$(call MKDIR,build/shaders/spirv)
 #	$(SILENT) $(MAKE) -C $(SRC)/osd/modules/render/bgfx/shaders rebuild CHAIN="$(CHAIN)" SILENT="$(SILENT)"
-#
-##-------------------------------------------------
-## Translation
-##-------------------------------------------------
-#
-#.PHONY: translation
-#
+
+
+#################################################
+# Translation
+#################################################
+
 #$(GENDIR)/mame.pot: FORCE
 #	$(SILENT) echo Generating mame.pot
 #	$(SILENT) find src -iname "*.cpp" -print0 | xargs -0 xgettext --from-code=UTF-8 -k_ -k__ -o $@
@@ -796,7 +799,10 @@ dump_mame_options()
 #	$(SILENT) find language -name "*.po" -print0 | xargs -0 -n 1 -I %% msgmerge -U -N %% $<
 #	$(SILENT) find language -name "*.po" -print0 | xargs -0 -n 1 -I %% msgattrib --clear-fuzzy --empty %% -o %%
 
+
+#################################################
 # Converting translation
+#################################################
 subdir_list(LANGUAGE_DIRS ${MAME_DIR}/language)
 set(LANGUAGE_FILES "")
 foreach(subdir ${LANGUAGE_DIRS})
@@ -806,7 +812,10 @@ endforeach()
 add_custom_target(languages ALL DEPENDS ${LANGUAGE_FILES})
 set_target_properties(languages PROPERTIES FOLDER generate)
 
+
+#################################################
 # Compressing layouts
+#################################################
 file(GLOB LAYOUT_FILES ${MAME_DIR}/src/${TARGET}/layout/*.lay)
 set(GEN_LAYOUT_FILES "")
 foreach(lay ${LAYOUT_FILES})
