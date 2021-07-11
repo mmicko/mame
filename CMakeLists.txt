@@ -770,8 +770,6 @@ dump_mame_options()
 
 add_project_to_group_and_include(shaderc shaderc scripts/cmake/tools/shaderc.cmake)
 
-#.PHONY: shaders bgfx-tools
-#
 #bgfx-tools:
 #	$(SILENT) $(MAKE) -C 3rdparty/bgfx -f makefile shaderc CC="$(CC)" CXX="$(CXX)" MINGW="$(MINGW)" SILENT="$(SILENT)"
 #
@@ -790,15 +788,23 @@ add_project_to_group_and_include(shaderc shaderc scripts/cmake/tools/shaderc.cma
 # Translation
 #################################################
 
-#$(GENDIR)/mame.pot: FORCE
-#	$(SILENT) echo Generating mame.pot
-#	$(SILENT) find src -iname "*.cpp" -print0 | xargs -0 xgettext --from-code=UTF-8 -k_ -k__ -o $@
-#	$(SILENT) find plugins -iname "*.lua" -print0 | xargs -0 xgettext --from-code=UTF-8 -k_ -k__ -j -o $@
-#
-#translation: $(GENDIR)/mame.pot
-#	$(SILENT) find language -name "*.po" -print0 | xargs -0 -n 1 -I %% msgmerge -U -N %% $<
-#	$(SILENT) find language -name "*.po" -print0 | xargs -0 -n 1 -I %% msgattrib --clear-fuzzy --empty %% -o %%
+add_custom_command(
+  COMMAND cd ${MAME_DIR} && find src -iname "*.cpp" -print0 | xargs -0 xgettext --from-code=UTF-8 -k_ -k__ -o ${GEN_DIR}/mame.pot
+  COMMAND cd ${MAME_DIR} && find plugins -iname "*.lua" -print0 | xargs -0 xgettext --from-code=UTF-8 -k_ -k__ -j -o ${GEN_DIR}/mame.pot
+  OUTPUT ${GEN_DIR}/mamepot.flag
+  COMMENT "Extracting translations..."
+)
 
+add_custom_command(
+  COMMAND cd ${MAME_DIR}
+  COMMAND find ${MAME_DIR}/language -name "*.po" -print0 | xargs -0 -n 1 -I %% msgmerge -U -N %% ${GEN_DIR}/mame.pot
+  COMMAND find ${MAME_DIR}/language -name "*.po" -print0 | xargs -0 -n 1 -I %% msgattrib --clear-fuzzy --empty %% -o %%
+  DEPENDS ${GEN_DIR}/mamepot.flag
+  OUTPUT ${GEN_DIR}/translation.flag
+  COMMENT "Updating translations..."
+)
+
+add_custom_target(translation DEPENDS ${GEN_DIR}/mamepot.flag ${GEN_DIR}/translation.flag)
 
 #################################################
 # Converting translation
