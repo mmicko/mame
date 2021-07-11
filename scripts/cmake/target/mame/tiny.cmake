@@ -1,14 +1,14 @@
 # license:BSD-3-Clause
 # copyright-holders:MAMEdev Team
 
-###########################################################################
+##########################################################################
 ##
 ##   tiny.lua
 ##
 ##   Small driver-specific example makefile
 ##   Use make SUBTARGET=tiny to build
 ##
-###########################################################################
+##########################################################################
 
 
 ##################################################
@@ -45,11 +45,13 @@ list(APPEND SOUNDS VOTRAX)
 list(APPEND SOUNDS YM2151)
 list(APPEND SOUNDS YM3812)
 
+
 ##################################################
 ## specify available video cores
 ##################################################
 
 list(APPEND VIDEOS MC6845)
+
 
 ##################################################
 ## specify available machine cores
@@ -84,6 +86,7 @@ list(APPEND MACHINES Z80PIO)
 
 list(APPEND BUSES CENTRONICS)
 
+
 ##################################################
 ## This is the list of files that are necessary
 ## for building all of the drivers referenced
@@ -91,7 +94,23 @@ list(APPEND BUSES CENTRONICS)
 ##################################################
 
 macro(createProjects_mame_tiny _target  _subtarget)
-	set(MAME_TINY_SRCS
+	add_library(mame_tiny ${LIBTYPE})
+	addprojectflags(mame_tiny)
+	precompiledheaders_novs(mame_tiny)
+	add_dependencies(mame_tiny layouts)
+
+	target_include_directories(mame_tiny PRIVATE
+		${MAME_DIR}/src/osd
+		${MAME_DIR}/src/emu
+		${MAME_DIR}/src/devices
+		${MAME_DIR}/src/mame
+		${MAME_DIR}/src/lib
+		${MAME_DIR}/src/lib/util
+		${MAME_DIR}/3rdparty
+		${GEN_DIR}/mame/layout
+	)
+
+	target_sources(mame_tiny PRIVATE
 		${MAME_DIR}/src/mame/audio/nl_carpolo.cpp
 		${MAME_DIR}/src/mame/audio/nl_carpolo.h
 		${MAME_DIR}/src/mame/drivers/carpolo.cpp
@@ -153,23 +172,7 @@ macro(createProjects_mame_tiny _target  _subtarget)
 		${MAME_DIR}/src/mame/drivers/supertnk.cpp
 		${MAME_DIR}/src/mame/drivers/goldnpkr.cpp
 	)
-
-	add_library(mame_tiny ${LIBTYPE} ${MAME_TINY_SRCS})
-	addprojectflags(mame_tiny)
-	precompiledheaders_novs(mame_tiny)
-	add_dependencies(mame_tiny layouts)
 	add_project_to_group(drivers mame_tiny)
-
-	target_include_directories(mame_tiny PRIVATE
-		${MAME_DIR}/src/osd
-		${MAME_DIR}/src/emu
-		${MAME_DIR}/src/devices
-		${MAME_DIR}/src/mame
-		${MAME_DIR}/src/lib
-		${MAME_DIR}/src/lib/util
-		${MAME_DIR}/3rdparty
-		${GEN_DIR}/mame/layout
-	)
 endmacro()
 
 macro(linkProjects_mame_tiny _target _subtarget _projectname)

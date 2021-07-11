@@ -375,8 +375,8 @@ if("BBC_FDC" IN_LIST BUSES)
 		${MAME_DIR}/src/devices/bus/bbc/fdc/cumana.h
 		${MAME_DIR}/src/devices/bus/bbc/fdc/cv1797.cpp
 		${MAME_DIR}/src/devices/bus/bbc/fdc/cv1797.h
-		${MAME_DIR}/src/devices/bus/bbc/fdc/kendifa.cpp
-		${MAME_DIR}/src/devices/bus/bbc/fdc/kendifa.h
+		${MAME_DIR}/src/devices/bus/bbc/fdc/kenda.cpp
+		${MAME_DIR}/src/devices/bus/bbc/fdc/kenda.h
 		${MAME_DIR}/src/devices/bus/bbc/fdc/opus.cpp
 		${MAME_DIR}/src/devices/bus/bbc/fdc/opus.h
 		${MAME_DIR}/src/devices/bus/bbc/fdc/solidisk.cpp
@@ -3221,8 +3221,8 @@ if("SMS_EXP" IN_LIST BUSES)
 	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/sms_exp/smsexp.cpp
 		${MAME_DIR}/src/devices/bus/sms_exp/smsexp.h
-		${MAME_DIR}/src/devices/bus/sms_exp/gendifer.cpp
-		${MAME_DIR}/src/devices/bus/sms_exp/gendifer.h
+		${MAME_DIR}/src/devices/bus/sms_exp/gender.cpp
+		${MAME_DIR}/src/devices/bus/sms_exp/gender.h
 	)
 endif()
 

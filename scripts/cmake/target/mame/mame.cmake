@@ -1,14 +1,14 @@
-### license:BSD-3-Clause
-### copyright-holders:MAMEdev Team
-#
-############################################################################
-###
-###   mame.lua
-###
-###   MAME target makefile
-###
-############################################################################
-#
+# license:BSD-3-Clause
+# copyright-holders:MAMEdev Team
+
+##########################################################################
+##
+##   mame.lua
+##
+##   MAME target makefile
+##
+##########################################################################
+
 include(scripts/cmake/target/mame/arcade.cmake)
 include(scripts/cmake/target/mame/mess.cmake)
 include(scripts/cmake/target/mame/virtual.cmake)

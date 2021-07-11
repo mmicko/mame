@@ -1,21 +1,21 @@
-### license:BSD-3-Clause
-### copyright-holders:MAMEdev Team
-#
-############################################################################
-###
-###   ci.lua
-###
-###   Small driver-specific example makefile for use in CI
-###   Use make SUBTARGET=ci to build
-###
-############################################################################
-#
-#
-###################################################
-### Specify all the CPU cores necessary for the
-### drivers referenced in ci.lst.
-###################################################
-#
+# license:BSD-3-Clause
+# copyright-holders:MAMEdev Team
+
+##########################################################################
+##
+##   ci.lua
+##
+##   Small driver-specific example makefile for use in CI
+##   Use make SUBTARGET=ci to build
+##
+##########################################################################
+
+
+##################################################
+## Specify all the CPU cores necessary for the
+## drivers referenced in ci.lst.
+##################################################
+
 list(APPEND CPUS Z80)
 list(APPEND CPUS M6502)
 list(APPEND CPUS MCS48)
@@ -29,12 +29,12 @@ list(APPEND CPUS COP400)
 list(APPEND CPUS MIPS3)
 list(APPEND CPUS ADSP21XX)
 list(APPEND CPUS FR)
-#
-###################################################
-### Specify all the sound cores necessary for the
-### drivers referenced in ci.lst.
-###################################################
-#
+
+##################################################
+## Specify all the sound cores necessary for the
+## drivers referenced in ci.lst.
+##################################################
+
 list(APPEND SOUNDS SAMPLES)
 list(APPEND SOUNDS DAC)
 list(APPEND SOUNDS DISCRETE)
@@ -50,18 +50,18 @@ list(APPEND SOUNDS VOTRAX)
 list(APPEND SOUNDS DMADAC)
 list(APPEND SOUNDS CDDA)
 list(APPEND SOUNDS POKEY)
-#
-###################################################
-### specify available video cores
-###################################################
-#
+
+##################################################
+## specify available video cores
+##################################################
+
 list(APPEND VIDEOS PS2GIF)
 list(APPEND VIDEOS PS2GS)
-#
-###################################################
-### specify available machine cores
-###################################################
-#
+
+##################################################
+## specify available machine cores
+##################################################
+
 list(APPEND MACHINES 6821PIA)
 list(APPEND MACHINES ADC0808)
 list(APPEND MACHINES TTL74148)
@@ -85,112 +85,104 @@ list(APPEND MACHINES NETLIST)
 list(APPEND MACHINES IDECTRL)
 list(APPEND MACHINES PS2INTC)
 list(APPEND MACHINES ER2055)
-#
-###################################################
-### specify available bus cores
-###################################################
-#
+
+##################################################
+## specify available bus cores
+##################################################
+
 list(APPEND BUSES CENTRONICS)
 list(APPEND BUSES ATA)
-#
-###################################################
-### This is the list of files that are necessary
-### for building all of the drivers referenced
-### in ci.lst
-###################################################
+
+##################################################
+## This is the list of files that are necessary
+## for building all of the drivers referenced
+## in ci.lst
+##################################################
 
 macro(createProjects_mame_ci _target  _subtarget)
-#function createProjects_mame_ci(_target, _subtarget)
-#	project ("mame_ci")
-#	targetsubdir(_target .."_" .. _subtarget)
-#	kind (LIBTYPE)
-#	uuid (os.uuid("drv-mame-ci"))
-#	addprojectflags()
-#	precompiledheaders_novs()
-#
-#	includedirs {
-#		MAME_DIR .. "src/osd",
-#		MAME_DIR .. "src/emu",
-#		MAME_DIR .. "src/devices",
-#		MAME_DIR .. "src/mame",
-#		MAME_DIR .. "src/lib",
-#		MAME_DIR .. "src/lib/util",
-#		MAME_DIR .. "3rdparty",
-#		GEN_DIR  .. "mame/layout",
-#	}
-#
-#files{
-#	MAME_DIR .. "src/mame/audio/nl_carpolo.cpp",
-#	MAME_DIR .. "src/mame/audio/nl_carpolo.h",
-#	MAME_DIR .. "src/mame/drivers/carpolo.cpp",
-#	MAME_DIR .. "src/mame/includes/carpolo.h",
-#	MAME_DIR .. "src/mame/machine/carpolo.cpp",
-#	MAME_DIR .. "src/mame/video/carpolo.cpp",
-#	MAME_DIR .. "src/mame/drivers/circus.cpp",
-#	MAME_DIR .. "src/mame/includes/circus.h",
-#	MAME_DIR .. "src/mame/audio/circus.cpp",
-#	MAME_DIR .. "src/mame/video/circus.cpp",
-#	MAME_DIR .. "src/mame/drivers/exidy.cpp",
-#	MAME_DIR .. "src/mame/includes/exidy.h",
-#	MAME_DIR .. "src/mame/audio/exidy.cpp",
-#	MAME_DIR .. "src/mame/audio/exidy.h",
-#	MAME_DIR .. "src/mame/video/exidy.cpp",
-#	MAME_DIR .. "src/mame/audio/exidy440.cpp",
-#	MAME_DIR .. "src/mame/audio/exidy440.h",
-#	MAME_DIR .. "src/mame/drivers/starfire.cpp",
-#	MAME_DIR .. "src/mame/audio/nl_fireone.cpp",
-#	MAME_DIR .. "src/mame/audio/nl_fireone.h",
-#	MAME_DIR .. "src/mame/audio/nl_starfire.cpp",
-#	MAME_DIR .. "src/mame/audio/nl_starfire.h",
-#	MAME_DIR .. "src/mame/includes/starfire.h",
-#	MAME_DIR .. "src/mame/video/starfire.cpp",
-#	MAME_DIR .. "src/mame/drivers/vertigo.cpp",
-#	MAME_DIR .. "src/mame/includes/vertigo.h",
-#	MAME_DIR .. "src/mame/machine/vertigo.cpp",
-#	MAME_DIR .. "src/mame/video/vertigo.cpp",
-#	MAME_DIR .. "src/mame/drivers/victory.cpp",
-#	MAME_DIR .. "src/mame/includes/victory.h",
-#	MAME_DIR .. "src/mame/video/victory.cpp",
-#	MAME_DIR .. "src/mame/drivers/astrocde.cpp",
-#	MAME_DIR .. "src/mame/includes/astrocde.h",
-#	MAME_DIR .. "src/mame/video/astrocde.cpp",
-#	MAME_DIR .. "src/mame/drivers/gridlee.cpp",
-#	MAME_DIR .. "src/mame/includes/gridlee.h",
-#	MAME_DIR .. "src/mame/audio/gridlee.cpp",
-#	MAME_DIR .. "src/mame/video/gridlee.cpp",
-#	MAME_DIR .. "src/mame/drivers/williams.cpp",
-#	MAME_DIR .. "src/mame/includes/williams.h",
-#	MAME_DIR .. "src/mame/machine/williams.cpp",
-#	MAME_DIR .. "src/mame/audio/williams.cpp",
-#	MAME_DIR .. "src/mame/audio/williams.h",
-#	MAME_DIR .. "src/mame/video/williams.cpp",
-#	MAME_DIR .. "src/mame/audio/s11c_bg.cpp",
-#	MAME_DIR .. "src/mame/audio/s11c_bg.h",
-#	MAME_DIR .. "src/mame/drivers/gaelco.cpp",
-#	MAME_DIR .. "src/mame/includes/gaelco.h",
-#	MAME_DIR .. "src/mame/video/gaelco.cpp",
-#	MAME_DIR .. "src/mame/machine/gaelcrpt.cpp",
-#	MAME_DIR .. "src/mame/drivers/wrally.cpp",
-#	MAME_DIR .. "src/mame/includes/wrally.h",
-#	MAME_DIR .. "src/mame/video/wrally.cpp",
-#	MAME_DIR .. "src/mame/video/gaelco_wrally_sprites.cpp",
-#	MAME_DIR .. "src/mame/video/gaelco_wrally_sprites.h",
-#	MAME_DIR .. "src/mame/machine/gaelco_ds5002fp.cpp",
-#	MAME_DIR .. "src/mame/machine/gaelco_ds5002fp.h",
-#	MAME_DIR .. "src/mame/drivers/looping.cpp",
-#	MAME_DIR .. "src/mame/drivers/supertnk.cpp",
-#	MAME_DIR .. "src/mame/drivers/kinst.cpp",
-#	MAME_DIR .. "src/mame/audio/dcs.cpp",
-#	MAME_DIR .. "src/mame/audio/dcs.h",
-#	MAME_DIR .. "src/mame/drivers/akkaarrh.cpp",
-#}
-#end
+	add_library(mame_ci ${LIBTYPE})
+	addprojectflags(mame_ci)
+	precompiledheaders_novs(mame_ci)
+	add_dependencies(mame_ci layouts)
+
+	target_include_directories(mame_ci PRIVATE
+		${MAME_DIR}/src/osd
+		${MAME_DIR}/src/emu
+		${MAME_DIR}/src/devices
+		${MAME_DIR}/src/mame
+		${MAME_DIR}/src/lib
+		${MAME_DIR}/src/lib/util
+		${MAME_DIR}/3rdparty
+		${GEN_DIR}/mame/layout
+	)
+
+	target_sources(mame_ci PRIVATE
+		${MAME_DIR}/src/mame/audio/nl_carpolo.cpp
+		${MAME_DIR}/src/mame/audio/nl_carpolo.h
+		${MAME_DIR}/src/mame/drivers/carpolo.cpp
+		${MAME_DIR}/src/mame/includes/carpolo.h
+		${MAME_DIR}/src/mame/machine/carpolo.cpp
+		${MAME_DIR}/src/mame/video/carpolo.cpp
+		${MAME_DIR}/src/mame/drivers/circus.cpp
+		${MAME_DIR}/src/mame/includes/circus.h
+		${MAME_DIR}/src/mame/audio/circus.cpp
+		${MAME_DIR}/src/mame/video/circus.cpp
+		${MAME_DIR}/src/mame/drivers/exidy.cpp
+		${MAME_DIR}/src/mame/includes/exidy.h
+		${MAME_DIR}/src/mame/audio/exidy.cpp
+		${MAME_DIR}/src/mame/audio/exidy.h
+		${MAME_DIR}/src/mame/video/exidy.cpp
+		${MAME_DIR}/src/mame/audio/exidy440.cpp
+		${MAME_DIR}/src/mame/audio/exidy440.h
+		${MAME_DIR}/src/mame/drivers/starfire.cpp
+		${MAME_DIR}/src/mame/audio/nl_fireone.cpp
+		${MAME_DIR}/src/mame/audio/nl_fireone.h
+		${MAME_DIR}/src/mame/audio/nl_starfire.cpp
+		${MAME_DIR}/src/mame/audio/nl_starfire.h
+		${MAME_DIR}/src/mame/includes/starfire.h
+		${MAME_DIR}/src/mame/video/starfire.cpp
+		${MAME_DIR}/src/mame/drivers/vertigo.cpp
+		${MAME_DIR}/src/mame/includes/vertigo.h
+		${MAME_DIR}/src/mame/machine/vertigo.cpp
+		${MAME_DIR}/src/mame/video/vertigo.cpp
+		${MAME_DIR}/src/mame/drivers/victory.cpp
+		${MAME_DIR}/src/mame/includes/victory.h
+		${MAME_DIR}/src/mame/video/victory.cpp
+		${MAME_DIR}/src/mame/drivers/astrocde.cpp
+		${MAME_DIR}/src/mame/includes/astrocde.h
+		${MAME_DIR}/src/mame/video/astrocde.cpp
+		${MAME_DIR}/src/mame/drivers/gridlee.cpp
+		${MAME_DIR}/src/mame/includes/gridlee.h
+		${MAME_DIR}/src/mame/audio/gridlee.cpp
+		${MAME_DIR}/src/mame/video/gridlee.cpp
+		${MAME_DIR}/src/mame/drivers/williams.cpp
+		${MAME_DIR}/src/mame/includes/williams.h
+		${MAME_DIR}/src/mame/machine/williams.cpp
+		${MAME_DIR}/src/mame/audio/williams.cpp
+		${MAME_DIR}/src/mame/audio/williams.h
+		${MAME_DIR}/src/mame/video/williams.cpp
+		${MAME_DIR}/src/mame/audio/s11c_bg.cpp
+		${MAME_DIR}/src/mame/audio/s11c_bg.h
+		${MAME_DIR}/src/mame/drivers/gaelco.cpp
+		${MAME_DIR}/src/mame/includes/gaelco.h
+		${MAME_DIR}/src/mame/video/gaelco.cpp
+		${MAME_DIR}/src/mame/machine/gaelcrpt.cpp
+		${MAME_DIR}/src/mame/drivers/wrally.cpp
+		${MAME_DIR}/src/mame/includes/wrally.h
+		${MAME_DIR}/src/mame/video/wrally.cpp
+		${MAME_DIR}/src/mame/video/gaelco_wrally_sprites.cpp
+		${MAME_DIR}/src/mame/video/gaelco_wrally_sprites.h
+		${MAME_DIR}/src/mame/machine/gaelco_ds5002fp.cpp
+		${MAME_DIR}/src/mame/machine/gaelco_ds5002fp.h
+		${MAME_DIR}/src/mame/drivers/looping.cpp
+		${MAME_DIR}/src/mame/drivers/supertnk.cpp
+		${MAME_DIR}/src/mame/drivers/kinst.cpp
+		${MAME_DIR}/src/mame/audio/dcs.cpp
+		${MAME_DIR}/src/mame/audio/dcs.h
+		${MAME_DIR}/src/mame/drivers/akkaarrh.cpp
+	)
 endmacro()
 
 macro(linkProjects_mame_ci _target _subtarget _projectname)
-#function linkProjects_mame_ci(_target, _subtarget)
-#	links {
-#		"mame_ci",
-#	}
-#end
+	target_link_libraries(${_projectname} PRIVATE mame_ci)
 endmacro()
