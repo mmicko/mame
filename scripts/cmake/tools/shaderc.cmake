@@ -226,6 +226,7 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Cla
 		
 		-Wno-misleading-indentation
 		-Wno-pessimizing-move
+		-Wno-maybe-uninitialized
 	)
 endif()
 
