@@ -1177,7 +1177,7 @@ macro(linkProjects_mame_mess _target, _subtarget _projectname)
     target_link_libraries(${_projectname} PRIVATE
 		access
 		aci
-		acorn
+		messacorn
 		act
 		adc
 		agat
@@ -1186,7 +1186,7 @@ macro(linkProjects_mame_mess _target, _subtarget _projectname)
 		altos
 		ami
 		amirix
-		amiga
+		messamiga
 		ampro
 		amstrad
 		apf
@@ -1194,9 +1194,9 @@ macro(linkProjects_mame_mess _target, _subtarget _projectname)
 		apple
 		applied
 		arcadia
-		ascii
+		messascii
 		at
-		atari
+		messatari
 		att
 		ave
 		aviion
@@ -1253,7 +1253,7 @@ macro(linkProjects_mame_mess _target, _subtarget _projectname)
 		epoch
 		epson
 		ericsson
-		exidy
+		messexidy
 		exorterm
 		fairch
 		fairlight
@@ -1331,13 +1331,13 @@ macro(linkProjects_mame_mess _target, _subtarget _projectname)
 		nec
 		netronic
 		next
-		nintendo
+		messnintendo
 		nokia
 		northstar
 		novag
 		novation
 		olivetti
-		olympia
+		messolympia
 		omnibyte
 		openuni
 		orion
@@ -1379,8 +1379,8 @@ macro(linkProjects_mame_mess _target, _subtarget _projectname)
 		sinclair
 		skeleton
 		slicer
-		snk
-		sony
+		messsnk
+		messsony
 		sony_news
 		sord
 		special
@@ -1438,7 +1438,7 @@ macro(linkProjects_mame_mess _target, _subtarget _projectname)
 		zvt
 		messshared
     )
-    if (_subtarget STREQUAL "mess")
+    if (${_subtarget} STREQUAL "mess")
         target_link_libraries(${_projectname} PRIVATE mameshared)
     endif()
 endmacro()
@@ -1491,7 +1491,8 @@ macro(createProjects_mame_mess _target _subtarget)
 ## vectrex.c (MESS + MAME)
 ## cps1.c (MESS + MAME)
 ##################################################
-if (_subtarget STREQUAL "mess")
+
+if (${_subtarget} STREQUAL "mess")
 createMESSProjects(_target _subtarget "mameshared"
 	${MAME_DIR}/src/mame/machine/amiga.cpp
 	${MAME_DIR}/src/mame/video/amiga.cpp
@@ -1636,7 +1637,7 @@ createMESSProjects(_target _subtarget "aci"
 	${MAME_DIR}/src/mame/drivers/aci_prodigy.cpp
 )
 
-createMESSProjects(_target _subtarget "acorn"
+createMESSProjects(_target _subtarget "messacorn"
 	${MAME_DIR}/src/mame/drivers/aa310.cpp
 	${MAME_DIR}/src/mame/machine/archimedes_keyb.cpp
 	${MAME_DIR}/src/mame/machine/archimedes_keyb.h
@@ -1721,7 +1722,7 @@ createMESSProjects(_target _subtarget "amirix"
 	${MAME_DIR}/src/mame/drivers/wxstar4000.cpp
 )
 
-createMESSProjects(_target _subtarget "amiga"
+createMESSProjects(_target _subtarget "messamiga"
 	${MAME_DIR}/src/mame/drivers/amiga.cpp
 	${MAME_DIR}/src/mame/includes/amiga.h
 )
@@ -1831,7 +1832,7 @@ createMESSProjects(_target _subtarget "arcadia"
 	${MAME_DIR}/src/mame/video/arcadia.cpp
 )
 
-createMESSProjects(_target _subtarget "ascii"
+createMESSProjects(_target _subtarget "messascii"
 	${MAME_DIR}/src/mame/drivers/msx.cpp
 	${MAME_DIR}/src/mame/includes/msx.h
 	${MAME_DIR}/src/mame/machine/msx.cpp
@@ -1853,7 +1854,7 @@ createMESSProjects(_target _subtarget "at"
 	${MAME_DIR}/src/mame/drivers/ct486.cpp
 )
 
-createMESSProjects(_target _subtarget "atari"
+createMESSProjects(_target _subtarget "messatari"
 	${MAME_DIR}/src/mame/includes/a2600.h
 	${MAME_DIR}/src/mame/drivers/a2600.cpp
 	${MAME_DIR}/src/mame/drivers/a7800.cpp
@@ -2324,7 +2325,7 @@ createMESSProjects(_target _subtarget "ericsson"
 	${MAME_DIR}/src/mame/machine/eispc_kb.h
 )
 
-createMESSProjects(_target _subtarget "exidy"
+createMESSProjects(_target _subtarget "messexidy"
 	${MAME_DIR}/src/mame/machine/sorcerer.cpp
 	${MAME_DIR}/src/mame/drivers/sorcerer.cpp
 	${MAME_DIR}/src/mame/includes/sorcerer.h
@@ -2976,7 +2977,7 @@ createMESSProjects(_target _subtarget "next"
 	${MAME_DIR}/src/mame/machine/nextmo.h
 )
 
-createMESSProjects(_target _subtarget "nintendo"
+createMESSProjects(_target _subtarget "messnintendo"
 	${MAME_DIR}/src/mame/drivers/gb.cpp
 	${MAME_DIR}/src/mame/includes/gb.h
 	${MAME_DIR}/src/mame/machine/gb.cpp
@@ -3081,7 +3082,7 @@ createMESSProjects(_target _subtarget "olivetti"
 	${MAME_DIR}/src/mame/drivers/olivpc1.cpp
 )
 
-createMESSProjects(_target _subtarget "olympia"
+createMESSProjects(_target _subtarget "messolympia"
 	${MAME_DIR}/src/mame/drivers/olyboss.cpp
 	${MAME_DIR}/src/mame/drivers/olytext.cpp
 	${MAME_DIR}/src/mame/drivers/peoplepc.cpp
@@ -3558,14 +3559,14 @@ createMESSProjects(_target _subtarget "slicer"
 	${MAME_DIR}/src/mame/drivers/slicer.cpp
 )
 
-createMESSProjects(_target _subtarget "snk"
+createMESSProjects(_target _subtarget "messsnk"
 	${MAME_DIR}/src/mame/drivers/neogeocd.cpp
 	${MAME_DIR}/src/mame/drivers/ngp.cpp
 	${MAME_DIR}/src/mame/video/k1ge.cpp
 	${MAME_DIR}/src/mame/video/k1ge.h
 )
 
-createMESSProjects(_target _subtarget "sony"
+createMESSProjects(_target _subtarget "messsony"
 	${MAME_DIR}/src/mame/drivers/betacam.cpp
 	${MAME_DIR}/src/mame/drivers/bvm.cpp
 	${MAME_DIR}/src/mame/drivers/dfs500.cpp
