@@ -15,7 +15,7 @@
 ###################################################
 
 if("A7800" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/a7800/a78_slot.cpp
 		${MAME_DIR}/src/devices/bus/a7800/a78_slot.h
 		${MAME_DIR}/src/devices/bus/a7800/a78_carts.h
@@ -37,7 +37,7 @@ endif()
 ###################################################
 
 if("A800" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/a800/a8sio.cpp
 		${MAME_DIR}/src/devices/bus/a800/a8sio.h
 		${MAME_DIR}/src/devices/bus/a800/atari810.cpp
@@ -65,7 +65,7 @@ endif()
 ###################################################
 
 if("ABCBUS" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/abcbus/abcbus.cpp
 		${MAME_DIR}/src/devices/bus/abcbus/abcbus.h
 		${MAME_DIR}/src/devices/bus/abcbus/abc890.cpp
@@ -112,7 +112,7 @@ endif()
 ###################################################
 
 if("ACORN" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/acorn/bus.cpp
 		${MAME_DIR}/src/devices/bus/acorn/bus.h
 		${MAME_DIR}/src/devices/bus/acorn/atom/discpack.cpp
@@ -155,7 +155,7 @@ endif()
 ###################################################
 
 if("ADAM" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/adam/exp.cpp
 		${MAME_DIR}/src/devices/bus/adam/exp.h
 		${MAME_DIR}/src/devices/bus/adam/adamlink.cpp
@@ -174,7 +174,7 @@ endif()
 ###################################################
 
 if("ADAMNET" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/adamnet/adamnet.cpp
 		${MAME_DIR}/src/devices/bus/adamnet/adamnet.h
 		${MAME_DIR}/src/devices/bus/adamnet/ddp.cpp
@@ -196,7 +196,7 @@ endif()
 ###################################################
 
 if("ADB" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/adb/adb.cpp
 		${MAME_DIR}/src/devices/bus/adb/adb.h
 		${MAME_DIR}/src/devices/bus/adb/adbhle.cpp
@@ -214,7 +214,7 @@ endif()
 ###################################################
 
 if("APF" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/apf/slot.cpp
 		${MAME_DIR}/src/devices/bus/apf/slot.h
 		${MAME_DIR}/src/devices/bus/apf/rom.cpp
@@ -229,7 +229,7 @@ endif()
 ###################################################
 
 if("APRICOT_EXPANSION" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/apricot/expansion/expansion.cpp
 		${MAME_DIR}/src/devices/bus/apricot/expansion/expansion.h
 		${MAME_DIR}/src/devices/bus/apricot/expansion/cards.cpp
@@ -248,7 +248,7 @@ endif()
 ###################################################
 
 if("APRICOT_KEYBOARD" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/apricot/keyboard/keyboard.cpp
 		${MAME_DIR}/src/devices/bus/apricot/keyboard/keyboard.h
 		${MAME_DIR}/src/devices/bus/apricot/keyboard/hle.cpp
@@ -263,7 +263,7 @@ endif()
 ###################################################
 
 if("AQUARIUS" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/aquarius/slot.cpp
 		${MAME_DIR}/src/devices/bus/aquarius/slot.h
 		${MAME_DIR}/src/devices/bus/aquarius/c1541.cpp
@@ -288,7 +288,7 @@ endif()
 ###################################################
 
 if("ARCADIA" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/arcadia/slot.cpp
 		${MAME_DIR}/src/devices/bus/arcadia/slot.h
 		${MAME_DIR}/src/devices/bus/arcadia/rom.cpp
@@ -303,7 +303,7 @@ endif()
 ###################################################
 
 if("ASTROCADE" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/astrocde/slot.cpp
 		${MAME_DIR}/src/devices/bus/astrocde/slot.h
 		${MAME_DIR}/src/devices/bus/astrocde/rom.cpp
@@ -337,7 +337,7 @@ if (MACHINES["ATAFLASH" IN_LIST BUSES)
 endif()
 
 if("ATA" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/ata/atadev.cpp
 		${MAME_DIR}/src/devices/bus/ata/atadev.h
 		${MAME_DIR}/src/devices/bus/ata/atahle.cpp
@@ -364,7 +364,7 @@ endif()
 ###################################################
 
 if("BBC_FDC" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/bbc/fdc/fdc.cpp
 		${MAME_DIR}/src/devices/bus/bbc/fdc/fdc.h
 		${MAME_DIR}/src/devices/bus/bbc/fdc/acorn.cpp
@@ -395,7 +395,7 @@ endif()
 ###################################################
 
 if("BBC_ANALOGUE" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/bbc/analogue/analogue.cpp
 		${MAME_DIR}/src/devices/bus/bbc/analogue/analogue.h
 		${MAME_DIR}/src/devices/bus/bbc/analogue/bitstik.cpp
@@ -414,7 +414,7 @@ endif()
 ###################################################
 
 if("BBC_CART" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/bbc/cart/slot.cpp
 		${MAME_DIR}/src/devices/bus/bbc/cart/slot.h
 		${MAME_DIR}/src/devices/bus/bbc/cart/click.cpp
@@ -435,7 +435,7 @@ endif()
 ###################################################
 
 if("BBC_INTERNAL" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/bbc/internal/internal.cpp
 		${MAME_DIR}/src/devices/bus/bbc/internal/internal.h
 		${MAME_DIR}/src/devices/bus/bbc/internal/aries.cpp
@@ -480,7 +480,7 @@ endif()
 ###################################################
 
 if("BBC_EXP" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/bbc/exp/exp.cpp
 		${MAME_DIR}/src/devices/bus/bbc/exp/exp.h
 		${MAME_DIR}/src/devices/bus/bbc/exp/autocue.cpp
@@ -497,7 +497,7 @@ endif()
 ###################################################
 
 if("BBC_JOYPORT" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/bbc/joyport/joyport.cpp
 		${MAME_DIR}/src/devices/bus/bbc/joyport/joyport.h
 		${MAME_DIR}/src/devices/bus/bbc/joyport/joystick.cpp
@@ -512,7 +512,7 @@ endif()
 ###################################################
 
 if("BBC_MODEM" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/bbc/modem/modem.cpp
 		${MAME_DIR}/src/devices/bus/bbc/modem/modem.h
 		${MAME_DIR}/src/devices/bus/bbc/modem/scsiaiv.cpp
@@ -527,7 +527,7 @@ endif()
 ###################################################
 
 if("BBC_1MHZBUS" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/bbc/1mhzbus/1mhzbus.cpp
 		${MAME_DIR}/src/devices/bus/bbc/1mhzbus/1mhzbus.h
 		${MAME_DIR}/src/devices/bus/bbc/1mhzbus/autoprom.cpp
@@ -578,7 +578,7 @@ endif()
 ###################################################
 
 if("BBC_ROM" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/bbc/rom/slot.cpp
 		${MAME_DIR}/src/devices/bus/bbc/rom/slot.h
 		${MAME_DIR}/src/devices/bus/bbc/rom/rom.cpp
@@ -607,7 +607,7 @@ endif()
 ###################################################
 
 if("BBC_TUBE" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/bbc/tube/tube.cpp
 		${MAME_DIR}/src/devices/bus/bbc/tube/tube.h
 		${MAME_DIR}/src/devices/bus/bbc/tube/tube_32016.cpp
@@ -646,7 +646,7 @@ endif()
 ###################################################
 
 if("BBC_USERPORT" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/bbc/userport/userport.cpp
 		${MAME_DIR}/src/devices/bus/bbc/userport/userport.h
 		${MAME_DIR}/src/devices/bus/bbc/userport/beebspch.cpp
@@ -675,7 +675,7 @@ endif()
 ###################################################
 
 if("BW2" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/bw2/exp.cpp
 		${MAME_DIR}/src/devices/bus/bw2/exp.h
 		${MAME_DIR}/src/devices/bus/bw2/ramcard.cpp
@@ -691,7 +691,7 @@ endif()
 ###################################################
 
 if("C64" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/c64/exp.cpp
 		${MAME_DIR}/src/devices/bus/c64/exp.h
 		${MAME_DIR}/src/devices/bus/c64/buscard.cpp
@@ -853,7 +853,7 @@ endif()
 ###################################################
 
 if("CBM2" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/cbm2/exp.cpp
 		${MAME_DIR}/src/devices/bus/cbm2/exp.h
 		${MAME_DIR}/src/devices/bus/cbm2/24k.cpp
@@ -874,7 +874,7 @@ endif()
 ###################################################
 
 if("CBMIEC" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/cbmiec/cbmiec.cpp
 		${MAME_DIR}/src/devices/bus/cbmiec/cbmiec.h
 		${MAME_DIR}/src/devices/bus/cbmiec/c1541.cpp
@@ -911,7 +911,7 @@ endif()
 ###################################################
 
 if("CHANNELF" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/chanf/slot.cpp
 		${MAME_DIR}/src/devices/bus/chanf/slot.h
 		${MAME_DIR}/src/devices/bus/chanf/rom.cpp
@@ -926,7 +926,7 @@ endif()
 ###################################################
 
 if("COMX35" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/comx35/exp.cpp
 		${MAME_DIR}/src/devices/bus/comx35/exp.h
 		${MAME_DIR}/src/devices/bus/comx35/clm.cpp
@@ -955,7 +955,7 @@ endif()
 ###################################################
 
 if("COLECO_CONTROLLER" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/coleco/controller/ctrl.cpp
 		${MAME_DIR}/src/devices/bus/coleco/controller/ctrl.h
 		${MAME_DIR}/src/devices/bus/coleco/controller/hand.cpp
@@ -972,7 +972,7 @@ endif()
 ###################################################
 
 if("COLECO_CART" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/coleco/cartridge/exp.cpp
 		${MAME_DIR}/src/devices/bus/coleco/cartridge/exp.h
 		${MAME_DIR}/src/devices/bus/coleco/cartridge/megacart.cpp
@@ -991,7 +991,7 @@ endif()
 ###################################################
 
 if("CRVISION" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/crvision/slot.cpp
 		${MAME_DIR}/src/devices/bus/crvision/slot.h
 		${MAME_DIR}/src/devices/bus/crvision/rom.cpp
@@ -1006,7 +1006,7 @@ endif()
 ###################################################
 
 if("DMV" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/dmv/dmvbus.cpp
 		${MAME_DIR}/src/devices/bus/dmv/dmvbus.h
 		${MAME_DIR}/src/devices/bus/dmv/k012.cpp
@@ -1037,7 +1037,7 @@ endif()
 ###################################################
 
 if("ECBBUS" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/ecbbus/ecbbus.cpp
 		${MAME_DIR}/src/devices/bus/ecbbus/ecbbus.h
 		${MAME_DIR}/src/devices/bus/ecbbus/grip.cpp
@@ -1052,7 +1052,7 @@ endif()
 ###################################################
 
 if("ECONET" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/econet/econet.cpp
 		${MAME_DIR}/src/devices/bus/econet/econet.h
 		${MAME_DIR}/src/devices/bus/econet/e01.cpp
@@ -1066,7 +1066,7 @@ endif()
 ###################################################
 
 if("EKARA" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/ekara/slot.cpp
 		${MAME_DIR}/src/devices/bus/ekara/slot.h
 		${MAME_DIR}/src/devices/bus/ekara/rom.cpp
@@ -1080,7 +1080,7 @@ endif()
 ###################################################
 
 if("ELECTRON" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/electron/exp.cpp
 		${MAME_DIR}/src/devices/bus/electron/exp.h
 		${MAME_DIR}/src/devices/bus/electron/fbjoy.cpp
@@ -1115,7 +1115,7 @@ endif()
 ###################################################
 
 if("ELECTRON_CART" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/electron/cart/slot.cpp
 		${MAME_DIR}/src/devices/bus/electron/cart/slot.h
 		${MAME_DIR}/src/devices/bus/electron/cart/abr.cpp
@@ -1160,7 +1160,7 @@ endif()
 ###################################################
 
 if("EP64" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/ep64/exp.cpp
 		${MAME_DIR}/src/devices/bus/ep64/exp.h
 		${MAME_DIR}/src/devices/bus/ep64/exdos.cpp
@@ -1175,7 +1175,7 @@ endif()
 ###################################################
 
 if("FMT_SCSI" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/fmt_scsi/fmt_scsi.cpp
 		${MAME_DIR}/src/devices/bus/fmt_scsi/fmt_scsi.h
 		${MAME_DIR}/src/devices/bus/fmt_scsi/fmt121.cpp
@@ -1189,7 +1189,7 @@ endif()
 ###################################################
 
 if("GAMATE" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/gamate/slot.cpp
 		${MAME_DIR}/src/devices/bus/gamate/slot.h
 		${MAME_DIR}/src/devices/bus/gamate/rom.cpp
@@ -1206,7 +1206,7 @@ endif()
 ###################################################
 
 if("GIO64" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/gio64/gio64.cpp
 		${MAME_DIR}/src/devices/bus/gio64/gio64.h
 		${MAME_DIR}/src/devices/bus/gio64/newport.cpp
@@ -1221,7 +1221,7 @@ endif()
 ###################################################
 
 if("HPHIL" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/hp_hil/hp_hil.cpp
 		${MAME_DIR}/src/devices/bus/hp_hil/hp_hil.h
 		${MAME_DIR}/src/devices/bus/hp_hil/hil_devices.cpp
@@ -1241,7 +1241,7 @@ endif()
 ###################################################
 
 if("HPDIO" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/hp_dio/hp_dio.cpp
 		${MAME_DIR}/src/devices/bus/hp_dio/hp_dio.h
 		${MAME_DIR}/src/devices/bus/hp_dio/hp98265a.cpp
@@ -1273,7 +1273,7 @@ endif()
 ###################################################
 
 if("GENERIC" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/generic/slot.cpp
 		${MAME_DIR}/src/devices/bus/generic/slot.h
 		${MAME_DIR}/src/devices/bus/generic/carts.cpp
@@ -1291,7 +1291,7 @@ endif()
 ###################################################
 
 if("HEXBUS" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/hexbus/hexbus.cpp
 		${MAME_DIR}/src/devices/bus/hexbus/hexbus.h
 		${MAME_DIR}/src/devices/bus/hexbus/hx5102.cpp
@@ -1307,7 +1307,7 @@ endif()
 ###################################################
 
 if("IEEE488" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/ieee488/ieee488.cpp
 		${MAME_DIR}/src/devices/bus/ieee488/ieee488.h
 		${MAME_DIR}/src/devices/bus/ieee488/c2031.cpp
@@ -1350,7 +1350,7 @@ endif()
 ###################################################
 
 if("IQ151" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/iq151/iq151.cpp
 		${MAME_DIR}/src/devices/bus/iq151/iq151.h
 		${MAME_DIR}/src/devices/bus/iq151/disc2.cpp
@@ -1379,7 +1379,7 @@ endif()
 ###################################################
 
 if("IMI7000" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/imi7000/imi7000.cpp
 		${MAME_DIR}/src/devices/bus/imi7000/imi7000.h
 		${MAME_DIR}/src/devices/bus/imi7000/imi5000h.cpp
@@ -1394,7 +1394,7 @@ endif()
 ###################################################
 
 if("INTELLEC4" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/intellec4/insdatastor.cpp
 		${MAME_DIR}/src/devices/bus/intellec4/insdatastor.h
 		${MAME_DIR}/src/devices/bus/intellec4/intellec4.cpp
@@ -1413,7 +1413,7 @@ endif()
 ###################################################
 
 if("INTV" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/intv/slot.cpp
 		${MAME_DIR}/src/devices/bus/intv/slot.h
 		${MAME_DIR}/src/devices/bus/intv/rom.cpp
@@ -1432,7 +1432,7 @@ endif()
 ###################################################
 
 if("INTV_CTRL" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/intv_ctrl/ctrl.cpp
 		${MAME_DIR}/src/devices/bus/intv_ctrl/ctrl.h
 		${MAME_DIR}/src/devices/bus/intv_ctrl/handctrl.cpp
@@ -1449,7 +1449,7 @@ endif()
 ###################################################
 
 if("ISA" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/isa/isa.cpp
 		${MAME_DIR}/src/devices/bus/isa/isa.h
 		${MAME_DIR}/src/devices/bus/isa/isa_cards.cpp
@@ -1619,7 +1619,7 @@ endif()
 ###################################################
 
 if("ISBX" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/isbx/isbx.cpp
 		${MAME_DIR}/src/devices/bus/isbx/isbx.h
 		${MAME_DIR}/src/devices/bus/isbx/compis_fdc.cpp
@@ -1635,7 +1635,7 @@ endif()
 ###################################################
 
 if("JAKKS_GAMEKEY" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/jakks_gamekey/slot.cpp
 		${MAME_DIR}/src/devices/bus/jakks_gamekey/slot.h
 		${MAME_DIR}/src/devices/bus/jakks_gamekey/rom.cpp
@@ -1649,7 +1649,7 @@ endif()
 ###################################################
 
 if("MSX_SLOT" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/msx_slot/bunsetsu.cpp
 		${MAME_DIR}/src/devices/bus/msx_slot/bunsetsu.h
 		${MAME_DIR}/src/devices/bus/msx_slot/cartridge.cpp
@@ -1732,7 +1732,7 @@ endif()
 ###################################################
 
 if("MTX" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/mtx/exp.cpp
 		${MAME_DIR}/src/devices/bus/mtx/exp.h
 		${MAME_DIR}/src/devices/bus/mtx/sdx.cpp
@@ -1747,7 +1747,7 @@ endif()
 ###################################################
 
 if("MC10" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/mc10/mc10_cart.cpp
 		${MAME_DIR}/src/devices/bus/mc10/mc10_cart.h
 		${MAME_DIR}/src/devices/bus/mc10/mcx128.cpp
@@ -1765,7 +1765,7 @@ endif()
 ###################################################
 
 if("KC" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/kc/kc.cpp
 		${MAME_DIR}/src/devices/bus/kc/kc.h
 		${MAME_DIR}/src/devices/bus/kc/d002.cpp
@@ -1785,7 +1785,7 @@ endif()
 ###################################################
 
 if("O2" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/odyssey2/slot.cpp
 		${MAME_DIR}/src/devices/bus/odyssey2/slot.h
 		${MAME_DIR}/src/devices/bus/odyssey2/rom.cpp
@@ -1814,7 +1814,7 @@ endif()
 ###################################################
 
 if("PASOPIA" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/pasopia/pac2.cpp
 		${MAME_DIR}/src/devices/bus/pasopia/pac2.h
 		${MAME_DIR}/src/devices/bus/pasopia/pac2exp.cpp
@@ -1833,7 +1833,7 @@ endif()
 ###################################################
 
 if("PC_JOY" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/pc_joy/pc_joy.cpp
 		${MAME_DIR}/src/devices/bus/pc_joy/pc_joy.h
 		${MAME_DIR}/src/devices/bus/pc_joy/pc_joy_sw.cpp
@@ -1848,7 +1848,7 @@ endif()
 ###################################################
 
 if("PC_KBD" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/pc_kbd/pc_kbdc.cpp
 		${MAME_DIR}/src/devices/bus/pc_kbd/pc_kbdc.h
 		${MAME_DIR}/src/devices/bus/pc_kbd/keyboards.cpp
@@ -1883,7 +1883,7 @@ endif()
 ###################################################
 
 if("PET" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/pet/cass.cpp
 		${MAME_DIR}/src/devices/bus/pet/cass.h
 		${MAME_DIR}/src/devices/bus/pet/c2n.cpp
@@ -1919,7 +1919,7 @@ endif()
 ###################################################
 
 if("PLUS4" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/plus4/exp.cpp
 		${MAME_DIR}/src/devices/bus/plus4/exp.h
 		${MAME_DIR}/src/devices/bus/plus4/c1551.cpp
@@ -1942,7 +1942,7 @@ endif()
 ###################################################
 
 if("POFO" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/pofo/exp.cpp
 		${MAME_DIR}/src/devices/bus/pofo/exp.h
 		${MAME_DIR}/src/devices/bus/pofo/hpc101.cpp
@@ -1967,7 +1967,7 @@ endif()
 ###################################################
 
 if("S100" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/s100/s100.cpp
 		${MAME_DIR}/src/devices/bus/s100/s100.h
 		${MAME_DIR}/src/devices/bus/s100/am310.cpp
@@ -2006,7 +2006,7 @@ endif()
 ###################################################
 
 if("SPC1000" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/spc1000/exp.cpp
 		${MAME_DIR}/src/devices/bus/spc1000/exp.h
 		${MAME_DIR}/src/devices/bus/spc1000/fdd.cpp
@@ -2023,7 +2023,7 @@ endif()
 ###################################################
 
 if("SS50" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/ss50/interface.cpp
 		${MAME_DIR}/src/devices/bus/ss50/interface.h
 		${MAME_DIR}/src/devices/bus/ss50/dc5.cpp
@@ -2048,7 +2048,7 @@ endif()
 ###################################################
 
 if("TIKI100" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/tiki100/exp.cpp
 		${MAME_DIR}/src/devices/bus/tiki100/exp.h
 		${MAME_DIR}/src/devices/bus/tiki100/8088.cpp
@@ -2065,7 +2065,7 @@ endif()
 ###################################################
 
 if("TVC" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/tvc/tvc.cpp
 		${MAME_DIR}/src/devices/bus/tvc/tvc.h
 		${MAME_DIR}/src/devices/bus/tvc/hbf.cpp
@@ -2080,7 +2080,7 @@ endif()
 ###################################################
 
 if("VC4000" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/vc4000/slot.cpp
 		${MAME_DIR}/src/devices/bus/vc4000/slot.h
 		${MAME_DIR}/src/devices/bus/vc4000/rom.cpp
@@ -2095,7 +2095,7 @@ endif()
 ###################################################
 
 if("VCS" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/vcs/vcs_slot.cpp
 		${MAME_DIR}/src/devices/bus/vcs/vcs_slot.h
 		${MAME_DIR}/src/devices/bus/vcs/rom.cpp
@@ -2118,7 +2118,7 @@ endif()
 ###################################################
 
 if("VCS_CTRL" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/vcs_ctrl/ctrl.cpp
 		${MAME_DIR}/src/devices/bus/vcs_ctrl/ctrl.h
 		${MAME_DIR}/src/devices/bus/vcs_ctrl/joystick.cpp
@@ -2145,7 +2145,7 @@ endif()
 ###################################################
 
 if("VECTREX" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/vectrex/slot.cpp
 		${MAME_DIR}/src/devices/bus/vectrex/slot.h
 		${MAME_DIR}/src/devices/bus/vectrex/rom.cpp
@@ -2160,7 +2160,7 @@ endif()
 ###################################################
 
 if("VIC10" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/vic10/exp.cpp
 		${MAME_DIR}/src/devices/bus/vic10/exp.h
 		${MAME_DIR}/src/devices/bus/vic10/multimax.cpp
@@ -2178,7 +2178,7 @@ endif()
 ###################################################
 
 if("VIC20" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/vic20/exp.cpp
 		${MAME_DIR}/src/devices/bus/vic20/exp.h
 		${MAME_DIR}/src/devices/bus/vic20/fe3.cpp
@@ -2217,7 +2217,7 @@ endif()
 ###################################################
 
 if("VIDBRAIN" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/vidbrain/exp.cpp
 		${MAME_DIR}/src/devices/bus/vidbrain/exp.h
 		${MAME_DIR}/src/devices/bus/vidbrain/std.cpp
@@ -2237,7 +2237,7 @@ endif()
 ###################################################
 
 if("VIP" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/vip/byteio.cpp
 		${MAME_DIR}/src/devices/bus/vip/byteio.h
 		${MAME_DIR}/src/devices/bus/vip/vp620.cpp
@@ -2268,7 +2268,7 @@ endif()
 ###################################################
 
 if("VME" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/vme/vme.cpp
 		${MAME_DIR}/src/devices/bus/vme/vme.h
 		${MAME_DIR}/src/devices/bus/vme/vme_mzr8300.cpp
@@ -2293,7 +2293,7 @@ endif()
 ###################################################
 
 if("WANGPC" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/wangpc/wangpc.cpp
 		${MAME_DIR}/src/devices/bus/wangpc/wangpc.h
 		${MAME_DIR}/src/devices/bus/wangpc/emb.cpp
@@ -2322,7 +2322,7 @@ endif()
 ###################################################
 
 if("Z29_KBD" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/z29_kbd/keyboard.cpp
 		${MAME_DIR}/src/devices/bus/z29_kbd/keyboard.h
 		${MAME_DIR}/src/devices/bus/z29_kbd/he191_3425.cpp
@@ -2339,7 +2339,7 @@ endif()
 ###################################################
 
 if("Z88" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/z88/z88.cpp
 		${MAME_DIR}/src/devices/bus/z88/z88.h
 		${MAME_DIR}/src/devices/bus/z88/flash.cpp
@@ -2357,7 +2357,7 @@ endif()
 ###################################################
 
 if("A2BUS" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/a2bus/a2bus.cpp
 		${MAME_DIR}/src/devices/bus/a2bus/a2bus.h
 		${MAME_DIR}/src/devices/bus/a2bus/a2eauxslot.cpp
@@ -2495,7 +2495,7 @@ endif()
 ###################################################
 
 if("A2GAMEIO" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/a2gameio/computereyes.cpp
 		${MAME_DIR}/src/devices/bus/a2gameio/computereyes.h
 		${MAME_DIR}/src/devices/bus/a2gameio/gameio.cpp
@@ -2520,7 +2520,7 @@ endif()
 ###################################################
 
 if("NSCSI" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/nscsi/applecd.cpp
 		${MAME_DIR}/src/devices/bus/nscsi/applecd.h
 		${MAME_DIR}/src/devices/bus/nscsi/cd.cpp
@@ -2556,7 +2556,7 @@ endif()
 ###################################################
 
 if("NUBUS" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/nubus/nubus.cpp
 		${MAME_DIR}/src/devices/bus/nubus/nubus.h
 		${MAME_DIR}/src/devices/bus/nubus/nubus_48gc.cpp
@@ -2606,7 +2606,7 @@ endif()
 ###################################################
 
 if("CENTRONICS" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/centronics/ctronics.cpp
 		${MAME_DIR}/src/devices/bus/centronics/ctronics.h
 		${MAME_DIR}/src/devices/bus/centronics/chessmec.cpp
@@ -2649,7 +2649,7 @@ endif()
 ###################################################
 
 if("RS232" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/rs232/keyboard.cpp
 		${MAME_DIR}/src/devices/bus/rs232/keyboard.h
 		${MAME_DIR}/src/devices/bus/rs232/loopback.cpp
@@ -2689,7 +2689,7 @@ endif()
 ###################################################
 
 if("MIDI" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/midi/midi.cpp
 		${MAME_DIR}/src/devices/bus/midi/midi.h
 		${MAME_DIR}/src/devices/bus/midi/midiinport.cpp
@@ -2705,7 +2705,7 @@ endif()
 ###################################################
 
 if("LPCI" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/lpci/pci.cpp
 		${MAME_DIR}/src/devices/bus/lpci/pci.h
 		${MAME_DIR}/src/devices/bus/lpci/cirrus.cpp
@@ -2733,7 +2733,7 @@ endif()
 ###################################################
 
 if("NES" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/nes/nes_slot.cpp
 		${MAME_DIR}/src/devices/bus/nes/nes_slot.h
 		${MAME_DIR}/src/devices/bus/nes/nes_ines.hxx
@@ -2852,7 +2852,7 @@ endif()
 ###################################################
 
 if("NES_CTRL" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/nes_ctrl/ctrl.cpp
 		${MAME_DIR}/src/devices/bus/nes_ctrl/ctrl.h
 		${MAME_DIR}/src/devices/bus/nes_ctrl/joypad.cpp
@@ -2894,7 +2894,7 @@ endif()
 ###################################################
 
 if("SDK85" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/sdk85/memexp.cpp
 		${MAME_DIR}/src/devices/bus/sdk85/memexp.h
 		${MAME_DIR}/src/devices/bus/sdk85/i8755.cpp
@@ -2908,7 +2908,7 @@ endif()
 ###################################################
 
 if("SNES" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/snes/snes_slot.cpp
 		${MAME_DIR}/src/devices/bus/snes/snes_slot.h
 		${MAME_DIR}/src/devices/bus/snes/snes_carts.cpp
@@ -2944,7 +2944,7 @@ endif()
 ###################################################
 
 if("SNES_CTRL" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/snes_ctrl/ctrl.cpp
 		${MAME_DIR}/src/devices/bus/snes_ctrl/ctrl.h
 		${MAME_DIR}/src/devices/bus/snes_ctrl/bcbattle.cpp
@@ -2971,7 +2971,7 @@ endif()
 ##@src/devices/bus/vboy/slot.h,BUSES["VBOY"] = true
 ###################################################
 if("VBOY" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/vboy/slot.cpp
 		${MAME_DIR}/src/devices/bus/vboy/slot.h
 		${MAME_DIR}/src/devices/bus/vboy/rom.cpp
@@ -2985,7 +2985,7 @@ endif()
 ###################################################
 
 if("MEGADRIVE" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/megadrive/md_slot.cpp
 		${MAME_DIR}/src/devices/bus/megadrive/md_slot.h
 		${MAME_DIR}/src/devices/bus/megadrive/md_carts.cpp
@@ -3013,7 +3013,7 @@ endif()
 ###################################################
 
 if("NEOGEO" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/neogeo/slot.cpp
 		${MAME_DIR}/src/devices/bus/neogeo/slot.h
 		${MAME_DIR}/src/devices/bus/neogeo/carts.cpp
@@ -3082,7 +3082,7 @@ endif()
 ###################################################
 
 if("NEOGEO_CTRL" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/neogeo_ctrl/ctrl.cpp
 		${MAME_DIR}/src/devices/bus/neogeo_ctrl/ctrl.h
 		${MAME_DIR}/src/devices/bus/neogeo_ctrl/joystick.cpp
@@ -3104,7 +3104,7 @@ endif()
 ###################################################
 
 if("SAT_CTRL" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/sat_ctrl/ctrl.cpp
 		${MAME_DIR}/src/devices/bus/sat_ctrl/ctrl.h
 		${MAME_DIR}/src/devices/bus/sat_ctrl/analog.cpp
@@ -3134,7 +3134,7 @@ endif()
 ###################################################
 
 if("SATURN" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/saturn/sat_slot.cpp
 		${MAME_DIR}/src/devices/bus/saturn/sat_slot.h
 		${MAME_DIR}/src/devices/bus/saturn/bram.cpp
@@ -3152,7 +3152,7 @@ endif()
 ###################################################
 
 if("SEGA8" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/sega8/sega8_slot.cpp
 		${MAME_DIR}/src/devices/bus/sega8/sega8_slot.h
 		${MAME_DIR}/src/devices/bus/sega8/rom.cpp
@@ -3170,7 +3170,7 @@ endif()
 ###################################################
 
 if("SG1000_EXP" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/sg1000_exp/sg1000exp.cpp
 		${MAME_DIR}/src/devices/bus/sg1000_exp/sg1000exp.h
 		${MAME_DIR}/src/devices/bus/sg1000_exp/fm_unit.cpp
@@ -3190,7 +3190,7 @@ endif()
 ###################################################
 
 if("SMS_CTRL" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/sms_ctrl/smsctrl.cpp
 		${MAME_DIR}/src/devices/bus/sms_ctrl/smsctrl.h
 		${MAME_DIR}/src/devices/bus/sms_ctrl/joypad.cpp
@@ -3218,7 +3218,7 @@ endif()
 ###################################################
 
 if("SMS_EXP" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/sms_exp/smsexp.cpp
 		${MAME_DIR}/src/devices/bus/sms_exp/smsexp.h
 		${MAME_DIR}/src/devices/bus/sms_exp/gendifer.cpp
@@ -3232,7 +3232,7 @@ endif()
 ###################################################
 
 if("TANBUS" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/tanbus/bullsnd.cpp
 		${MAME_DIR}/src/devices/bus/tanbus/bullsnd.h
 		${MAME_DIR}/src/devices/bus/tanbus/tanbus.cpp
@@ -3268,7 +3268,7 @@ endif()
 ###################################################
 
 if("TI8X" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/ti8x/bitsocket.cpp
 		${MAME_DIR}/src/devices/bus/ti8x/bitsocket.h
 		${MAME_DIR}/src/devices/bus/ti8x/graphlinkhle.cpp
@@ -3290,7 +3290,7 @@ endif()
 ###################################################
 
 if("TI99X" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/ti99x/990_dk.cpp
 		${MAME_DIR}/src/devices/bus/ti99x/990_dk.h
 		${MAME_DIR}/src/devices/bus/ti99x/990_hd.cpp
@@ -3310,7 +3310,7 @@ endif()
 ###################################################
 
 if("TI99" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/ti99/internal/992board.cpp
 		${MAME_DIR}/src/devices/bus/ti99/internal/992board.h
 		${MAME_DIR}/src/devices/bus/ti99/internal/998board.cpp
@@ -3398,7 +3398,7 @@ endif()
 ###################################################
 
 if("GAMEBOY" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/gameboy/gb_slot.cpp
 		${MAME_DIR}/src/devices/bus/gameboy/gb_slot.h
 		${MAME_DIR}/src/devices/bus/gameboy/rom.cpp
@@ -3414,7 +3414,7 @@ endif()
 ###################################################
 
 if("GAMEGEAR" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/gamegear/ggext.cpp
 		${MAME_DIR}/src/devices/bus/gamegear/ggext.h
 		${MAME_DIR}/src/devices/bus/gamegear/smsctrladp.cpp
@@ -3428,7 +3428,7 @@ endif()
 ###################################################
 
 if("GBA" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/gba/gba_slot.cpp
 		${MAME_DIR}/src/devices/bus/gba/gba_slot.h
 		${MAME_DIR}/src/devices/bus/gba/rom.cpp
@@ -3441,7 +3441,7 @@ endif()
 ##@src/devices/bus/bml3/bml3bus.h,BUSES["BML3"] = true
 ###################################################
 if("BML3" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/bml3/bml3bus.cpp
 		${MAME_DIR}/src/devices/bus/bml3/bml3bus.h
 		${MAME_DIR}/src/devices/bus/bml3/bml3mp1802.cpp
@@ -3460,7 +3460,7 @@ endif()
 ##@src/devices/bus/coco/cococart.h,BUSES["COCO"] = true
 ###################################################
 if("COCO" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/coco/coco_dcmodem.cpp
 		${MAME_DIR}/src/devices/bus/coco/coco_dcmodem.h
 		${MAME_DIR}/src/devices/bus/coco/coco_dwsock.cpp
@@ -3523,7 +3523,7 @@ endif()
 ##@src/devices/bus/cpc/cpcexp.h,BUSES["CPC"] = true
 ###################################################
 if("CPC" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/cpc/cpcexp.cpp
 		${MAME_DIR}/src/devices/bus/cpc/cpcexp.h
 		${MAME_DIR}/src/devices/bus/cpc/cpc_ssa1.cpp
@@ -3566,7 +3566,7 @@ endif()
 ##@src/devices/bus/epson_sio/epson_sio.h,BUSES["EPSON_SIO"] = true
 ###################################################
 if("EPSON_SIO" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/epson_sio/epson_sio.cpp
 		${MAME_DIR}/src/devices/bus/epson_sio/epson_sio.h
 		${MAME_DIR}/src/devices/bus/epson_sio/pf10.cpp
@@ -3581,7 +3581,7 @@ endif()
 ##@src/devices/bus/pce/pce_slot.h,BUSES["PCE"] = true
 ###################################################
 if("PCE" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/pce/pce_slot.cpp
 		${MAME_DIR}/src/devices/bus/pce/pce_slot.h
 		${MAME_DIR}/src/devices/bus/pce/pce_rom.cpp
@@ -3594,7 +3594,7 @@ endif()
 ##@src/devices/bus/scv/slot.h,BUSES["SCV"] = true
 ###################################################
 if("SCV" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/scv/slot.cpp
 		${MAME_DIR}/src/devices/bus/scv/slot.h
 		${MAME_DIR}/src/devices/bus/scv/rom.cpp
@@ -3607,7 +3607,7 @@ endif()
 ##@src/devices/bus/x68k/x68kexp.h,BUSES["X68K"] = true
 ###################################################
 if("X68K" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/x68k/x68kexp.cpp
 		${MAME_DIR}/src/devices/bus/x68k/x68kexp.h
 		${MAME_DIR}/src/devices/bus/x68k/x68k_neptunex.cpp
@@ -3624,7 +3624,7 @@ endif()
 ##@src/devices/bus/abckb/abckb.h,BUSES["ABCKB"] = true
 ###################################################
 if("ABCKB" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/abckb/abckb.cpp
 		${MAME_DIR}/src/devices/bus/abckb/abckb.h
 		${MAME_DIR}/src/devices/bus/abckb/abc77.cpp
@@ -3641,7 +3641,7 @@ endif()
 ##@src/devices/bus/compucolor/floppy.h,BUSES["COMPUCOLOR"] = true
 ###################################################
 if("COMPUCOLOR" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/compucolor/floppy.cpp
 		${MAME_DIR}/src/devices/bus/compucolor/floppy.h
 	)
@@ -3652,7 +3652,7 @@ endif()
 ##@src/devices/bus/scsi/scsi.h,BUSES["SCSI"] = true
 ###################################################
 if("SCSI" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/scsi/scsi.cpp
 		${MAME_DIR}/src/devices/bus/scsi/scsi.h
 		${MAME_DIR}/src/devices/bus/scsi/scsicd.cpp
@@ -3686,7 +3686,7 @@ endif()
 ###################################################
 
 if("MACKBD" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/mackbd/keyboard.cpp
 		${MAME_DIR}/src/devices/bus/mackbd/keyboard.h
 		${MAME_DIR}/src/devices/bus/mackbd/mackbd.cpp
@@ -3701,7 +3701,7 @@ endif()
 ##@src/devices/bus/macpds/macpds.h,BUSES["MACPDS"] = true
 ###################################################
 if("MACPDS" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/macpds/macpds.cpp
 		${MAME_DIR}/src/devices/bus/macpds/macpds.h
 		${MAME_DIR}/src/devices/bus/macpds/pds_tpdfpd.cpp
@@ -3716,7 +3716,7 @@ endif()
 ##@src/devices/bus/oricext/oricext.h,BUSES["ORICEXT"] = true
 ###################################################
 if("ORICEXT" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/oricext/oricext.cpp
 		${MAME_DIR}/src/devices/bus/oricext/oricext.h
 		${MAME_DIR}/src/devices/bus/oricext/jasmin.cpp
@@ -3732,7 +3732,7 @@ endif()
 ###################################################
 
 if("A1BUS" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/a1bus/a1bus.cpp
 		${MAME_DIR}/src/devices/bus/a1bus/a1bus.h
 		${MAME_DIR}/src/devices/bus/a1bus/a1cassette.cpp
@@ -3748,7 +3748,7 @@ endif()
 ###################################################
 
 if("AMIGA_KEYBOARD" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/amiga/keyboard/keyboard.cpp
 		${MAME_DIR}/src/devices/bus/amiga/keyboard/keyboard.h
 		${MAME_DIR}/src/devices/bus/amiga/keyboard/matrix.cpp
@@ -3768,7 +3768,7 @@ endif()
 ###################################################
 
 if("ZORRO" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/amiga/zorro/zorro.cpp
 		${MAME_DIR}/src/devices/bus/amiga/zorro/zorro.h
 		${MAME_DIR}/src/devices/bus/amiga/zorro/cards.cpp
@@ -3796,7 +3796,7 @@ endif()
 ###################################################
 
 if("SGIKBD" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/sgikbd/hlekbd.cpp
 		${MAME_DIR}/src/devices/bus/sgikbd/hlekbd.h
 		${MAME_DIR}/src/devices/bus/sgikbd/sgikbd.cpp
@@ -3810,7 +3810,7 @@ endif()
 ###################################################
 
 if("SUNKBD" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/sunkbd/hlekbd.cpp
 		${MAME_DIR}/src/devices/bus/sunkbd/hlekbd.h
 		${MAME_DIR}/src/devices/bus/sunkbd/sunkbd.cpp
@@ -3824,7 +3824,7 @@ endif()
 ###################################################
 
 if("SUNMOUSE" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/sunmouse/hlemouse.cpp
 		${MAME_DIR}/src/devices/bus/sunmouse/hlemouse.h
 		${MAME_DIR}/src/devices/bus/sunmouse/sunmouse.cpp
@@ -3838,7 +3838,7 @@ endif()
 ###################################################
 
 if("SBUS" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/sbus/artecon.cpp
 		${MAME_DIR}/src/devices/bus/sbus/artecon.h
 		${MAME_DIR}/src/devices/bus/sbus/bwtwo.cpp
@@ -3862,7 +3862,7 @@ endif()
 ###################################################
 
 if("QBUS" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/qbus/dsd4432.cpp
 		${MAME_DIR}/src/devices/bus/qbus/dsd4432.h
 		${MAME_DIR}/src/devices/bus/qbus/pc11.cpp
@@ -3880,7 +3880,7 @@ endif()
 ###################################################
 
 if("QL" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/ql/exp.cpp
 		${MAME_DIR}/src/devices/bus/ql/exp.h
 		${MAME_DIR}/src/devices/bus/ql/cst_qdisc.cpp
@@ -3922,7 +3922,7 @@ endif()
 ###################################################
 
 if("SPECTRUM" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/spectrum/exp.cpp
 		${MAME_DIR}/src/devices/bus/spectrum/exp.h
 		${MAME_DIR}/src/devices/bus/spectrum/beta.cpp
@@ -3986,7 +3986,7 @@ endif()
 ###################################################
 
 if("UTS_KBD" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/uts_kbd/400kbd.cpp
 		${MAME_DIR}/src/devices/bus/uts_kbd/400kbd.h
 		${MAME_DIR}/src/devices/bus/uts_kbd/extw.cpp
@@ -4003,7 +4003,7 @@ endif()
 ###################################################
 
 if("VSMILE" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/vsmile/vsmile_ctrl.cpp
 		${MAME_DIR}/src/devices/bus/vsmile/vsmile_ctrl.h
 		${MAME_DIR}/src/devices/bus/vsmile/pad.cpp
@@ -4025,7 +4025,7 @@ endif()
 ###################################################
 
 if("VTECH_MEMEXP" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/vtech/memexp/memexp.cpp
 		${MAME_DIR}/src/devices/bus/vtech/memexp/memexp.h
 		${MAME_DIR}/src/devices/bus/vtech/memexp/carts.cpp
@@ -4051,7 +4051,7 @@ endif()
 ###################################################
 
 if("VTECH_IOEXP" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/vtech/ioexp/ioexp.cpp
 		${MAME_DIR}/src/devices/bus/vtech/ioexp/ioexp.h
 		${MAME_DIR}/src/devices/bus/vtech/ioexp/carts.cpp
@@ -4071,7 +4071,7 @@ endif()
 ###################################################
 
 if("WSWAN" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/wswan/slot.cpp
 		${MAME_DIR}/src/devices/bus/wswan/slot.h
 		${MAME_DIR}/src/devices/bus/wswan/rom.cpp
@@ -4085,7 +4085,7 @@ endif()
 ###################################################
 
 if("PSX_CONTROLLER" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/psx/ctlrport.cpp
 		${MAME_DIR}/src/devices/bus/psx/ctlrport.h
 		${MAME_DIR}/src/devices/bus/psx/analogue.cpp
@@ -4103,7 +4103,7 @@ endif()
 ###################################################
 
 if("PSX_PARALLEL" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/psx/parallel.cpp
 		${MAME_DIR}/src/devices/bus/psx/parallel.h
 		${MAME_DIR}/src/devices/bus/psx/gamebooster.cpp
@@ -4117,7 +4117,7 @@ endif()
 ###################################################
 
 if("NASBUS" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/nasbus/nasbus.cpp
 		${MAME_DIR}/src/devices/bus/nasbus/nasbus.h
 		${MAME_DIR}/src/devices/bus/nasbus/cards.cpp
@@ -4135,7 +4135,7 @@ endif()
 ###################################################
 
 if("CGENIE_EXPANSION" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/cgenie/expansion/expansion.cpp
 		${MAME_DIR}/src/devices/bus/cgenie/expansion/expansion.h
 		${MAME_DIR}/src/devices/bus/cgenie/expansion/carts.cpp
@@ -4151,7 +4151,7 @@ endif()
 ###################################################
 
 if("CGENIE_PARALLEL" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/cgenie/parallel/parallel.cpp
 		${MAME_DIR}/src/devices/bus/cgenie/parallel/parallel.h
 		${MAME_DIR}/src/devices/bus/cgenie/parallel/carts.cpp
@@ -4168,7 +4168,7 @@ endif()
 ##@src/devices/bus/m5/slot.h,BUSES["M5"] = true
 ###################################################
 if("M5" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/m5/slot.cpp
 		${MAME_DIR}/src/devices/bus/m5/slot.h
 		${MAME_DIR}/src/devices/bus/m5/rom.cpp
@@ -4182,7 +4182,7 @@ endif()
 ###################################################
 
 if("NEWBRAIN" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/newbrain/exp.cpp
 		${MAME_DIR}/src/devices/bus/newbrain/exp.h
 		${MAME_DIR}/src/devices/bus/newbrain/eim.cpp
@@ -4198,7 +4198,7 @@ endif()
 ###################################################
 
 if("SVI_EXPANDER" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/svi3x8/expander/expander.cpp
 		${MAME_DIR}/src/devices/bus/svi3x8/expander/expander.h
 		${MAME_DIR}/src/devices/bus/svi3x8/expander/modules.cpp
@@ -4218,7 +4218,7 @@ endif()
 ###################################################
 
 if("SVI_SLOT" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/svi3x8/slot/slot.cpp
 		${MAME_DIR}/src/devices/bus/svi3x8/slot/slot.h
 		${MAME_DIR}/src/devices/bus/svi3x8/slot/cards.cpp
@@ -4244,7 +4244,7 @@ endif()
 ###################################################
 
 if("HP80_IO" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/hp80_io/hp80_io.cpp
 		${MAME_DIR}/src/devices/bus/hp80_io/hp80_io.h
 		${MAME_DIR}/src/devices/bus/hp80_io/82900.cpp
@@ -4262,7 +4262,7 @@ endif()
 ###################################################
 
 if("HP9845_IO" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/hp9845_io/hp9845_io.cpp
 		${MAME_DIR}/src/devices/bus/hp9845_io/hp9845_io.h
 		${MAME_DIR}/src/devices/bus/hp9845_io/98032.cpp
@@ -4286,7 +4286,7 @@ endif()
 ###################################################
 
 if("HP_IPC_IO" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/hp_ipc_io/hp_ipc_io.cpp
 		${MAME_DIR}/src/devices/bus/hp_ipc_io/hp_ipc_io.h
 		${MAME_DIR}/src/devices/bus/hp_ipc_io/82919.cpp
@@ -4300,7 +4300,7 @@ endif()
 ###################################################
 
 if("COMPIS_GRAPHICS" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/compis/graphics.cpp
 		${MAME_DIR}/src/devices/bus/compis/graphics.h
 		${MAME_DIR}/src/devices/bus/compis/hrg.cpp
@@ -4314,7 +4314,7 @@ endif()
 ###################################################
 
 if("PC1512" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/pc1512/mouse.cpp
 		${MAME_DIR}/src/devices/bus/pc1512/mouse.h
 	)
@@ -4326,7 +4326,7 @@ endif()
 ###################################################
 
 if("CBUS" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/cbus/pc9801_26.cpp
 		${MAME_DIR}/src/devices/bus/cbus/pc9801_26.h
 		${MAME_DIR}/src/devices/bus/cbus/pc9801_86.cpp
@@ -4350,7 +4350,7 @@ endif()
 ###################################################
 
 if("PSI_KEYBOARD" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/psi_kbd/psi_kbd.cpp
 		${MAME_DIR}/src/devices/bus/psi_kbd/psi_kbd.h
 		${MAME_DIR}/src/devices/bus/psi_kbd/ergoline.cpp
@@ -4366,7 +4366,7 @@ endif()
 ###################################################
 
 if("INTERPRO_SR" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/interpro/sr/sr.cpp
 		${MAME_DIR}/src/devices/bus/interpro/sr/sr.h
 		${MAME_DIR}/src/devices/bus/interpro/sr/sr_cards.cpp
@@ -4384,7 +4384,7 @@ endif()
 ###################################################
 
 if("INTERPRO_KEYBOARD" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/interpro/keyboard/keyboard.cpp
 		${MAME_DIR}/src/devices/bus/interpro/keyboard/keyboard.h
 		${MAME_DIR}/src/devices/bus/interpro/keyboard/hle.cpp
@@ -4400,7 +4400,7 @@ endif()
 ###################################################
 
 if("INTERPRO_MOUSE" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/interpro/mouse/mouse.cpp
 		${MAME_DIR}/src/devices/bus/interpro/mouse/mouse.h
 	)
@@ -4412,7 +4412,7 @@ endif()
 ###################################################
 
 if("TATUNG_PIPE" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/einstein/pipe/pipe.cpp
 		${MAME_DIR}/src/devices/bus/einstein/pipe/pipe.h
 		${MAME_DIR}/src/devices/bus/einstein/pipe/silicon_disc.cpp
@@ -4430,7 +4430,7 @@ endif()
 ###################################################
 
 if("EINSTEIN_USERPORT" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/einstein/userport/userport.cpp
 		${MAME_DIR}/src/devices/bus/einstein/userport/userport.h
 		${MAME_DIR}/src/devices/bus/einstein/userport/mouse.cpp
@@ -4446,7 +4446,7 @@ endif()
 ###################################################
 
 if("TMC600" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/tmc600/euro.cpp
 		${MAME_DIR}/src/devices/bus/tmc600/euro.h
 	)
@@ -4458,7 +4458,7 @@ endif()
 ###################################################
 
 if("MULTIBUS" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/multibus/multibus.cpp
 		${MAME_DIR}/src/devices/bus/multibus/multibus.h
 		${MAME_DIR}/src/devices/bus/multibus/isbc202.cpp
@@ -4472,7 +4472,7 @@ endif()
 ###################################################
 
 if("RTPC_KBD" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/rtpc/kbd_con.cpp
 		${MAME_DIR}/src/devices/bus/rtpc/kbd_con.h
 		${MAME_DIR}/src/devices/bus/rtpc/kbd.cpp
@@ -4486,7 +4486,7 @@ endif()
 ###################################################
 
 if("SAITEK_OSA" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/saitek_osa/expansion.cpp
 		${MAME_DIR}/src/devices/bus/saitek_osa/expansion.h
 		${MAME_DIR}/src/devices/bus/saitek_osa/maestro.cpp
@@ -4504,7 +4504,7 @@ endif()
 ###################################################
 
 if("SAMCOUPE_DRIVE_PORT" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/samcoupe/drive/drive.cpp
 		${MAME_DIR}/src/devices/bus/samcoupe/drive/drive.h
 		${MAME_DIR}/src/devices/bus/samcoupe/drive/modules.cpp
@@ -4522,7 +4522,7 @@ endif()
 ###################################################
 
 if("SAMCOUPE_EXPANSION" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/samcoupe/expansion/expansion.cpp
 		${MAME_DIR}/src/devices/bus/samcoupe/expansion/expansion.h
 		${MAME_DIR}/src/devices/bus/samcoupe/expansion/modules.cpp
@@ -4552,7 +4552,7 @@ endif()
 ###################################################
 
 if("SAMCOUPE_MOUSE_PORT" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/samcoupe/mouse/mouseport.cpp
 		${MAME_DIR}/src/devices/bus/samcoupe/mouse/mouseport.h
 		${MAME_DIR}/src/devices/bus/samcoupe/mouse/modules.cpp
@@ -4568,7 +4568,7 @@ endif()
 ###################################################
 
 if("THOMSON" IN_LIST BUSES)
-	list(APPEND BUS_SRC
+	list(APPEND BUS_SRCS
 		${MAME_DIR}/src/devices/bus/thomson/extension.cpp
 		${MAME_DIR}/src/devices/bus/thomson/extension.h
 		${MAME_DIR}/src/devices/bus/thomson/cd90_015.cpp
