@@ -117,9 +117,7 @@ function(createVirtualProjects _target  _subtarget _name)
 		${EXT_INCLUDEDIR_ZLIB}
 		${EXT_INCLUDEDIR_FLAC}
 	)
-	set(SOURCE_LIST ${ARGV})
-	list(REMOVE_AT SOURCE_LIST 0 1 2)	
-	target_sources(${_name} PRIVATE ${SOURCE_LIST})
+	target_sources(${_name} PRIVATE ${ARGN})
 	add_project_to_group(drivers ${_name})
 endfunction()
 
