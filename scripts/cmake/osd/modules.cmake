@@ -357,7 +357,7 @@ macro(qtdebuggerbuild _projectname)
 		target_compile_definitions(${_projectname} PRIVATE USE_QTDEBUG=1)
 
 		find_package(Qt5 COMPONENTS Core Widgets Gui REQUIRED)
-		if((NOT QT5_FOUND) OR (NOT QT_QTCORE_FOUND) OR (NOT QT_QTWIDGETS_FOUND) OR (NOT QT_QTGUI_FOUND))
+		if((NOT Qt5_FOUND) OR (NOT Qt5Core_FOUND) OR (NOT Qt5Widgets_FOUND) OR (NOT Qt5Gui_FOUND))
 			message(FATAL_ERROR "Qt5 or its components not found")
 		endif()
 		
