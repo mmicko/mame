@@ -17,6 +17,13 @@ set(DIRECTINPUT "8" CACHE STRING "inimum DirectInput version to support.")
 
 option(USE_SDL "Enable SDL sound output." OFF)
 
+if(USE_SDL)
+    find_package(SDL2 REQUIRED)
+    if(NOT SDL2_FOUND)
+        message(FATAL_ERROR "SDL2 not found")
+    endif()    
+endif()
+
 ########################
 # qtdbg_sdl library
 ########################
@@ -187,10 +194,4 @@ macro(maintargetosdoptions _projectname)
     else()
         target_link_libraries(${_projectname} PUBLIC dinput)
     endif()
-
-    if(USE_SDL)
-        find_package(SDL2 REQUIRED)
-        target_link_libraries(${_projectname} PUBLIC SDL2::SDL2)
-    endif()
-
 endmacro()

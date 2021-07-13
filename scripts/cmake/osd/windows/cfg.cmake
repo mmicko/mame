@@ -37,13 +37,15 @@ macro(osd_cfg _project)
         endif()
     endif()
 
+    
     if(USE_SDL)
         target_compile_definitions(${_project} PRIVATE 
-            SDLMAME_SDL2=1
+            #SDLMAME_SDL2=0
             USE_XINPUT=0
             USE_SDL=1
             USE_SDL_SOUND
         )
+        target_link_libraries(${_project} PUBLIC SDL2::Core)
     else()
         target_compile_definitions(${_project} PRIVATE USE_SDL=0)
     endif()
