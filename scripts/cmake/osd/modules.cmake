@@ -67,7 +67,7 @@ option(USE_QTDEBUG "Use QT debugger." ${USE_QTDEBUG_DEFAULT})
 # Setup
 ########################
 
-if (NOT NO_OPENGL)
+if ((NOT NO_OPENGL) AND (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten"))
 	find_package(OpenGL REQUIRED)
 	if(NOT OpenGL_FOUND)
 		message(FATAL_ERROR "OpenGL not found")
