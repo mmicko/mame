@@ -686,7 +686,13 @@ include(scripts/cmake/devices.cmake)
 
 # drivers
 if(NOT STANDALONE)
-  cmake_language(CALL createProjects_${TARGET}_${SUBTARGET} ${TARGET} ${SUBTARGET})
+  
+  if(${CMAKE_VERSION} VERSION_LESS "3.18.0") 
+      file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/build/eval_createProjects.cmake "createProjects_${TARGET}_${SUBTARGET}(${TARGET} ${SUBTARGET})")
+      include(${CMAKE_CURRENT_BINARY_DIR}/build/eval_createProjects.cmake)
+  else()
+    cmake_language(CALL createProjects_${TARGET}_${SUBTARGET} ${TARGET} ${SUBTARGET})
+  endif()
 endif()
 
 # emulator

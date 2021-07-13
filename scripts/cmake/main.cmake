@@ -109,7 +109,12 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
 endif()
 
 if(NOT STANDALONE)
-    cmake_language(CALL linkProjects_${TARGET}_${SUBTARGET} ${TARGET} ${SUBTARGET} ${projectname})
+    if(${CMAKE_VERSION} VERSION_LESS "3.18.0") 
+        file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/build/eval_linkProjects.cmake "linkProjects_${TARGET}_${SUBTARGET}(${TARGET} ${SUBTARGET} ${projectname})")
+        include(${CMAKE_CURRENT_BINARY_DIR}/build/eval_linkProjects.cmake)
+    else()
+        cmake_language(CALL linkProjects_${TARGET}_${SUBTARGET} ${TARGET} ${SUBTARGET} ${projectname})
+    endif()
 endif()
 
 target_link_libraries(${projectname} PRIVATE osd_${OSD})
