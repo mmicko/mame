@@ -182,14 +182,18 @@ macro(precompiledheaders_novs _project)
 	endif()
 endmacro()
 
+option(IGNORE_GIT "Do not use GIT for versioning." OFF)
+
 macro(set_git_version)
 	find_package(Git REQUIRED)
 
-	execute_process(COMMAND ${GIT_EXECUTABLE} describe --dirty
+	if (NOT IGNORE_GIT AND GIT_FOUND AND (EXISTS ${MAME_DIR}/.git))
+		execute_process(COMMAND ${GIT_EXECUTABLE} describe --dirty
 					OUTPUT_VARIABLE NEW_GIT_VERSION
 					ERROR_QUIET)
 
-	string(STRIP "${NEW_GIT_VERSION}" NEW_GIT_VERSION)
+		string(STRIP "${NEW_GIT_VERSION}" NEW_GIT_VERSION)
+	endif()
 
 	if ("${NEW_GIT_VERSION}" STREQUAL "")
 		set(NEW_GIT_VERSION "unknown")
