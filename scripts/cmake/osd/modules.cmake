@@ -69,6 +69,9 @@ option(USE_QTDEBUG "Use QT debugger." ${USE_QTDEBUG_DEFAULT})
 
 if (NOT NO_OPENGL)
 	find_package(OpenGL REQUIRED)
+	if(NOT OpenGL_FOUND)
+		message(FATAL_ERROR "OpenGL not found")
+	endif()
 endif()
 
 ########################
@@ -354,6 +357,10 @@ macro(qtdebuggerbuild _projectname)
 		target_compile_definitions(${_projectname} PRIVATE USE_QTDEBUG=1)
 
 		find_package(Qt5 COMPONENTS Core Widgets Gui REQUIRED)
+		if((NOT QT5_FOUND) OR (NOT QT_QTCORE_FOUND) OR (NOT QT_QTWIDGETS_FOUND) OR (NOT QT_QTGUI_FOUND))
+			message(FATAL_ERROR "Qt5 or its components not found")
+		endif()
+		
 		target_link_libraries(${_projectname} PUBLIC Qt5::Core Qt5::Widgets Qt5::Gui)
 
 		qt5_generate_moc(${MAME_DIR}/src/osd/modules/debugger/qt/debuggerview.h ${GEN_DIR}/osd/modules/debugger/qt/debuggerview.moc.cpp)
@@ -405,6 +412,9 @@ macro(osdmodulestargetconf _projectname)
 	if(NOT NO_USE_MIDI)
 		if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 			find_package(ALSA REQUIRED)
+			if(NOT ALSA_FOUND)
+				message(FATAL_ERROR "ALSA not found")
+			endif()
 			target_link_libraries(${_projectname} PRIVATE ALSA::ALSA)
 		elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
 			target_link_libraries(${_projectname} PRIVATE "-framework CoreMIDI")
