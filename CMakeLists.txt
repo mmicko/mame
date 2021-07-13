@@ -3,6 +3,7 @@
 
 cmake_minimum_required(VERSION 3.16)
 # 3.16 introduce precompile headers support
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake/modules)
 
 set(TARGET "mame" CACHE STRING "Building target")
 set(SUBTARGET "mame" CACHE STRING "Building subtarget")
