@@ -43,6 +43,9 @@ option(USE_LIBSDL "Use SDL library on OS (rather than framework/dll)" OFF)
 
 if (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
     find_package(SDL2 REQUIRED)
+    if(NOT SDL2_FOUND)
+        message(FATAL_ERROR "SDL2 not found")
+    endif()
     set(EXTLIB_SDL2_LIBRARY SDL2::Core)
 else()
     set(EXTLIB_SDL2_LIBRARY SDL2)
@@ -64,6 +67,25 @@ if (${BASE_TARGETOS} STREQUAL "unix")
             set_option(USE_QTDEBUG OFF)
             set_option(NO_USE_XINPUT ON)
 		endif()
+    endif()
+endif()
+
+if(NOT NO_X11)
+    find_package(X11 REQUIRED)
+    if(NOT X11_FOUND)
+        message(FATAL_ERROR "X11 not found")
+    endif()
+    if(NOT X11_Xinerama_FOUND)
+        message(FATAL_ERROR "X11 Xinerama not found")
+    endif()
+
+    if(NOT NO_USE_XINPUT)
+        if(NOT X11_Xext_FOUND)
+            message(FATAL_ERROR "X11 Xext not found")
+        endif()
+        if(NOT X11_Xi_FOUND)
+            message(FATAL_ERROR "X11 Xi not found")
+        endif()
     endif()
 endif()
 
@@ -258,25 +280,32 @@ macro(maintargetosdoptions _projectname)
 
     if(NOT NO_X11)
         target_link_libraries(${_projectname} PRIVATE
-            X11
-            Xinerama
+            ${X11_X11_LIB}
+            ${X11_Xinerama_LIB}
         )
+
+        if(NOT NO_USE_XINPUT)
+            target_link_libraries(${_projectname} PRIVATE
+                ${X11_Xext_LIB}
+                ${X11_Xi_LIB}
+            )
+        endif()
     else()
         if((${CMAKE_SYSTEM_NAME} STREQUAL "Linux") OR (${CMAKE_SYSTEM_NAME} STREQUAL "NetBSD") OR (${CMAKE_SYSTEM_NAME} STREQUAL "OpenBSD"))
             target_link_libraries(${_projectname} PRIVATE OpenGL::EGL)
         endif()
     endif()
 
-    if(NOT NO_USE_XINPUT)
-        target_link_libraries(${_projectname} PRIVATE
-            Xext
-            Xi
-        )
-    endif()
 
     if((${BASE_TARGETOS} STREQUAL "unix") AND (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Darwin") AND (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Android") AND (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten"))
         find_package(SDL2_ttf REQUIRED)
         find_package(Fontconfig REQUIRED)
+        if(NOT SDL2_ttf_FOUND)
+            message(FATAL_ERROR "SDL2_ttf not found")
+        endif()
+        if(NOT Fontconfig_FOUND)
+            message(FATAL_ERROR "Fontconfig not found")
+        endif()
         target_link_libraries(${_projectname} PRIVATE SDL2::TTF)
         target_link_libraries(${_projectname} PRIVATE Fontconfig::Fontconfig)
     endif()

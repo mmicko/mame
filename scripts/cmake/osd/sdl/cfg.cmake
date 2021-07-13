@@ -34,6 +34,7 @@ macro(osd_cfg _project)
         target_compile_definitions(${_project} PRIVATE SDLMAME_NO_X11)
     else()
         target_compile_definitions(${_project} PRIVATE SDLMAME_X11)
+        target_include_directories(${_project} PRIVATE ${X11_INCLUDE_DIR})
     endif()
 
     if(NO_USE_XINPUT)
