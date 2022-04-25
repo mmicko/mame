@@ -6,7 +6,7 @@
 #pragma once
 
 #include "machine/z80daisy.h"
-
+#include "z180asci.h"
 
 enum
 {
@@ -115,6 +115,7 @@ protected:
 	// device-level overrides
 	virtual void device_start() override;
 	virtual void device_reset() override;
+	virtual void device_add_mconfig(machine_config &config) override;
 
 	// device_execute_interface overrides
 	virtual uint32_t execute_min_cycles() const noexcept override { return 1; }
@@ -147,6 +148,9 @@ protected:
 	address_space_config m_io_config;
 	address_space_config m_decrypted_opcodes_config;
 
+	required_device<z180asci_channel> m_asci_0;
+	required_device<z180asci_channel> m_asci_1;
+
 	void set_address_width(int bits);
 
 private:
@@ -165,11 +169,6 @@ private:
 	uint8_t   m_tmdr_latch;                     // flag latched TMDR0H, TMDR1H values
 	uint8_t   m_read_tcr_tmdr[2];               // flag to indicate that TCR or TMDR was read
 	uint32_t  m_iol;                            // I/O line status bits
-	uint8_t   m_asci_cntla[2];                  // ASCI control register A ch 0-1
-	uint8_t   m_asci_cntlb[2];                  // ASCI control register B ch 0-1
-	uint8_t   m_asci_stat[2];                   // ASCI status register 0-1
-	uint8_t   m_asci_tdr[2];                    // ASCI transmit data register 0-1
-	uint8_t   m_asci_rdr[2];                    // ASCI receive data register 0-1
 	uint8_t   m_csio_cntr;                      // CSI/O control/status register
 	uint8_t   m_csio_trdr;                      // CSI/O transmit/receive register
 	PAIR16    m_tmdr[2];                        // PRT data register ch 0-1
