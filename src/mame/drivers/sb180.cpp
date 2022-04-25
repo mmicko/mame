@@ -68,10 +68,10 @@ INPUT_PORTS_END
 void sb180_state::machine_reset()
 {
 	// motor is actually connected on TXS pin of CPU
-	m_floppy0->mon_w(1);
-	m_floppy1->mon_w(1);
-	m_floppy2->mon_w(1);
-	m_floppy3->mon_w(1);
+	m_floppy0->mon_w(0);
+	m_floppy1->mon_w(0);
+	m_floppy2->mon_w(0);
+	m_floppy3->mon_w(0);
 }
 
 static void sb180_floppies(device_slot_interface &device)
