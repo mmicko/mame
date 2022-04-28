@@ -96,6 +96,8 @@ z180_device::z180_device(const machine_config &mconfig, device_type type, const 
 	, m_asci_0(*this, "asci_0")
 	, m_asci_1(*this, "asci_1")
 	, m_extended_io(extended_io)
+	, m_tend0_cb(*this)
+	, m_tend1_cb(*this)
 {
 	// some arbitrary initial values
 	m_csio_trdr = 0;
@@ -140,6 +142,12 @@ z8s180_device::z8s180_device(const machine_config &mconfig, const char *tag, dev
 z80182_device::z80182_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock)
 	: z8s180_device(mconfig, Z80182, tag, owner, clock)
 {
+}
+
+void z180_device::device_resolve_objects()
+{
+	m_tend0_cb.resolve_safe();
+	m_tend1_cb.resolve_safe();
 }
 
 #define CF  0x01
@@ -1195,6 +1203,7 @@ int z180_device::z180_dma0(int max_cycles)
 		if (bcr0 == 1)
 		{
 			m_iol |= Z180_TEND0;
+			m_tend0_cb(true);
 		}
 		switch( m_dmode & (Z180_DMODE_SM | Z180_DMODE_DM) )
 		{
@@ -1317,6 +1326,7 @@ int z180_device::z180_dma0(int max_cycles)
 	if (bcr0 == 0)
 	{
 		m_iol &= ~Z180_TEND0;
+		m_tend0_cb(false);
 		m_dstat &= ~Z180_DSTAT_DE0;
 		/* terminal count interrupt enabled? */
 		if (m_dstat & Z180_DSTAT_DIE0 && m_IFF1)
@@ -1350,6 +1360,7 @@ int z180_device::z180_dma1()
 	if (bcr1 == 1)
 	{
 		m_iol |= Z180_TEND1;
+		m_tend1_cb(true);
 	}
 
 	m_extra_cycles = 0;
@@ -1358,15 +1369,19 @@ int z180_device::z180_dma1()
 	{
 	case 0x00:  /* memory MAR1+1 to I/O IAR1 fixed */
 		m_io.write_byte(iar1, z180_read_memory(mar1++));
+		bcr1--;
 		break;
 	case 0x01:  /* memory MAR1-1 to I/O IAR1 fixed */
 		m_io.write_byte(iar1, z180_read_memory(mar1--));
+		bcr1--;
 		break;
 	case 0x02:  /* I/O IAR1 fixed to memory MAR1+1 */
 		z180_write_memory(mar1++, m_io.read_byte(iar1));
+		bcr1--;
 		break;
 	case 0x03:  /* I/O IAR1 fixed to memory MAR1-1 */
 		z180_write_memory(mar1--, m_io.read_byte(iar1));
+		bcr1--;
 		break;
 	}
 
@@ -1384,6 +1399,7 @@ int z180_device::z180_dma1()
 	if (bcr1 == 0)
 	{
 		m_iol &= ~Z180_TEND1;
+		m_tend1_cb(false);
 		m_dstat &= ~Z180_DSTAT_DE1;
 		if (m_dstat & Z180_DSTAT_DIE1 && m_IFF1)
 			m_int_pending[Z180_INT_DMA1] = 1;

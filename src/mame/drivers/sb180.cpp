@@ -59,6 +59,7 @@ void sb180_state::sb180_io(address_map &map)
 	map.unmap_value_high();
 	map(0x0000, 0x007f).ram(); /* Z180 internal registers */
 	map(0x0080, 0x0081).m(m_fdc, FUNC(upd765a_device::map));
+	map(0x00a0, 0x00a0).rw(m_fdc, FUNC(upd765a_device::dma_r), FUNC(upd765a_device::dma_w));
 }
 
 /* Input ports */
@@ -101,10 +102,12 @@ void sb180_state::sb180(machine_config &config)
 	m_maincpu->set_addrmap(AS_PROGRAM, &sb180_state::sb180_mem);
 	m_maincpu->set_addrmap(AS_IO, &sb180_state::sb180_io);
 	m_maincpu->subdevice<z180asci_channel>("asci_1")->tx_handler().set("rs232", FUNC(rs232_port_device::write_txd));
+	m_maincpu->tend1_wr_callback().set([this](int state) { m_fdc->tc_w(state); });
 
 	// FDC9266 location U24
 	UPD765A(config, m_fdc, XTAL(8'000'000));
 	m_fdc->intrq_wr_callback().set_inputline(m_maincpu, INPUT_LINE_IRQ2);
+	m_fdc->drq_wr_callback().set_inputline(m_maincpu, Z180_INPUT_LINE_DREQ1);
 
 	/* floppy drives */
 	FLOPPY_CONNECTOR(config, FDC9266_TAG ":0", sb180_floppies, "35dd", sb180_floppy_formats);

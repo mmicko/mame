@@ -107,6 +107,8 @@ class z180_device : public cpu_device, public z80_daisy_chain_interface
 public:
 	bool get_tend0();
 	bool get_tend1();
+	auto tend0_wr_callback() { return m_tend0_cb.bind(); }
+	auto tend1_wr_callback() { return m_tend1_cb.bind(); }
 
 protected:
 	// construction/destruction
@@ -116,6 +118,7 @@ protected:
 	virtual void device_start() override;
 	virtual void device_reset() override;
 	virtual void device_add_mconfig(machine_config &config) override;
+	virtual void device_resolve_objects() override;
 
 	// device_execute_interface overrides
 	virtual uint32_t execute_min_cycles() const noexcept override { return 1; }
@@ -152,7 +155,6 @@ protected:
 	required_device<z180asci_channel> m_asci_1;
 
 	void set_address_width(int bits);
-
 private:
 	uint8_t z180_read_memory(offs_t addr) { return m_program.read_byte(addr); }
 	void z180_write_memory(offs_t addr, uint8_t data) { m_program.write_byte(addr, data); }
@@ -209,6 +211,7 @@ private:
 	int m_icount;
 	int m_extra_cycles;           /* extra cpu cycles */
 	uint8_t *m_cc[6];
+	devcb_write_line m_tend0_cb, m_tend1_cb;
 
 	typedef void (z180_device::*opcode_func)();
 	static const opcode_func s_z180ops[6][0x100];
