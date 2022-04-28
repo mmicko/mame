@@ -34,7 +34,7 @@ public:
 
 	// inline configuration
 	void set_id(uint8_t id) { m_id = id; }
-	
+
 	auto tx_handler() { return m_tx_handler.bind(); }
 	DECLARE_WRITE_LINE_MEMBER( write_rx );
 	int check_interrupt();
@@ -62,7 +62,7 @@ private:
 	uint8_t   m_asci_tdr;                    // ASCI transmit data register 0-1
 	uint8_t   m_asci_rdr;                    // ASCI receive data register 0-1
 	int       m_irq;
-	int		  m_id;
+	int       m_id;
 
 	devcb_write_line m_tx_handler;
 };

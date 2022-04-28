@@ -178,7 +178,7 @@ void tim011_state::tim011(machine_config &config)
 	m_maincpu->subdevice<z180asci_channel>("asci_1")->tx_handler().set("rs232", FUNC(rs232_port_device::write_txd));
 	m_maincpu->tend1_wr_callback().set([this](int state) { m_fdc->tc_w(state); });
 
-  	//CDP1802(config, m_keyboardcpu, XTAL(1'750'000)); // CDP1802, unknown clock
+	//CDP1802(config, m_keyboardcpu, XTAL(1'750'000)); // CDP1802, unknown clock
 	//m_keyboardcpu->set_addrmap(AS_PROGRAM, &tim011_state::keyboard_mem_map);
 	//m_keyboardcpu->set_addrmap(AS_IO, &tim011_state::keyboard_io_map);
 

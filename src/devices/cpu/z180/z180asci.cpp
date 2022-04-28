@@ -7,7 +7,7 @@
 *********************************************************************/
 
 #include "emu.h"
-#include "z180asci.h"
+#include "z180.h"
 
 //#define VERBOSE 1
 
@@ -130,18 +130,20 @@ void z180asci_channel::device_start()
 	transmit_register_reset();
 	receive_register_reset();
 
-/*	state_add(Z180_CNTLA0,     "CNTLA0",    m_asci_cntla);
-	state_add(Z180_CNTLB0,     "CNTLB0",    m_asci_cntlb);
-	state_add(Z180_STAT0,      "STAT0",     m_asci_stat);
-	state_add(Z180_TDR0,       "TDR0",      m_asci_tdr);
-	state_add(Z180_RDR0,       "RDR0",      m_asci_rdr);
-
-	state_add(Z180_CNTLA1,     "CNTLA1",    m_asci_cntla[1]);
-	state_add(Z180_CNTLB1,     "CNTLB1",    m_asci_cntlb[1]);
-	state_add(Z180_STAT1,      "STAT1",     m_asci_stat[1]);
-	state_add(Z180_TDR1,       "TDR1",      m_asci_tdr[1]);
-	state_add(Z180_RDR1,       "RDR1",      m_asci_rdr[1]);
-*/
+	cpu_device *cpu = reinterpret_cast<cpu_device *>(owner());
+	if (m_id==0) {
+		cpu->state_add(Z180_CNTLA0,     "CNTLA0",    m_asci_cntla);
+		cpu->state_add(Z180_CNTLB0,     "CNTLB0",    m_asci_cntlb);
+		cpu->state_add(Z180_STAT0,      "STAT0",     m_asci_stat);
+		cpu->state_add(Z180_TDR0,       "TDR0",      m_asci_tdr);
+		cpu->state_add(Z180_RDR0,       "RDR0",      m_asci_rdr);
+	} else {
+		cpu->state_add(Z180_CNTLA1,     "CNTLA1",    m_asci_cntla);
+		cpu->state_add(Z180_CNTLB1,     "CNTLB1",    m_asci_cntlb);
+		cpu->state_add(Z180_STAT1,      "STAT1",     m_asci_stat);
+		cpu->state_add(Z180_TDR1,       "TDR1",      m_asci_tdr);
+		cpu->state_add(Z180_RDR1,       "RDR1",      m_asci_rdr);
+	}
 }
 
 //-------------------------------------------------
@@ -213,7 +215,7 @@ void z180asci_channel::cntlb_w(uint8_t data)
 {
 	LOG("Z180 CNTLB%d wr $%02x\n", m_id, data);
 	m_asci_cntlb = data;
-	
+
 	int divisor = 1<<(m_asci_cntlb & 0x07);
 	divisor *= ((m_asci_cntlb & 0x20) ? 30 : 10);
 	divisor *= ((m_asci_cntlb & 0x08) ? 64 : 16);
