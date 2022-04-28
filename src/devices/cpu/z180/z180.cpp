@@ -1928,6 +1928,8 @@ int z180_device::check_interrupts()
 		{
 			cycles += take_interrupt(i);
 			m_int_pending[i] = 0;
+			if (i==Z180_INT_ASCI0) m_asci_0->clear_interrupt();
+			if (i==Z180_INT_ASCI1) m_asci_1->clear_interrupt();
 			break;
 		}
 

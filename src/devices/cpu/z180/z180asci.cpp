@@ -95,6 +95,7 @@ z180asci_channel::z180asci_channel(
 	m_asci_tdr = 0;
 	m_asci_rdr = 0;
 	m_id = 0;
+	m_irq = 0;
 }
 
 z180asci_channel::z180asci_channel(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock)
@@ -182,8 +183,6 @@ uint8_t z180asci_channel::stat_r()
 {
 	uint8_t data = m_asci_stat;
 	LOG("Z180 STAT%d  rd $%02x\n", m_id, data);
-	if (m_id==1)
-		data |= 0x80; // for STAT1
 	return data;
 }
 
@@ -199,7 +198,6 @@ uint8_t z180asci_channel::rdr_r()
 	uint8_t data = m_asci_rdr;
 	LOG("Z180 RDR%d   rd $%02x\n", m_id, data);
 	m_asci_stat &= ~0x80;
-	m_asci_rdr = 0;
 
 	return data;
 }
@@ -208,7 +206,7 @@ void z180asci_channel::cntla_w(uint8_t data)
 {
 	LOG("Z180 CNTLA%d wr $%02x\n", m_id, data);
 	m_asci_cntla = data;
-	set_data_frame(1, 8, PARITY_NONE, STOP_BITS_1);
+	set_data_frame(1, (data & 4) ? 8 : 7, (data & 2) ? PARITY_ODD : PARITY_NONE, (data & 2) ? STOP_BITS_2 : STOP_BITS_1);
 }
 
 void z180asci_channel::cntlb_w(uint8_t data)
@@ -240,7 +238,7 @@ void z180asci_channel::tdr_w(uint8_t data)
 	LOG("Z180 TDR%d   wr $%02x\n", m_id, data);
 	m_asci_tdr = data;
 	m_asci_stat &= ~0x02; // clear TDRE
-	transmit_register_setup(m_asci_tdr);
+	transmit_byte(m_asci_tdr);
 }
 
 void z180asci_channel::tra_callback()
@@ -250,7 +248,11 @@ void z180asci_channel::tra_callback()
 
 void z180asci_channel::tra_complete()
 {
+	device_buffered_serial_interface::tra_complete();
 	m_asci_stat |= 0x02; // set TDRE
+	if (m_asci_stat & Z180_STAT0_TIE) {
+		m_irq = 1;
+	}
 }
 
 void z180asci_channel::rdr_w(uint8_t data)
@@ -263,15 +265,21 @@ void z180asci_channel::received_byte(u8 byte)
 {
 	m_asci_stat |= 0x80;
 	m_asci_rdr = byte;
+	if (m_asci_stat & Z180_STAT0_RIE) {
+		m_irq = 1;
+	}
 }
 
 DECLARE_WRITE_LINE_MEMBER( z180asci_channel::write_rx )
 {
-	device_serial_interface::rx_w(state);
+	device_buffered_serial_interface::rx_w(state);
 }
 
 int z180asci_channel::check_interrupt()
 {
-	// TODO: Check interrupts
-	return 0;
+	return m_irq;
+}
+void z180asci_channel::clear_interrupt()
+{
+	m_irq = 0;
 }
