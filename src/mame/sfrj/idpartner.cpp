@@ -34,6 +34,10 @@
 #include "bus/rs232/rs232.h"
 
 #include "imagedev/floppy.h"
+
+#include "formats/imd_dsk.h"
+#include "formats/idpartner_dsk.h"
+
 #include "screen.h"
 
 namespace {
@@ -212,7 +216,14 @@ void idpartner_state::gdc_map(address_map &map)
 
 static void partner_floppies(device_slot_interface &device)
 {
-	device.option_add("fdd", FLOPPY_525_DD);
+	device.option_add("fdd", FLOPPY_525_HD);
+}
+
+static void partner_floppy_formats(format_registration &fr)
+{
+	fr.add_mfm_containers();
+	fr.add(FLOPPY_IMD_FORMAT);
+	fr.add(FLOPPY_IDPARTNER_FORMAT);
 }
 
 void idpartner_state::write_f1_clock(int state)
@@ -286,8 +297,8 @@ void idpartner_state::partner1fg(machine_config &config)
 
 	I8272A(config, m_fdc, 8_MHz_XTAL / 2);
 	m_fdc->intrq_wr_callback().set(FUNC(idpartner_state::fdc_int_w));
-	FLOPPY_CONNECTOR(config, "fdc:0", partner_floppies, "fdd", floppy_image_device::default_mfm_floppy_formats).enable_sound(true);
-	FLOPPY_CONNECTOR(config, "fdc:1", partner_floppies, "fdd", floppy_image_device::default_mfm_floppy_formats).enable_sound(true);
+	FLOPPY_CONNECTOR(config, "fdc:0", partner_floppies, "fdd", partner_floppy_formats).enable_sound(true);
+	FLOPPY_CONNECTOR(config, "fdc:1", partner_floppies, "fdd", partner_floppy_formats).enable_sound(true);
 }
 
 /* ROM definition */

@@ -1513,6 +1513,18 @@ end
 
 --------------------------------------------------
 --
+--@src/lib/formats/idpartner_dsk.h,FORMATS["IDPARTNER_DSK"] = true
+--------------------------------------------------
+
+if opt_tool(FORMATS, "IDPARTNER_DSK") then
+	files {
+		MAME_DIR.. "src/lib/formats/idpartner_dsk.cpp",
+		MAME_DIR.. "src/lib/formats/idpartner_dsk.h",
+	}
+end
+
+--------------------------------------------------
+--
 --@src/lib/formats/p2000t_cas.h,FORMATS["P2000T_CAS"] = true
 --------------------------------------------------
 
