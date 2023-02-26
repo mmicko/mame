@@ -49,11 +49,13 @@ public:
 		: driver_device(mconfig, type, tag)
 		, m_maincpu(*this, "maincpu")
 		, m_gdc(*this, "gdc")
-		//, m_avdc(*this, "avdc")
+		, m_avdc(*this, "avdc")
 		, m_pio_gdc(*this, "pio_gdc")
 		, m_sio1(*this, "sio1")
 		, m_sio2(*this, "sio2")
+		, m_dma(*this, "dma")
 		, m_fdc(*this, "fdc")
+		, m_floppy(*this, "fdc:%u", 0)
 		, m_fdc_daisy(*this, "fdc_daisy")
 		, m_brg(*this, "brg")
 		, m_rom(*this, "maincpu")
@@ -82,20 +84,39 @@ private:
 	void bank2_w(u8 data) { m_bank = 1; update_bank(); }
 	void char_w(u8 data);
 	void attr_w(u8 data);
-	void fdc_vector_w(u8 data) { m_fdc_daisy->set_vector(data); m_fdc_daisy->int_w(ASSERT_LINE); }
+	void fdc_vector_w(u8 data) { m_fdc_daisy->set_vector(data); }
 	void fdc_int_w(int state);
-	void write_f1_clock(int state);
+	void tc_w(int state) { printf("tc_w\n"); m_fdc->tc_w(state); }
+	//void busreq_w(int state);
+	uint8_t memory_read_byte(offs_t offset);
+	void memory_write_byte(offs_t offset, uint8_t data);
+	uint8_t io_read_byte(offs_t offset);
+	void io_write_byte(offs_t offset, uint8_t data);
 
+	void write_f1_clock(int state);
+	void floppy_mon_w(u8 data) { printf("motor %02x\n", data); m_floppy_mon = 1; update_floppy_mon(); }
+	u8 floppy_mon_r() { return m_floppy_mon; }
 	int m_bank;
 	bool m_rom_enabled;
+	int m_floppy_mon;
+	void update_floppy_mon();
 
+/*	uint8_t attr_r(offs_t offset);
+	void attrram_map(address_map &map);
+	uint8_t char_r(offs_t offset);
+	void charram_map(address_map &map);
+
+	SCN2674_DRAW_CHARACTER_MEMBER(draw_character);
+*/
 	required_device<z80_device> m_maincpu;
 	required_device<ef9365_device> m_gdc;
-	//required_device<scn2674_device> m_avdc;
+	required_device<scn2674_device> m_avdc;
 	required_device<z80pio_device> m_pio_gdc;
 	required_device<z80sio_device> m_sio1;
 	required_device<z80sio_device> m_sio2;
+	required_device<z80dma_device> m_dma;
 	required_device<i8272a_device> m_fdc;
+	required_device_array<floppy_connector, 2> m_floppy;
 	required_device<z80daisy_generic_device> m_fdc_daisy;
 	required_device<mc14411_device> m_brg;
 	std::unique_ptr<u8[]> m_ram;
@@ -106,16 +127,43 @@ private:
 	required_memory_bank m_bank2;
 };
 
+/*void idpartner_state::busreq_w(int state)
+{
+	printf("busreq_w\n");
+	// since our Z80 has no support for BUSACK, we assume it is granted immediately
+	m_maincpu->set_input_line(INPUT_LINE_HALT, state);
+	m_dma->bai_w(state); // tell dma that bus has been granted
+}*/
+uint8_t idpartner_state::memory_read_byte(offs_t offset)
+{
+	printf("mem read [%04x]\n", offset);
+	return 0;
+}
+void idpartner_state::memory_write_byte(offs_t offset, uint8_t data)
+{
+	printf("mem write [%04x] = %02x\n", offset, data);
+}
+uint8_t idpartner_state::io_read_byte(offs_t offset)
+{
+	printf("io read [%04x]\n", offset);
+	return 0;
+}
+void idpartner_state::io_write_byte(offs_t offset, uint8_t data)
+{
+	printf("io write [%04x] = %02x\n", offset, data);
+}
+
 void idpartner_state::char_w(u8 data)
 {
+	printf("char_w %02x\n",data);
 }
 void idpartner_state::attr_w(u8 data)
 {
+	printf("attr_w %02x\n",data);
 }
 
 void idpartner_state::fdc_int_w(int state)
 {
-	m_fdc_daisy->mask_w(1);
 	m_fdc_daisy->int_w(state);
 }
 
@@ -153,11 +201,22 @@ void idpartner_state::update_bank()
 	m_bank1->set_entry(m_bank);
 }
 
+void idpartner_state::update_floppy_mon()
+{
+	for (auto &drive : m_floppy)
+	{
+		if (drive->get_device())
+			drive->get_device()->mon_w(m_floppy_mon);
+	}
+}
+
 void idpartner_state::machine_reset()
 {
 	m_bank = 0;
 	m_rom_enabled = true;
 	update_bank();
+	m_floppy_mon = 0;
+	update_floppy_mon();
 }
 
 /* Address maps */
@@ -176,16 +235,16 @@ void idpartner_state::io_map(address_map &map)
 	map(0x34,0x34).w(FUNC(idpartner_state::char_w)); // char reg
 	map(0x35,0x35).w(FUNC(idpartner_state::attr_w)); // attr reg
 	//map(0x36,0x36) // scroll reg/common input
-	//map(0x38,0x3f).rw(m_avdc, FUNC(scn2674_device::read), FUNC(scn2674_device::write)); // AVDC SCN2674
+	map(0x38,0x3f).rw(m_avdc, FUNC(scn2674_device::read), FUNC(scn2674_device::write)); // AVDC SCN2674
 	map(0x80,0x87).rw(FUNC(idpartner_state::rom_bank_r), FUNC(idpartner_state::rom_bank_w)); // ROM bank
 	map(0x88,0x8f).rw(FUNC(idpartner_state::bank1_r), FUNC(idpartner_state::bank1_w)); // RAM bank 1
 	map(0x90,0x97).rw(FUNC(idpartner_state::bank2_r), FUNC(idpartner_state::bank2_w)); // RAM bank 2
-	//map(0x98,0x9f) // floppy motors
+	map(0x98,0x9f).rw(FUNC(idpartner_state::floppy_mon_r), FUNC(idpartner_state::floppy_mon_w)); // floppy motors
 	//map(0xa0,0xa7) //
 	//map(0xa8,0xaf) //
 	//map(0xb0,0xb7) // RTC - mm58167
 	//map(0xb8,0xbf) //
-	//map(0xc0,0xc7) // DMA
+	map(0xc0,0xc0).mirror(0x07).rw(m_dma, FUNC(z80dma_device::read), FUNC(z80dma_device::write)); // DMA
 	map(0xc8,0xcb).mirror(0x04).rw("ctc", FUNC(z80ctc_device::read), FUNC(z80ctc_device::write));  // CTC - A2 not connected
 	//map(0xd0,0xd7) // PIO - A2 not connected
 	map(0xd8,0xdb).mirror(0x04).rw("sio1", FUNC(z80sio_device::ba_cd_r), FUNC(z80sio_device::ba_cd_w)); // SIO1 - A2 not connected
@@ -204,6 +263,7 @@ static const z80_daisy_config daisy_chain[] =
 	{ "sio1" },
 	{ "sio2" },
 	{ "ctc" },
+	{ "dma" },
 	{ "pio_gdc" },
 	{ "fdc_daisy" },
 	{ nullptr }
@@ -257,8 +317,9 @@ void idpartner_state::partner1fg(machine_config &config)
 
 	MC14411(config, m_brg, XTAL(1'843'200));
 	m_brg->out_f<1>().set(FUNC(idpartner_state::write_f1_clock));
+	m_brg->rate_select_w(2);
 
-	rs232_port_device &rs232a(RS232_PORT(config, "rs232a", default_rs232_devices, nullptr));
+	rs232_port_device &rs232a(RS232_PORT(config, "rs232a", default_rs232_devices, "keyboard"));
 	rs232a.rxd_handler().set(m_sio1, FUNC(z80sio_device::rxa_w));
 
 	rs232_port_device &rs232b(RS232_PORT(config, "rs232b", default_rs232_devices, nullptr));
@@ -272,6 +333,12 @@ void idpartner_state::partner1fg(machine_config &config)
 
 	z80ctc_device& ctc(Z80CTC(config, "ctc", XTAL(8'000'000) / 2));
 	ctc.intr_callback().set_inputline(m_maincpu, INPUT_LINE_IRQ0);
+
+	screen_device &screen2(SCREEN(config, "screen2", SCREEN_TYPE_RASTER, rgb_t::green()));
+	screen2.set_screen_update(m_avdc, FUNC(scn2674_device::screen_update));
+	screen2.set_size(1024, 512);
+	screen2.set_visarea(0, 1024-1, 0, 512-1);
+	screen2.set_refresh_hz(25);
 
 	screen_device &screen(SCREEN(config, "screen", SCREEN_TYPE_RASTER, rgb_t::green()));
 	screen.set_screen_update(m_gdc, FUNC(ef9365_device::screen_update));
@@ -287,18 +354,34 @@ void idpartner_state::partner1fg(machine_config &config)
 	m_gdc->set_nb_bitplanes(1);
 	m_gdc->set_display_mode(ef9365_device::DISPLAY_MODE_1024x512);
 
-	//SCN2674(config, m_avdc, XTAL(24'000'000) / 16); // SCN2674B
-	//m_avdc->set_screen("screen");
-	//m_avdc->set_character_width(12);
-	//m_avdc->intr_callback().set_inputline(m_maincpu, INPUT_LINE_NMI);
+	SCN2674(config, m_avdc, XTAL(24'000'000) / 16); // SCN2674B
+	m_avdc->set_screen("screen2");
+	m_avdc->set_character_width(8);
+	m_avdc->intr_callback().set_inputline(m_maincpu, INPUT_LINE_NMI);
+	//m_avdc->mbc_callback().set(FUNC(hds200_state::nmi_w));
+	//m_avdc->set_addrmap(0, &idpartner_state::charram_map);
+	//m_avdc->set_addrmap(1, &idpartner_state::attrram_map);
+	//m_avdc->set_display_callback(FUNC(idpartner_state::draw_character));
 
 	Z80DAISY_GENERIC(config, m_fdc_daisy, 0xff);
 	m_fdc_daisy->int_handler().set_inputline(m_maincpu, INPUT_LINE_IRQ0);
 
 	I8272A(config, m_fdc, 8_MHz_XTAL / 2);
 	m_fdc->intrq_wr_callback().set(FUNC(idpartner_state::fdc_int_w));
-	FLOPPY_CONNECTOR(config, "fdc:0", partner_floppies, "fdd", partner_floppy_formats).enable_sound(true);
-	FLOPPY_CONNECTOR(config, "fdc:1", partner_floppies, "fdd", partner_floppy_formats).enable_sound(true);
+	m_fdc->drq_wr_callback().set(m_dma, FUNC(z80dma_device::rdy_w));
+
+	FLOPPY_CONNECTOR(config, m_floppy[0], partner_floppies, "fdd", partner_floppy_formats).enable_sound(true);
+	FLOPPY_CONNECTOR(config, m_floppy[1], partner_floppies, "fdd", partner_floppy_formats).enable_sound(true);
+
+	Z80DMA(config, m_dma, XTAL(8'000'000) / 2);
+	m_dma->out_busreq_callback().set_inputline(m_maincpu, INPUT_LINE_HALT);
+	m_dma->out_int_callback().set_inputline(m_maincpu, INPUT_LINE_IRQ0);
+	//m_dma->out_busreq_callback().set(FUNC(idpartner_state::busreq_w));
+	//m_dma->out_int_callback().set(FUNC(idpartner_state::tc_w));
+	m_dma->in_mreq_callback().set(FUNC(idpartner_state::memory_read_byte));
+	m_dma->out_mreq_callback().set(FUNC(idpartner_state::memory_write_byte));
+	m_dma->in_iorq_callback().set(FUNC(idpartner_state::io_read_byte));
+	m_dma->out_iorq_callback().set(FUNC(idpartner_state::io_write_byte));
 }
 
 /* ROM definition */
@@ -306,6 +389,7 @@ void idpartner_state::partner1fg(machine_config &config)
 ROM_START( partner1fg )
 	ROM_REGION( 0x1000, "maincpu", 0 )
 	ROM_LOAD( "partner1fg.e51",  0x0000, 0x800, CRC(571e297a) SHA1(05379c75d6ceb338e49958576f3a1c844f202a00) )
+	ROM_FILL(0x0482, 1, 0x00) // Disable EI in FDCIntHandler for now
 	// e50 is empty
 ROM_END
 
