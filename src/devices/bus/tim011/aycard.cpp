@@ -25,7 +25,7 @@ void tim011_aycard_devices::device_add_mconfig(machine_config &config)
 {
 	/* sound hardware */
 	SPEAKER(config, "mono").front_center();
-	AY8912(config, m_psg, 3.579545_MHz_XTAL / 2);
+	AY8912(config, m_psg, 1.843_MHz_XTAL);
 	m_psg->add_route(ALL_OUTPUTS, "mono", 0.25);
 }
 
