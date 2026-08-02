@@ -2178,3 +2178,105 @@ project "asmjit"
 		MAME_DIR .. "3rdparty/asmjit/asmjit/x86/x86rapass_p.h",
 	}
 end
+
+--------------------------------------------------
+-- thorvg library objects
+--------------------------------------------------
+
+function generate_thorvg_header()
+    fname = GEN_DIR .. "3rdparty/thorvg/config.h"
+    file = io.open(fname, "w")
+    file:write("// Generated file, edition is futile\n")
+    file:write("\n")
+	file:write("#pragma once\n")
+	file:write("#define THORVG_CPU_ENGINE_SUPPORT 1\n")
+	file:write("#define THORVG_FILE_IO_SUPPORT 1\n")
+	file:write("#define THORVG_LOTTIE_LOADER_SUPPORT 1\n")
+	file:write("#define THORVG_PARTIAL_RENDER_SUPPORT 1\n")
+	file:write("#define THORVG_SFNT_LOADER_SUPPORT 1\n")
+	file:write("#define THORVG_SVG_LOADER_SUPPORT 1\n")
+	file:write("#define THORVG_THREAD_SUPPORT 1\n")
+	file:write("#define THORVG_TTF_LOADER_SUPPORT 1\n")
+	file:write("#define THORVG_VERSION_STRING \"1.1.0\"\n")
+	file:write("#define WIN32_LEAN_AND_MEAN 1\n")                                                          
+    file:close()
+end
+
+project "thorvg"
+	uuid "7190c604-26be-4014-be9b-726fcb2dcab5"
+	kind "StaticLib"
+
+	generate_thorvg_header()
+
+	configuration { }
+		defines {
+			"TVG_STATIC",
+		}
+		includedirs {
+			MAME_DIR .. "3rdparty/thorvg/inc",
+			MAME_DIR .. "3rdparty/thorvg/src/common",
+			MAME_DIR .. "3rdparty/thorvg/src/loaders/svg",
+			MAME_DIR .. "3rdparty/thorvg/src/loaders/raw",
+			MAME_DIR .. "3rdparty/thorvg/src/loaders/sfnt",
+			MAME_DIR .. "3rdparty/thorvg/src/loaders/lottie",
+			MAME_DIR .. "3rdparty/thorvg/src/renderer",
+			MAME_DIR .. "3rdparty/thorvg/src/renderer/cpu_engine",
+			GEN_DIR .. "3rdparty/thorvg",
+		}
+
+	files {
+    	MAME_DIR .. "3rdparty/thorvg/src/common/tvgCompressor.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/common/tvgMath.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/common/tvgStr.cpp",
+
+    	MAME_DIR .. "3rdparty/thorvg/src/loaders/svg/tvgSvgBuilder.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/loaders/svg/tvgSvgCssStyle.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/loaders/svg/tvgSvgLoader.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/loaders/svg/tvgSvgPath.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/loaders/svg/tvgSvgUtil.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/loaders/svg/tvgXmlParser.cpp",
+
+    	MAME_DIR .. "3rdparty/thorvg/src/loaders/lottie/tvgLottieAnimation.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/loaders/lottie/tvgLottieBuilder.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/loaders/lottie/tvgLottieExpressions.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/loaders/lottie/tvgLottieInterpolator.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/loaders/lottie/tvgLottieLoader.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/loaders/lottie/tvgLottieModel.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/loaders/lottie/tvgLottieModifier.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/loaders/lottie/tvgLottieParserHandler.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/loaders/lottie/tvgLottieParser.cpp",
+   
+		MAME_DIR .. "3rdparty/thorvg/src/loaders/raw/tvgRawLoader.cpp",
+
+		MAME_DIR .. "3rdparty/thorvg/src/loaders/sfnt/tvgSfntLoader.cpp",
+		MAME_DIR .. "3rdparty/thorvg/src/loaders/sfnt/tvgSfntReader.cpp",
+
+		MAME_DIR .. "3rdparty/thorvg/src/loaders/sfnt/tvgTtfReader.cpp",
+
+    	MAME_DIR .. "3rdparty/thorvg/src/renderer/tvgAccessor.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/renderer/tvgAnimation.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/renderer/tvgCanvas.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/renderer/tvgFill.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/renderer/tvgInitializer.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/renderer/tvgLoaderMgr.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/renderer/tvgPaint.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/renderer/tvgPicture.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/renderer/tvgRender.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/renderer/tvgSaver.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/renderer/tvgScene.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/renderer/tvgShape.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/renderer/tvgTaskScheduler.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/renderer/tvgText.cpp",
+
+    	MAME_DIR .. "3rdparty/thorvg/src/renderer/cpu_engine/tvgSwBlendOp.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/renderer/cpu_engine/tvgSwFill.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/renderer/cpu_engine/tvgSwImage.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/renderer/cpu_engine/tvgSwMemPool.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/renderer/cpu_engine/tvgSwPostEffect.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/renderer/cpu_engine/tvgSwRaster.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/renderer/cpu_engine/tvgSwRenderer.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/renderer/cpu_engine/tvgSwRle.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/renderer/cpu_engine/tvgSwShape.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/renderer/cpu_engine/tvgSwStroke.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/renderer/cpu_engine/tvgSwUtil.cpp",
+	}

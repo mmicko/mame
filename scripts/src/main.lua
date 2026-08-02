@@ -163,6 +163,7 @@ end
 		"residfp",
 		ext_lib("jpeg"),
 		"7z",
+		"thorvg",
 	}
 if CPU_INCLUDE_DRC_NATIVE then
 	links {
