@@ -616,7 +616,7 @@ private:
 
 	entry_vector m_entries;
 	util::ovectorstream m_buffer;
-	std::shared_ptr<NSVGrasterizer> const m_svg_rasterizer;
+	std::shared_ptr<tvg::SwCanvas> const m_svg_rasterizer;
 	device_t &m_device;
 	char const *const m_search_path;
 	char const *const m_directory_name;
@@ -625,7 +625,7 @@ private:
 
 public:
 	layout_environment(device_t &device, char const *searchpath, char const *dirname)
-		: m_svg_rasterizer(nsvgCreateRasterizer(), util::nsvg_deleter())
+		: m_svg_rasterizer(tvg::SwCanvas::gen())
 		, m_device(device)
 		, m_search_path(searchpath)
 		, m_directory_name(dirname)
@@ -646,7 +646,7 @@ public:
 	bool is_root_device() const { return &device() == &machine().root_device(); }
 	char const *search_path() const { return m_search_path; }
 	char const *directory_name() const { return m_directory_name; }
-	std::shared_ptr<NSVGrasterizer> const &svg_rasterizer() const { return m_svg_rasterizer; }
+	std::shared_ptr<tvg::SwCanvas> const &svg_rasterizer() const { return m_svg_rasterizer; }
 
 	void set_parameter(std::string &&name, std::string &&value)
 	{
@@ -1761,18 +1761,35 @@ private:
 
 	void draw_svg(bitmap_argb32 &dest, rectangle const &bounds, int state)
 	{
+		float width = 0.0f;
+		float height = 0.0f;
+		m_svg->size(&width, &height);
+		if (width <= 0.0f || height <= 0.0f)
+			return;
 		// rasterise into a temporary bitmap
-		float const xscale(bounds.width() / m_svg->width);
-		float const yscale(bounds.height() / m_svg->height);
+		float const xscale(bounds.width() / width);
+		float const yscale(bounds.height() / height);
 		float const drawscale((std::max)(xscale, yscale));
-		bitmap_argb32 tempbitmap(int(m_svg->width * drawscale), int(m_svg->height * drawscale));
-		nsvgRasterize(
-				m_rasterizer.get(),
-				m_svg.get(),
-				0, 0, drawscale,
-				reinterpret_cast<unsigned char *>(&tempbitmap.pix(0)),
-				tempbitmap.width(), tempbitmap.height(),
-				tempbitmap.rowbytes());
+		bitmap_argb32 tempbitmap(int(width * drawscale), int(height * drawscale));
+		auto result = m_rasterizer->target(
+				reinterpret_cast<uint32_t *>(&tempbitmap.pix(0)),
+				tempbitmap.rowpixels(),
+				tempbitmap.width(),
+				tempbitmap.height(),
+				tvg::ColorSpace::ABGR8888);
+
+		if (result != tvg::Result::Success) {
+			osd_printf_warning("Failed canvas->target\n");;
+			return;
+		}
+
+		// Canvas owns this Paint after add()
+		tvg::Paint *picture = m_svg->duplicate();
+		picture->scale(drawscale);
+		m_rasterizer->add(picture);
+		m_rasterizer->draw();
+		m_rasterizer->sync();
+		m_rasterizer->remove();
 
 		// correct colour format and multiply by state colour
 		bool havealpha(false);
@@ -1937,7 +1954,7 @@ private:
 
 		// clear out this stuff in case it's large
 		if (!m_svg)
-			m_rasterizer.reset();
+			m_rasterizer->remove();
 		m_searchpath.clear();
 		m_dirname.clear();
 		m_imagefile.clear();
@@ -2080,18 +2097,22 @@ private:
 			osd_printf_warning("No SVG rasteriser available, won't attempt to parse component image '%s' as SVG\n", m_imagefile);
 			return;
 		}
-		m_svg.reset(nsvgParse(svgdata, "px", 72));
-		if (!m_svg)
+		tvg::Picture *picture = tvg::Picture::gen();
+		if (picture->load(svgdata, strlen(svgdata),"svg", nullptr, true) != tvg::Result::Success)
 		{
 			osd_printf_warning("Failed to parse component image '%s' as SVG\n", m_imagefile);
+			picture->unref();
 			return;
 		}
-		if ((0.0F >= m_svg->width) || (0.0F >= m_svg->height))
+		float width = 0.0f, height = 0.0f;
+		picture->size(&width, &height);
+		if (width <= 0.0f || height <= 0.0f)
 		{
 			osd_printf_warning("Parsing component image '%s' as SVG produced empty image\n", m_imagefile);
-			m_svg.reset();
+			picture->unref();
 			return;
 		}
+		m_svg.reset(picture);
 	}
 
 	static std::string get_data(util::xml::data_node const &compnode)
@@ -2104,8 +2125,8 @@ private:
 	}
 
 	// internal state
-	util::nsvg_image_ptr            m_svg;              // parsed SVG image
-	std::shared_ptr<NSVGrasterizer> m_rasterizer;       // SVG rasteriser
+	util::tvg_picture_ptr			m_svg;              // parsed SVG image
+	std::shared_ptr<tvg::SwCanvas>  m_rasterizer;       // SVG rasteriser
 	bitmap_argb32                   m_bitmap;           // source bitmap for images
 	bool                            m_hasalpha = false; // is there any alpha component present?
 

@@ -449,29 +449,37 @@ void menu_select_launch::cache::cache_toolbar(running_machine &machine, render_t
 	if (m_toolbar_textures.empty() || (m_toolbar_bitmaps[0].width() != pix_size) || (m_toolbar_bitmaps[0].height() != pix_size))
 	{
 		m_toolbar_textures.clear();
-		util::nsvg_rasterizer_ptr rasterizer(nsvgCreateRasterizer());
+		auto rasterizer(tvg::SwCanvas::gen());
 		std::string xml;
 		for (unsigned i = 0; UI_TOOLBAR_BUTTONS > i; ++i)
 		{
 			// parse SVG and calculate scale
 			xml = toolbar_icons_svg[i];
-			util::nsvg_image_ptr svg(nsvgParse(xml.data(), "px", 72));
-			float const xscale(float(pix_size) / svg->width);
-			float const yscale(float(pix_size) / svg->height);
+			auto svg(tvg::Picture::gen());
+			svg->load(xml.data(), strlen(xml.data()),"svg", nullptr, true) ;
+			float width = 0.0f, height = 0.0f;
+			svg->size(&width, &height);
+
+			float const xscale(float(pix_size) / width);
+			float const yscale(float(pix_size) / height);
 			float const drawscale((std::max)(xscale, yscale));
 
 			// rasterise the SVG and clear it out of memory
 			bitmap_argb32 &bitmap(m_toolbar_bitmaps[2 * i]);
 			bitmap.resize(pix_size, pix_size);
-			nsvgRasterize(
-					rasterizer.get(),
-					svg.get(),
-					0, 0, drawscale,
-					reinterpret_cast<unsigned char *>(&bitmap.pix(0)),
-					pix_size, pix_size,
-					bitmap.rowbytes());
-			svg.reset();
+			rasterizer->target(
+					reinterpret_cast<uint32_t *>(&bitmap.pix(0)),
+					bitmap.rowpixels(),
+					bitmap.width(),
+					bitmap.height(),
+					tvg::ColorSpace::ABGR8888);
 
+			svg->scale(drawscale);
+			rasterizer->add(svg);
+			rasterizer->draw();
+			rasterizer->sync();
+			rasterizer->remove();
+		
 			// correct colour format
 			bitmap_argb32 &disabled_bitmap(m_toolbar_bitmaps[(2 * i) + 1]);
 			disabled_bitmap.resize(pix_size, pix_size);

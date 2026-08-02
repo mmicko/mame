@@ -81,10 +81,11 @@ private:
 
 	required_memory_region m_svg_region; // the region in which the svg data is in
 	screen_svg_update_delegate m_screen_svg_update;
-	util::nsvg_image_ptr m_image;
-	util::nsvg_rasterizer_ptr m_rasterizer;
+	util::tvg_picture_ptr m_image;
+	float m_width = 0.0f, m_height = 0.0f;
+	std::unique_ptr<tvg::SwCanvas> m_rasterizer;
 	std::vector<bool> m_key_state;
-	std::vector<std::vector<NSVGshape *>> m_keyed_shapes;
+	std::vector<std::vector<tvg::Paint *>> m_keyed_shapes;
 	util::transparent_string_unordered_map<std::string, int> m_key_ids;
 	int m_key_count;
 	u8              m_curbitmap;                // current bitmap index

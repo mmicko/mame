@@ -10,23 +10,23 @@
 #ifndef MAME_LIB_UTIL_NANOSVG_H
 #define MAME_LIB_UTIL_NANOSVG_H
 
-#include <nanosvg/src/nanosvg.h>
-#include <nanosvg/src/nanosvgrast.h>
+#include "thorvg/inc/thorvg.h"
 
 #include <memory>
 
 
 namespace util {
 
-struct nsvg_deleter
+struct tvg_deleter
 {
-	void operator()(NSVGimage *ptr) const { nsvgDelete(ptr); }
-	void operator()(NSVGrasterizer *ptr) const { nsvgDeleteRasterizer(ptr); }
+	void operator()(tvg::Picture *ptr) const
+	{
+		if (ptr)
+			ptr->unref();
+	}
 };
 
-
-using nsvg_image_ptr = std::unique_ptr<NSVGimage, nsvg_deleter>;
-using nsvg_rasterizer_ptr = std::unique_ptr<NSVGrasterizer, nsvg_deleter>;
+using tvg_picture_ptr = std::unique_ptr<tvg::Picture, tvg_deleter>;
 
 } // namespace util
 

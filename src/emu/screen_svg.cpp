@@ -16,34 +16,65 @@
 #include "render.h"
 #include "video.h"
 
+#include <pugixml.hpp>
+
 #include <cstdio>
 #include <set>
 
 // device type definition
 DEFINE_DEVICE_TYPE(SCREEN_SVG, screen_svg_device, "screen_svg", "SVG Video Screen")
 
+using title_map = std::unordered_map<std::string, std::vector<std::string>>;
+
+static void extract_titles(const pugi::xml_node &node, title_map &map)
+{
+	if (auto id = node.attribute("id"))
+	{
+		if (auto title = node.child("title"))
+		{
+			std::string title_text = title.child_value();
+			if (!title_text.empty())
+				map[title_text].push_back(id.value());
+		}
+	}
+
+	for (auto child : node.children())
+		extract_titles(child, map);
+}
+
 void screen_svg_device::svg_init()
 {
 	const std::unique_ptr<char []> s(new char[m_svg_region->bytes() + 1]);
 	memcpy(s.get(), m_svg_region->base(), m_svg_region->bytes());
 	s[m_svg_region->bytes()] = 0;
-	m_image.reset(nsvgParse(s.get(), "px", 72));
-	m_rasterizer.reset(nsvgCreateRasterizer());
+
+	title_map title_to_ids;
+	pugi::xml_document doc;
+	doc.load_string(s.get());
+	extract_titles(doc.document_element(), title_to_ids);
+
+	auto picture = tvg::Picture::gen();
+	picture->accessible = true;
+	picture->load(s.get(), strlen(s.get()), "svg", nullptr, true);
+	picture->size(&m_width, &m_height);
+	m_image.reset(picture);
+	m_rasterizer.reset(tvg::SwCanvas::gen());
 
 	m_key_count = 0;
 
-	for (NSVGshape *shape = m_image->shapes; shape; shape = shape->next)
-		if(shape->title[0]) {
-			const auto it = m_key_ids.find(shape->title);
-			if(it != m_key_ids.end())
-				m_keyed_shapes[it->second].push_back(shape);
-			else {
-				const int id = m_key_count++;
-				m_keyed_shapes.resize(m_key_count);
-				m_keyed_shapes[id].push_back(shape);
-				m_key_ids[shape->title] = id;
+	for (const auto &[title, ids] : title_to_ids)
+		for (const auto &id : ids)
+			if (auto *paint = const_cast<tvg::Paint *>(picture->paint(tvg::Accessor::id(id.c_str())))) {
+				const auto it = m_key_ids.find(title);
+				if(it != m_key_ids.end())
+					m_keyed_shapes[it->second].push_back(paint);
+				else {
+					const int key = m_key_count++;
+					m_keyed_shapes.resize(m_key_count);
+					m_keyed_shapes[key].push_back(paint);
+					m_key_ids[title] = key;
+				}
 			}
-		}
 	m_key_state.resize(m_key_count);
 	std::fill(m_key_state.begin(),m_key_state.end(),false);
 }
@@ -53,33 +84,20 @@ void screen_svg_device::render_state(std::vector<u32> &dest, const std::vector<b
 	for(int key = 0; key != m_key_count; key++) {
 		if (state[key])
 			for(auto s : m_keyed_shapes[key])
-				s->flags |= NSVG_FLAGS_VISIBLE;
+				s->visible(true);
 		else
 			for(auto s : m_keyed_shapes[key])
-				s->flags &= ~NSVG_FLAGS_VISIBLE;
+				s->visible(false);
 	}
 
-	nsvgRasterize(m_rasterizer.get(), m_image.get(), 0, 0, m_scale, (unsigned char *)&dest[0], m_sx, m_sy, m_sx*4);
+	m_rasterizer->target(reinterpret_cast<uint32_t *>(dest.data()), m_sx, m_sx, m_sy, tvg::ColorSpace::ARGB8888);
 
-	// Nanosvg generates non-premultiplied alpha, so remultiply by
-	// alpha to "blend" against a black background.  Plus align the
-	// channel order to what we do.
-
-	u8 *image = (u8 *)&dest[0];
-	for(unsigned int pixel=0; pixel != m_sy*m_sx; pixel++) {
-		u8 r = image[0];
-		u8 g = image[1];
-		u8 b = image[2];
-		u8 a = image[3];
-		if(a != 0xff) {
-			r = r*a/255;
-			g = g*a/255;
-			b = b*a/255;
-		}
-		u32 color = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
-		*(u32 *)image = color;
-		image += 4;
-	}
+	tvg::Paint *picture = m_image->duplicate();
+	picture->scale(m_scale);
+	m_rasterizer->add(picture);
+	m_rasterizer->draw();
+	m_rasterizer->sync();
+	m_rasterizer->remove();
 }
 
 void screen_svg_device::blit(bitmap_rgb32 &bitmap, const cached_bitmap &src) const
@@ -119,10 +137,14 @@ void screen_svg_device::compute_initial_bboxes(std::vector<bbox> &bboxes)
 		int x0, y0, x1, y1;
 		x0 = y0 = x1 = y1 = -1;
 		for(auto s : m_keyed_shapes[key]) {
-			int xx0 = int(floor(s->bounds[0]*m_scale));
-			int yy0 = int(floor(s->bounds[1]*m_scale));
-			int xx1 = int(ceil (s->bounds[2]*m_scale)) + 1;
-			int yy1 = int(ceil (s->bounds[3]*m_scale)) + 1;
+			float bounds[4];
+			s->bounds(&bounds[0], &bounds[1], &bounds[2], &bounds[3]);
+			bounds[2] += bounds[0];
+			bounds[3] += bounds[1];
+			int xx0 = int(floor(bounds[0]*m_scale));
+			int yy0 = int(floor(bounds[1]*m_scale));
+			int xx1 = int(ceil (bounds[2]*m_scale)) + 1;
+			int yy1 = int(ceil (bounds[3]*m_scale)) + 1;
 			if(xx0 < 0)
 				xx0 = 0;
 			if(xx0 >= m_sx)
@@ -480,7 +502,7 @@ void screen_svg_device::device_start()
 	// We don't yet have a way for the rendering to tell us the optimal bitmap size...
 	m_sx = m_render_width;
 	m_sy = m_render_height;
-	m_scale = m_render_width / m_image->width;
+	m_scale = m_render_width / m_width;
 
 	for (auto & elem : m_bitmap)
 		elem.resize(m_sx, m_sy);
@@ -500,7 +522,7 @@ void screen_svg_device::device_start()
 	m_vblank_timer = timer_alloc(FUNC(screen_svg_device::vblank_timer_callback), this);
 	m_vblank_timer->adjust(m_frame_period, 0, m_frame_period);
 
-	osd_printf_verbose("Parsed SVG '%s', aspect ratio %f\n", tag(), (m_image->height == 0.0f) ? 0 : m_image->width / m_image->height);
+	osd_printf_verbose("Parsed SVG '%s', aspect ratio %f\n", tag(), (m_height == 0.0f) ? 0 : m_width / m_height);
 }
 
 

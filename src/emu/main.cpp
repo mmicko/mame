@@ -14,17 +14,20 @@
 #include "emuopts.h"
 #include "http.h"
 
+#include "thorvg/inc/thorvg.h"
 
 machine_manager::machine_manager(emu_options& options, osd_interface& osd) :
 	m_osd(osd),
 	m_options(options),
 	m_machine(nullptr)
 {
+	tvg::Initializer::init();
 }
 
 
 machine_manager::~machine_manager()
 {
+	tvg::Initializer::term();
 }
 
 
