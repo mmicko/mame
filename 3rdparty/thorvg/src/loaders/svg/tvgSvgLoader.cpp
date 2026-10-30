@@ -3420,6 +3420,13 @@ static void _svgLoaderParserXmlClose(SvgParserContext* ctx, const char* content,
         return;
     }
 
+    // MAME: end of <title> element
+    if (ctx->openedTag == OpenedTagType::Title && STR_AS(tagName, "title")) {
+        ctx->openedTag = OpenedTagType::Other;
+        ctx->titleNode = nullptr;
+        return;
+    }
+
     for (unsigned int i = 0; i < sizeof(groupTags) / sizeof(groupTags[0]); i++) {
         if (!strncmp(tagName, groupTags[i].tag, sz)) {
             ctx->stack.pop();
@@ -3490,6 +3497,17 @@ static void _svgLoaderParserXmlOpen(SvgParserContext* ctx, const char* content, 
     if (ctx->gradientStack.count > 0) {
         TVGLOG("SVG", "Ignoring <%s> declared inside a gradient element", tagName);
         if (!empty) ctx->gradientStack.push(nullptr);
+        return;
+    }
+
+    // MAME: <title> names the enclosing graphics or group element
+    if (STR_AS(tagName, "title")) {
+        if (!empty && ctx->openedTag == OpenedTagType::Other) {
+            if (ctx->currentGraphicsNode) ctx->titleNode = ctx->currentGraphicsNode;
+            else if (ctx->stack.count > 0) ctx->titleNode = ctx->stack.last();
+            else ctx->titleNode = nullptr;
+            if (ctx->titleNode) ctx->openedTag = OpenedTagType::Title;
+        }
         return;
     }
 
@@ -3638,6 +3656,7 @@ static void _free(SvgNode* node)
     node->child.reset();
 
     tvg::free(node->id);
+    tvg::free(node->title);
     tvg::free(node->transform);
     _free(node->style);
     switch (node->type) {
@@ -3827,6 +3846,7 @@ static bool _svgLoaderParser(void* data, XMLType type, const char* content, unsi
         case XMLType::CData: {
             if (ctx->openedTag == OpenedTagType::Style) _svgLoaderParserXmlCssStyle(ctx, content, length);
             else if (ctx->openedTag == OpenedTagType::Text) _svgLoaderParserText(ctx, content, length);
+            else if (ctx->openedTag == OpenedTagType::Title) ctx->titleNode->title = append(ctx->titleNode->title, content, length);  // MAME
             break;
         }
         case XMLType::DoctypeChild: {

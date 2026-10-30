@@ -1255,10 +1255,15 @@ static Scene* _sceneBuildHelper(SvgParserContext& ctx, const SvgNode* node, cons
         }
         if (paint) {
             // TODO: enable this only when accessible is enabled at thorvg v2 (for backward compat)
+#ifdef THORVG_SVG_TITLE_AS_ID
+            // MAME: identify paints by their <title> text rather than their id attribute
+            if (child->title) paint->id = djb2Encode(child->title);
+#else
             if (child->id) {
                 paint->id = djb2Encode(child->id);
                 if (ctx.accessible) ctx.access.push({paint->id, paint, tvg::duplicate(child->id)});
             }
+#endif
             scene->add(paint);
         }
     }

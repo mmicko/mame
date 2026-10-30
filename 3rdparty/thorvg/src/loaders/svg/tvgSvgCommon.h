@@ -594,6 +594,7 @@ struct SvgNode
     SvgNode* parent;
     Array<SvgNode*> child;
     char *id;
+    char *title;  // MAME: text of the <title> child element
     SvgStyleProperty *style;
     Matrix* transform;
     union {
@@ -656,7 +657,8 @@ enum struct OpenedTagType : uint8_t
 {
     Other = 0,
     Style,
-    Text
+    Text,
+    Title  // MAME: <title> element content
 };
 
 struct SvgParserContext
@@ -666,6 +668,7 @@ struct SvgParserContext
     SvgNode* def = nullptr; //also used to store nested graphic nodes
     SvgNode* cssStyle = nullptr;
     SvgNode* currentGraphicsNode = nullptr;
+    SvgNode* titleNode = nullptr;  // MAME: node receiving <title> content
     Inlist<SvgNodeIdPair> cloneNodes;
     Array<SvgNode*> stack;
     Array<SvgStyleGradient*> gradients;
