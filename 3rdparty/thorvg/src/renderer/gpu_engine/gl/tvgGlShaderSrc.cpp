@@ -176,17 +176,17 @@ const char* STR_LINEAR_GRADIENT_VARIABLES = TVG_COMPOSE_SHADER(
 );
 
 //See: GlRenderer::initShaders()
-const char* STR_LINEAR_GRADIENT_MAIN = TVG_COMPOSE_SHADER(
+const char* STR_GRADIENT_MAIN = TVG_COMPOSE_SHADER(
     out vec4 FragColor;                                                                                     \n
     void main()                                                                                             \n
     {                                                                                                       \n
-        FragColor = linearGradientColor(vPos);                                                              \n
+        FragColor = gradientColor(vPos);                                                                    \n
     }                                                                                                       \n
 );
 
 //See: GlRenderer::initShaders()
 const char* STR_LINEAR_GRADIENT_FUNCTIONS = TVG_COMPOSE_SHADER(
-    vec4 linearGradientColor(vec2 pos)                                                                      \n
+    vec4 gradientColor(vec2 pos)                                                                            \n
     {                                                                                                       \n
         vec2 st = uGradientInfo.gradStartPos;                                                               \n
         vec2 ed = uGradientInfo.gradEndPos;                                                                 \n
@@ -207,16 +207,6 @@ const char* STR_RADIAL_GRADIENT_VARIABLES = TVG_COMPOSE_SHADER(
         vec4  stopPoints[MAX_STOP_COUNT / 4];                                                               \n
         vec4  stopColors[MAX_STOP_COUNT];                                                                   \n
     } uGradientInfo ;                                                                                       \n
-);
-
-//See: GlRenderer::initShaders()
-const char* STR_RADIAL_GRADIENT_MAIN = TVG_COMPOSE_SHADER(
-    out vec4 FragColor;                                                                                     \n
-                                                                                                            \n
-    void main()                                                                                             \n
-    {                                                                                                       \n
-        FragColor = radialGradientColor(vPos);                                                              \n
-    }                                                                                                       \n
 );
 
 // TODO: Precompute radial_matrix, f, r1n, inv_r1, d_radius_sign, is_focal_on_circle, is_well_behaved, is_swapped in CPU as a uniform
@@ -301,7 +291,7 @@ const char* STR_RADIAL_GRADIENT_FUNCTIONS = TVG_COMPOSE_SHADER(
         }                                                                                                   \n
     }                                                                                                       \n
                                                                                                             \n
-    vec4 radialGradientColor(vec2 pos)                                                                      \n
+    vec4 gradientColor(vec2 pos)                                                                            \n
     {                                                                                                       \n
         vec2 res = compute_radial_t(uGradientInfo.centerPos.xy,                                             \n
                                     uGradientInfo.radius.x,                                                 \n
@@ -312,6 +302,37 @@ const char* STR_RADIAL_GRADIENT_FUNCTIONS = TVG_COMPOSE_SHADER(
                                                                                                             \n
         float t = gradientWrap(res.x);                                                                      \n
         vec4 color = gradient(t, res.x, length(pos - uGradientInfo.centerPos.xy));                          \n
+        return vec4(color.rgb * color.a, color.a);                                                          \n
+    }                                                                                                       \n
+);
+
+//See: GlRenderer::initShaders()
+const char* STR_CONIC_GRADIENT_VARIABLES = TVG_COMPOSE_SHADER(
+    layout(std140) uniform GradientInfo {                                                                   \n
+        vec4  nStops;                                                                                       \n
+        vec4  stopPoints[MAX_STOP_COUNT / 4];                                                               \n
+        vec4  stopColors[MAX_STOP_COUNT];                                                                   \n
+    } uGradientInfo;                                                                                        \n
+);
+
+//See: GlRenderer::initShaders()
+const char* STR_CONIC_GRADIENT_FUNCTIONS = TVG_COMPOSE_SHADER(
+    vec4 gradientColor(vec2 pos)                                                                            \n
+    {                                                                                                       \n
+        float width = fwidth(pos.y);                                                                        \n
+        vec4 color;                                                                                         \n
+        if (pos.x >= 0.0 && abs(pos.y) < 0.5 * width) {                                                     \n
+            int count = int(uGradientInfo.nStops[0]);                                                       \n
+            float coverage = pos.y / width + 0.5;                                                           \n
+            // Seam coverage averages premultiplied colors, unlike gradient interpolation.
+            vec4 first = uGradientInfo.stopColors[0];                                                       \n
+            vec4 last = uGradientInfo.stopColors[count - 1];                                                \n
+            return mix(vec4(last.rgb * last.a, last.a), vec4(first.rgb * first.a, first.a), coverage);      \n
+        } else {                                                                                            \n
+            const float INV_TWO_PI = 0.15915494309189535;                                                   \n
+            float t = fract(atan(pos.y, pos.x) * INV_TWO_PI);                                               \n
+            color = gradient(t, 0.0, 1.0);                                                                  \n
+        }                                                                                                   \n
         return vec4(color.rgb * color.a, color.a);                                                          \n
     }                                                                                                       \n
 );
@@ -333,10 +354,7 @@ const char* IMAGE_VERT_SHADER = TVG_COMPOSE_SHADER(
 
 const char* IMAGE_FRAG_SHADER = TVG_COMPOSE_SHADER(
     layout(std140) uniform ColorInfo {                                                      \n
-        int format;                                                                         \n
-        int flipY;                                                                          \n
-        int opacity;                                                                        \n
-        int dummy;                                                                          \n
+        ivec4 params;                                                                       \n
     } uColorInfo;                                                                           \n
     uniform sampler2D uTexture;                                                             \n
     in vec2 vUV;                                                                            \n
@@ -344,20 +362,7 @@ const char* IMAGE_FRAG_SHADER = TVG_COMPOSE_SHADER(
                                                                                             \n
     void main()                                                                             \n
     {                                                                                       \n
-        vec2 uv = vUV;                                                                      \n
-        if (uColorInfo.flipY == 1) { uv.y = 1.0 - uv.y; }                                   \n
-        vec4 color = texture(uTexture, uv);                                                 \n
-        vec4 result;                                                                        \n
-        if (uColorInfo.format == 0) { /* FMT_ABGR8888 */                                    \n
-            result = color;                                                                 \n
-        } else if (uColorInfo.format == 1) { /* FMT_ARGB8888 */                             \n
-            result = color.bgra;                                                            \n
-        } else if (uColorInfo.format == 2) { /* FMT_ABGR8888S */                            \n
-            result = vec4(color.rgb * color.a, color.a);                                    \n
-        } else if (uColorInfo.format == 3) { /* FMT_ARGB8888S */                            \n
-            result = vec4(color.bgr * color.a, color.a);                                    \n
-        }                                                                                   \n
-        FragColor = result * float(uColorInfo.opacity) / 255.0;                             \n
+        FragColor = texture(uTexture, vUV) * float(uColorInfo.params.x) / 255.0;             \n
    }                                                                                        \n
 );
 
@@ -618,7 +623,7 @@ void getFragData() {
 vec4 postProcess(vec4 R) { return R; }
 )";
 
-const char* BLEND_SHAPE_LINEAR_FRAG_HEADER = R"(
+const char* BLEND_SHAPE_GRADIENT_FRAG_HEADER = R"(
 layout(std140) uniform BlendRegion {
     vec4 region;
 } uBlendRegion;
@@ -632,7 +637,7 @@ struct FragData { vec3 Sc; float Sa; float So; vec3 Dc; float Da; };
 FragData d;
 
 void getFragData() {
-    vec4 colorSrc = linearGradientColor(vPos);
+    vec4 colorSrc = gradientColor(vPos);
     vec2 uv = (gl_FragCoord.xy - uBlendRegion.region.xy) / uBlendRegion.region.zw;
     vec4 colorDst = texture(uDstTexture, uv);
 
@@ -641,41 +646,9 @@ void getFragData() {
     d.So = 1.0;
     d.Dc = colorDst.rgb;
     d.Da = colorDst.a;
-    if (d.Sa > 0.0) { d.Sc = d.Sc / d.Sa; }
+    // RGB is premultiplied.
     float srcOpacity = d.Sa * d.So;
-    d.Sc = mix(d.Dc, d.Sc, srcOpacity);
-    d.Sa = mix(d.Da, 1.0, srcOpacity);
-}
-
-vec4 postProcess(vec4 R) { return R; }
-)";
-
-const char* BLEND_SHAPE_RADIAL_FRAG_HEADER = R"(
-layout(std140) uniform BlendRegion {
-    vec4 region;
-} uBlendRegion;
-
-uniform sampler2D uDstTexture;
-
-out vec4 FragColor;
-
-vec3 One = vec3(1.0, 1.0, 1.0);
-struct FragData { vec3 Sc; float Sa; float So; vec3 Dc; float Da; };
-FragData d;
-
-void getFragData() {
-    vec4 colorSrc = radialGradientColor(vPos);
-    vec2 uv = (gl_FragCoord.xy - uBlendRegion.region.xy) / uBlendRegion.region.zw;
-    vec4 colorDst = texture(uDstTexture, uv);
-
-    d.Sc = colorSrc.rgb;
-    d.Sa = colorSrc.a;
-    d.So = 1.0;
-    d.Dc = colorDst.rgb;
-    d.Da = colorDst.a;
-    if (d.Sa > 0.0) { d.Sc = d.Sc / d.Sa; }
-    float srcOpacity = d.Sa * d.So;
-    d.Sc = mix(d.Dc, d.Sc, srcOpacity);
+    d.Sc = d.Dc * (1.0 - srcOpacity) + d.Sc * d.So;
     d.Sa = mix(d.Da, 1.0, srcOpacity);
 }
 
@@ -716,10 +689,7 @@ vec4 postProcess(vec4 R) { return mix(vec4(d.Dc, d.Da), R, d.Sa * d.So); }
 
 const char* BLEND_SCENE_FRAG_HEADER = R"(
 layout(std140) uniform ColorInfo {
-    int format;
-    int flipY;
-    int opacity;
-    int dummy;
+    ivec4 params;
 } uColorInfo;
 uniform sampler2D uSrcTexture;
 uniform sampler2D uDstTexture;
@@ -738,7 +708,7 @@ void getFragData() {
     // fill fragment data
     d.Sc = colorSrc.rgb;
     d.Sa = colorSrc.a;
-    d.So = float(uColorInfo.opacity) / 255.0;
+    d.So = float(uColorInfo.params.x) / 255.0;
     d.Dc = colorDst.rgb;
     d.Da = colorDst.a;
     if (d.Sa > 0.0) {d.Sc = d.Sc / d.Sa; }
@@ -781,10 +751,7 @@ vec4 postProcess(vec4 R) { return mix(vec4(d.Dc, d.Da), R, d.Sa * d.So); }
 
 const char* BLEND_SCENE_FRAG_HEADER = R"(
 layout(std140) uniform ColorInfo {
-    int format;
-    int flipY;
-    int opacity;
-    int dummy;
+    ivec4 params;
 } uColorInfo;
 
 layout(std140) uniform BlendRegion {
@@ -809,7 +776,7 @@ void getFragData() {
     // fill fragment data
     d.Sc = colorSrc.rgb;
     d.Sa = colorSrc.a;
-    d.So = float(uColorInfo.opacity) / 255.0;
+    d.So = float(uColorInfo.params.x) / 255.0;
     d.Dc = colorDst.rgb;
     d.Da = colorDst.a;
     if (d.Sa > 0.0) {d.Sc = d.Sc / d.Sa; }
@@ -1091,7 +1058,7 @@ layout(std140) uniform Gaussian {
     float sigma;
     float scale;
     float extend;
-    float dummy0;
+    float quality;
 } uGaussian;
 
 layout(std140) uniform Viewport {
@@ -1113,17 +1080,22 @@ void main()
     float sigma = uGaussian.sigma * uGaussian.scale;
     float weightSum = 0.0;
     int radius = int(uGaussian.extend);
+    int quality = int(uGaussian.quality);
     vec2 texelStep = vec2(0.0, texelSize.y);
 
     // Clamp the kernel range once so edge pixels skip taps outside the valid viewport.
     int first = max(-radius, int(ceil(uViewport.vp.y - gl_FragCoord.y)));
     int last = min(radius, int(ceil(uViewport.vp.w - gl_FragCoord.y)) - 1);
+    int remainder = first % quality;
+    if (remainder < 0) remainder += quality;
+    if (remainder > 0) first += quality - remainder;
     vec2 coord = vUV + texelStep * float(first);
-    for (int y = first; y <= last; ++y) {
+    vec2 sampleStep = texelStep * float(quality);
+    for (int y = first; y <= last; y += quality) {
         float weight = gaussian(float(y), sigma);
         colorSum += texture(uSrcTexture, coord) * weight;
         weightSum += weight;
-        coord += texelStep;
+        coord += sampleStep;
     }
     FragColor = weightSum > 0.0 ? colorSum / weightSum : texture(uSrcTexture, vUV);
 } 
@@ -1135,7 +1107,7 @@ layout(std140) uniform Gaussian {
     float sigma;
     float scale;
     float extend;
-    float dummy0;
+    float quality;
 } uGaussian;
 
 layout(std140) uniform Viewport {
@@ -1157,20 +1129,56 @@ void main()
     float sigma = uGaussian.sigma * uGaussian.scale;
     float weightSum = 0.0;
     int radius = int(uGaussian.extend);
+    int quality = int(uGaussian.quality);
     vec2 texelStep = vec2(texelSize.x, 0.0);
 
     // Clamp the kernel range once so edge pixels skip taps outside the valid viewport.
     int first = max(-radius, int(ceil(uViewport.vp.x - gl_FragCoord.x)));
     int last = min(radius, int(ceil(uViewport.vp.z - gl_FragCoord.x)) - 1);
+    int remainder = first % quality;
+    if (remainder < 0) remainder += quality;
+    if (remainder > 0) first += quality - remainder;
     vec2 coord = vUV + texelStep * float(first);
-    for (int x = first; x <= last; ++x) {
+    vec2 sampleStep = texelStep * float(quality);
+    for (int x = first; x <= last; x += quality) {
         float weight = gaussian(float(x), sigma);
         colorSum += texture(uSrcTexture, coord) * weight;
         weightSum += weight;
-        coord += texelStep;
+        coord += sampleStep;
     }
     FragColor = weightSum > 0.0 ? colorSum / weightSum : texture(uSrcTexture, vUV);
 } 
+)";
+
+const char* EFFECT_MOTIONBLUR = R"(
+uniform sampler2D uSrcTexture;
+layout(std140) uniform Params {
+    vec2 offset;
+    float samples;
+} uParams;
+
+layout(std140) uniform Viewport {
+    vec4 vp;
+} uViewport;
+
+out vec4 FragColor;
+
+void main()
+{
+    // The pooled texture can be larger than the compositing region.
+    // Clamp sampling coordinates to the region's outermost texel centers.
+    vec2 invTextureSize = 1.0 / vec2(textureSize(uSrcTexture, 0));
+    vec2 maxCoord = uViewport.vp.zw - vec2(0.5);
+    int samples = int(uParams.samples);
+    float invSamples = 1.0 / float(samples);
+    vec4 color = vec4(0.0);
+    for (int i = 0; i < samples; ++i) {
+        float t = (float(i) + 0.5) * invSamples - 0.5;
+        vec2 p = clamp(gl_FragCoord.xy + uParams.offset * t, vec2(0.5), maxCoord);
+        color += textureLod(uSrcTexture, p * invTextureSize, 0.0);
+    }
+    FragColor = color * invSamples;
+}
 )";
 
 const char* EFFECT_DROPSHADOW = R"(

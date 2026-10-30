@@ -24,8 +24,23 @@
 #define _TVG_WG_RENDERER_H_
 
 #include "tvgRender.h"
-#include "tvgWgRenderTask.h"
+#include "tvgWgSolidBatch.h"
+#include "tvgWgStencilBatch.h"
 #include "tvgWgTextureMgr.h"
+
+struct WgPaintPool
+{
+    Array<WgPaint*> list;    // full list of created paints
+    Array<WgShape*> shapes;  // reuse list
+    Array<WgImage*> images;  // reuse list
+
+    void recycle(WgShape* shape);
+    void recycle(WgImage* image);
+    void release(WgContext& context);
+
+    WgShape* shape();
+    WgImage* image();
+};
 
 struct WgRenderer : RenderMethod
 {
@@ -64,6 +79,8 @@ struct WgRenderer : RenderMethod
     //partial rendering
     void damage(RenderData rd, const RenderRegion& region) override;
     bool partial(bool disable) override;
+    uint32_t dirtyRegions() const override;
+    Result dirtyRegions(Region* regions, uint32_t cnt) const override;
 
     WgRenderer(uint32_t threads, EngineOption op);
     static bool term();
@@ -75,40 +92,34 @@ private:
     void releaseSurfaceTexture();
 
     void clearTargets();
-    void surfaceConfigure(WGPUSurface surface, WgContext& context, uint32_t width, uint32_t height, ColorSpace cs);
+    void surfaceConfigure(RenderSurface& rsurface, WGPUSurface wsurface, WgContext& context);
 
-    // render tree stacks
+    RenderSurface mSurface;  // main surface
     WgRenderTarget mRenderTargetRoot;
     Array<WgCompose*> mCompositorList;
     Array<WgRenderTarget*> mRenderTargetStack;
     Array<WgSceneTask*> mSceneTaskStack;
     Array<WgRenderTask*> mRenderTaskList;
-
-    // render target pool
+    WgSolidBatch mSolidBatch;
+    WgStencilBatch mStencilBatch;
     WgRenderTargetPool mRenderTargetPool;
-
-    // render data paint pools
-    WgRenderDataShapePool mRenderDataShapePool;
-    WgRenderDataPicturePool mRenderDataPicturePool;
-    WgRenderDataEffectParamsPool mRenderDataEffectParamsPool;
+    WgPaintPool mPaintPool;
+    WgRenderEffectPool mEffectPool;
     WgTextureMgr mTextures;
-
-    // rendering context
     WgContext mContext;
     WgCompositor mCompositor;
-
-    // rendering states
-    RenderSurface mTargetSurface;
-    BlendMethod mBlendMethod{};
+    BlendMethod mBlendMethod = BlendMethod::Normal;
 
     // disposable data list
-    Array<RenderData> mDisposeRenderDatas{};
+    Array<RenderData> mDisposedPaints;
     Key mDisposeKey{};
 
     // gpu handles
-    WGPUTexture targetTexture{}; // external handle
+    WGPUTexture targetTexture{};
     WGPUSurfaceTexture surfaceTexture{};
-    WGPUSurface surface{};  // external handle
+    WGPUSurface surface{};
+
+    bool mClearBuffer{};
 };
 
 #endif /* _TVG_WG_RENDERER_H_ */

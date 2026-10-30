@@ -26,13 +26,13 @@
 #include <png.h>
 #include "tvgLoader.h"
 
-struct PngLoader : ImageLoader
+struct PngLoader : BitmapLoader
 {
     PngLoader();
     ~PngLoader();
 
-    bool open(const char* path, const LoaderOps* ops) override;
-    bool open(const char* data, uint32_t size, const LoaderOps* ops, bool copy) override;
+    Result open(const char* path, const LoaderOps& ops) override;
+    Result open(const char* data, uint32_t size, const LoaderOps& ops) override;
     bool read() override;
 
 private:

@@ -27,7 +27,8 @@
 #include "tvgGpuCommon.h"
 #include "tvgWgBindGroups.h"
 
-struct WgContext {
+struct WgContext
+{
     WGPUInstance instance{};
     WGPUAdapter adapter{};
     WGPUDevice device{};
@@ -59,7 +60,8 @@ struct WgContext {
 
     // create buffer objects (return true, if buffer handle was changed)
     bool allocateBufferUniform(WGPUBuffer& buffer, const void* data, uint64_t size);
-    bool allocateBufferVertex(WGPUBuffer& buffer, const float* data, uint64_t size);
+    bool allocateBufferUniform(WGPUBuffer& buffer, const void* data, uint64_t capacity, uint64_t size);
+    bool allocateBufferVertex(WGPUBuffer& buffer, const void* data, uint64_t size);
     bool allocateBufferIndex(WGPUBuffer& buffer, const uint32_t* data, uint64_t size);
 
     // release buffer objects

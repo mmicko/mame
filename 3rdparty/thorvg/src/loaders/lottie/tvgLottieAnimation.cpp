@@ -23,6 +23,8 @@
 #include "tvgCommon.h"
 #include "thorvg_lottie.h"
 #include "tvgLottieLoader.h"
+#include "tvgLottieModel.h"
+#include "tvgLottieBuilder.h"
 #include "tvgAnimation.h"
 
 
@@ -30,7 +32,7 @@ LottieAnimation::LottieAnimation() = default;
 LottieAnimation::~LottieAnimation() = default;
 
 #define FETCH_LOADER(RET_VAL) \
-    auto loader = static_cast<LottieLoader*>(tvg::to<PictureImpl>(pImpl->picture)->loader); \
+    auto loader = tvg::to<PictureImpl>(pImpl->picture)->fetch<LottieLoader>(FileType::Lot); \
     if (!loader) return RET_VAL
 
 
@@ -46,7 +48,7 @@ Result LottieAnimation::apply(uint32_t id) noexcept
     FETCH_LOADER(Result::InsufficientCondition);
 
     if (loader->apply(id)) {
-        PAINT(pImpl->picture)->mark(RenderUpdateFlag::All);
+        PAINT(pImpl->picture)->mark(RenderUpdateFlag::Children);
         return Result::Success;
     }
 
@@ -59,7 +61,7 @@ Result LottieAnimation::del(uint32_t id) noexcept
     FETCH_LOADER(Result::InsufficientCondition);
 
     if (loader->del(id)) {
-        PAINT(pImpl->picture)->mark(RenderUpdateFlag::All);
+        PAINT(pImpl->picture)->mark(RenderUpdateFlag::Children);
         return Result::Success;
     }
 
@@ -86,7 +88,7 @@ Result LottieAnimation::tween(float from, float to, float progress) noexcept
 {
     FETCH_LOADER(Result::InsufficientCondition);
     if (!loader->tween(from, to, progress)) return Result::InsufficientCondition;
-    PAINT(pImpl->picture)->mark(RenderUpdateFlag::All);
+    PAINT(pImpl->picture)->mark(RenderUpdateFlag::Children);
     return Result::Success;
 }
 
@@ -94,14 +96,14 @@ Result LottieAnimation::tween(float progress) noexcept
 {
     FETCH_LOADER(Result::InsufficientCondition);
     if (!loader->tween(progress)) return Result::InsufficientCondition;
-    PAINT(pImpl->picture)->mark(RenderUpdateFlag::All);
+    PAINT(pImpl->picture)->mark(RenderUpdateFlag::Children);
     return Result::Success;
 }
 
 Result LottieAnimation::tweenTo(float to) noexcept
 {
     FETCH_LOADER(Result::InsufficientCondition);
-    if (static_cast<LottieLoader*>(loader)->tweenTo(to)) return Result::Success;
+    if (loader->tweenTo(to)) return Result::Success;
     return Result::InsufficientCondition;
 }
 
@@ -136,6 +138,29 @@ Result LottieAnimation::resolver(std::function<void(const LottieAudioResolver&, 
     FETCH_LOADER(Result::InsufficientCondition);
     loader->resolver(std::move(func), data);
     return Result::Success;
+}
+
+bool LottieAnimation::expressions() noexcept
+{
+#ifdef THORVG_LOTTIE_EXPRESSIONS_SUPPORT
+    return true;
+#else
+    return false;
+#endif
+}
+
+Result LottieAnimation::volume(float value) noexcept
+{
+    FETCH_LOADER(Result::InsufficientCondition);
+    loader->volume(value);
+    return Result::Success;
+}
+
+
+float LottieAnimation::volume() const noexcept
+{
+    FETCH_LOADER(0.0f);
+    return loader->builder->volume;
 }
 
 

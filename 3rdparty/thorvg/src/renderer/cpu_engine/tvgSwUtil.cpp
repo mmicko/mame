@@ -29,11 +29,11 @@
 
 void utilExport(SwOutline* outline, const Matrix& transform, BBox& bbox)
 {
-    outline->out.reserve(outline->in.count);
+    outline->out.reserve(outline->path->pts.count);
 
     bbox = {{FLT_MAX, FLT_MAX}, {-FLT_MAX, -FLT_MAX}};
 
-    ARRAY_FOREACH(pt, outline->in) {
+    ARRAY_FOREACH(pt, outline->path->pts) {
         auto t = *pt * transform;
         if (bbox.min.x > t.x) bbox.min.x = t.x;
         if (bbox.max.x < t.x) bbox.max.x = t.x;
@@ -46,11 +46,15 @@ void utilExport(SwOutline* outline, const Matrix& transform, BBox& bbox)
 bool utilBBox(const BBox& bbox, const RenderRegion& clipBox, RenderRegion& renderBox, bool fastTrack)
 {
     if (fastTrack) {
-        renderBox.min = {(int32_t)round(bbox.min.x), (int32_t)round(bbox.min.y)};
-        renderBox.max = {(int32_t)round(bbox.max.x), (int32_t)round(bbox.max.y)};
+        renderBox.xMin = (int32_t)round(bbox.min.x);
+        renderBox.yMin = (int32_t)round(bbox.min.y);
+        renderBox.xMax = (int32_t)round(bbox.max.x);
+        renderBox.yMax = (int32_t)round(bbox.max.y);
     } else {
-        renderBox.min = {(int32_t)floorf(bbox.min.x), (int32_t)floorf(bbox.min.y)};
-        renderBox.max = {(int32_t)ceilf(bbox.max.x), (int32_t)ceilf(bbox.max.y)};
+        renderBox.xMin = (int32_t)floorf(bbox.min.x);
+        renderBox.yMin = (int32_t)floorf(bbox.min.y);
+        renderBox.xMax = (int32_t)ceilf(bbox.max.x);
+        renderBox.yMax = (int32_t)ceilf(bbox.max.y);
     }
     renderBox.intersect(clipBox);
     return renderBox.valid();

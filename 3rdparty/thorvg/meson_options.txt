@@ -11,7 +11,7 @@ option('partial',
 
 option('loaders',
    type: 'array',
-   choices: ['', 'svg', 'png', 'jpg', 'lottie', 'ttf', 'otf', 'webp', 'all'],
+   choices: ['', 'svg', 'png', 'jpg', 'lottie', 'ttf', 'otf', 'webp', 'media', 'all'],
    value: ['svg', 'lottie', 'ttf'],
    description: 'Enable File Loaders in thorvg')
 
@@ -28,8 +28,8 @@ option('threads',
 
 option('simd',
    type: 'boolean',
-   value: false,
-   description: 'Enable CPU Vectorization(SIMD) in thorvg')
+   value: true,
+   description: 'Enable CPU vectorization (AVX2 on x86, NEON on ARM)')
 
 option('bindings',
    type: 'array',

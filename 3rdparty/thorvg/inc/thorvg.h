@@ -8,7 +8,7 @@
 
 #define TVG_VERSION_MAJOR 1  // for compile-time checks
 #define TVG_VERSION_MINOR 1  // for compile-time checks
-#define TVG_VERSION_MICRO 0  // for compile-time checks
+#define TVG_VERSION_MICRO 3  // for compile-time checks
 
 #ifdef TVG_API
     #undef TVG_API
@@ -46,43 +46,49 @@
     #define TVG_DEPRECATED
 #endif
 
-#define _TVG_DECLARE_PRIVATE(A) \
+#define _TVG_PROTECTED_CTOR(A) \
 protected: \
     A(const A&) = delete; \
     const A& operator=(const A&) = delete; \
     A()
 
-#define _TVG_DECLARE_PRIVATE_BASE(A) \
-    _TVG_DECLARE_PRIVATE(A); \
+#define _TVG_PROTECTED_CTOR_PIMPL(A) \
+    _TVG_PROTECTED_CTOR(A); \
 public: \
     struct Impl; \
     Impl* pImpl
 
-#define _TVG_DECLARE_PRIVATE_DERIVE(A) \
-    _TVG_DECLARE_PRIVATE(A); \
-protected: \
-    ~A() {}
+#define _TVG_PUBLIC_DTOR_PIMPL(A) \
+    _TVG_PROTECTED_CTOR_PIMPL(A); \
+    virtual ~A()
 
-#define _TVG_DISABLE_CTOR(A) \
+#define _TVG_PUBLIC_DTOR(A) \
+    _TVG_PROTECTED_CTOR(A); \
+public: \
+    virtual ~A() = default;
+
+#define _TVG_DISABLE_INST(A) \
     A() = delete; \
     ~A() = delete
 
-#define _TVG_DECLARE_ACCESSOR(A) \
+#define _TVG_FRIEND(A) \
     friend A
 
 namespace tvg
 {
 
-struct RenderMethod;
 struct Animation;
 struct Shape;
 
 /**
  * @defgroup ThorVG ThorVG
  * @brief ThorVG classes and enumerations providing C++ APIs.
+ *
+ *  @note Memory allocation failure is not guaranteed to be recoverable:
+ *        functions declared \c noexcept may terminate the process instead of returning a failure value.
+ *        Do not rely on \c nullptr or @ref Result::FailedAllocation unless the individual API documents it.
+ * \{
  */
-
-/**@{*/
 
 /**
  * @brief Enumeration specifying the result from the APIs.
@@ -99,6 +105,7 @@ enum struct Result
     FailedAllocation,      ///< The value returned in case of unsuccessful memory allocation.
     MemoryCorruption,      ///< The value returned in the event of bad memory handling - e.g. failing in pointer releasing or casting
     NonSupport,            ///< The value returned in case of choosing unsupported engine features(options).
+    SystemError,           ///< The value returned when an underlying system operation fails. @note Experimental API
     Unknown = 255          ///< The value returned in all other cases.
 };
 
@@ -113,6 +120,8 @@ enum struct ColorSpace : uint8_t
     ABGR8888S,     ///< The channels are joined in the order: alpha, blue, green, red. Colors are un-alpha-premultiplied. @since 0.12
     ARGB8888S,     ///< The channels are joined in the order: alpha, red, green, blue. Colors are un-alpha-premultiplied. @since 0.12
     Grayscale8,    ///< Single channel, 1 byte per pixel 8-bit grayscale.
+    XBGR8888,      ///< 32-bit opaque color in the order: unused, blue, green, red. @note Experimental API
+    XRGB8888,      ///< 32-bit opaque color in the order: unused, red, green, blue. @note Experimental API
     Unknown = 255  ///< Unknown channel data. This is reserved for an initial ColorSpace value. @since 1.0
 };
 
@@ -272,14 +281,14 @@ enum struct BlendMethod : uint8_t
  */
 enum struct SceneEffect : uint8_t
 {
-    Clear = 0,         ///< Clear all previously applied scene effects, restoring the scene to its original state.
-    GaussianBlur,      ///< Apply a blur effect with a Gaussian filter. Param(4) = {sigma(double)[> 0], direction(int)[both: 0 / horizontal: 1 / vertical: 2], border(int)[duplicate: 0 / wrap: 1], quality(int)[0 - 100]}
-    DropShadow,        ///< Apply a drop shadow effect with a Gaussian Blur filter. Param(8) = {color_R(int)[0 - 255], color_G(int)[0 - 255], color_B(int)[0 - 255], opacity(int)[0 - 255], angle(double)[0 - 360], distance(double), blur_sigma(double)[> 0], quality(int)[0 - 100]}
-    Fill,              ///< Override the scene content color with a given fill information. Param(4) = {color_R(int)[0 - 255], color_G(int)[0 - 255], color_B(int)[0 - 255], opacity(int)[0 - 255]}
-    Tint,              ///< Tinting the current scene color with a given black, white color parameters. Param(7) = {black_R(int)[0 - 255], black_G(int)[0 - 255], black_B(int)[0 - 255], white_R(int)[0 - 255], white_G(int)[0 - 255], white_B(int)[0 - 255], intensity(double)[0 - 100]}
-    Tritone            ///< Apply a tritone color effect to the scene using three color parameters for shadows, midtones, and highlights. A blending factor determines the mix between the original color and the tritone colors. Param(9) = {Shadow_R(int)[0 - 255], Shadow_G(int)[0 - 255], Shadow_B(int)[0 - 255], Midtone_R(int)[0 - 255], Midtone_G(int)[0 - 255], Midtone_B(int)[0 - 255], Highlight_R(int)[0 - 255], Highlight_G(int)[0 - 255], Highlight_B(int)[0 - 255], Blend(int)[0 - 255]}
+    Clear = 0,     ///< Clear all previously applied scene effects, restoring the scene to its original state.
+    GaussianBlur,  ///< Apply a blur effect with a Gaussian filter. Param(4) = {sigma(double)[>= 0], direction(int)[both: 0 / horizontal: 1 / vertical: 2], border(int)[unused], quality(int)[0 - 100]}
+    DropShadow,    ///< Apply a drop shadow effect with a Gaussian Blur filter. Param(8) = {color_R(int)[0 - 255], color_G(int)[0 - 255], color_B(int)[0 - 255], opacity(int)[0 - 255], angle(double)[0 - 360], distance(double), blur_sigma(double)[> 0], quality(int)[0 - 100]}
+    Fill,          ///< Override the scene content color with a given fill information. Param(4) = {color_R(int)[0 - 255], color_G(int)[0 - 255], color_B(int)[0 - 255], opacity(int)[0 - 255]}
+    Tint,          ///< Tinting the current scene color with a given black, white color parameters. Param(7) = {black_R(int)[0 - 255], black_G(int)[0 - 255], black_B(int)[0 - 255], white_R(int)[0 - 255], white_G(int)[0 - 255], white_B(int)[0 - 255], intensity(double)[0 - 100]}
+    Tritone,       ///< Apply a tritone color effect to the scene using three color parameters for shadows, midtones, and highlights. A blending factor determines the mix between the original color and the tritone colors. Param(9) = {Shadow_R(int)[0 - 255], Shadow_G(int)[0 - 255], Shadow_B(int)[0 - 255], Midtone_R(int)[0 - 255], Midtone_G(int)[0 - 255], Midtone_B(int)[0 - 255], Highlight_R(int)[0 - 255], Highlight_G(int)[0 - 255], Highlight_B(int)[0 - 255], Blend(int)[0 - 255]}
+    MotionBlur     ///< Apply a centered linear motion blur. Param(3) = {distance(double)[>= 0, scene-local units], angle(double)[degrees, clockwise from the positive X axis], quality(int)[0 - 100]} @note Experimental API
 };
-
 
 /**
  * @brief Enumeration that defines methods used for wrapping text.
@@ -319,7 +328,8 @@ enum struct Type : uint8_t
     Picture,               ///< Picture class
     Text,                  ///< Text class
     LinearGradient = 10,   ///< LinearGradient class
-    RadialGradient         ///< RadialGradient class
+    RadialGradient,        ///< RadialGradient class
+    ConicGradient          ///< ConicGradient class
 };
 
 
@@ -350,6 +360,18 @@ struct Matrix
     float e31, e32, e33;
 };
 
+/**
+ * @brief A data structure representing an axis-aligned rectangular region.
+ *
+ * The region is defined by its minimum and maximum x and y coordinates.
+ *
+ * @note Experimental API
+ */
+struct Region
+{
+    int32_t xMin, yMin;
+    int32_t xMax, yMax;
+};
 
 /**
  * @brief Describes the font metrics of a text object.
@@ -426,7 +448,7 @@ struct TVG_API Paint
      *
      * This is useful for selectively excluding paint objects during rendering.
      *
-     * @param[in] on A boolean flag indicating visibility. The default is @c true.
+     * @param[in] on A boolean flag indicating visibility. The initial value is @c true.
      *               @c true, the object will be rendered by the engine.
      *               @c false, the object will be excluded from the drawing process.
      *
@@ -458,7 +480,7 @@ struct TVG_API Paint
     /**
      * @brief Sets the scale value of the object.
      *
-     * @param[in] factor The value of the scaling factor. The default value is 1.
+     * @param[in] factor The value of the scaling factor. The initial value is 1.
      *
      * @retval Result::InsufficientCondition in case a custom transform is applied.
      * @see Paint::transform()
@@ -767,6 +789,15 @@ struct TVG_API Paint
     uint32_t id = 0;
 
     /**
+     * @brief User-defined data associated with this instance.
+     *
+     * ThorVG does not interpret or manage the lifetime of this data.
+     *
+     * @note Experimental API
+     */
+    void* data = nullptr;
+
+    /**
      * @brief Safely releases a Paint object.
      *
      * This is the counterpart to the `gen()` API, and releases the given Paint object safely, 
@@ -778,10 +809,7 @@ struct TVG_API Paint
      */
     static void rel(Paint* paint) noexcept;
 
-protected:
-    virtual ~Paint();
-
-    _TVG_DECLARE_PRIVATE_BASE(Paint);
+    _TVG_PUBLIC_DTOR_PIMPL(Paint);
 };
 
 
@@ -843,7 +871,7 @@ struct TVG_API Fill
      *
      * @return The number of colors used in the gradient. This value corresponds to the length of the @p colorStops array.
      */
-    uint32_t colorStops(const ColorStop** colorStops) const noexcept;
+    uint32_t colorStops(const ColorStop** colorStops = nullptr) const noexcept;
 
     /**
      * @brief Gets the FillSpread value of the fill.
@@ -881,7 +909,7 @@ struct TVG_API Fill
      */
     virtual Type type() const noexcept = 0;
 
-    _TVG_DECLARE_PRIVATE_BASE(Fill);
+    _TVG_PROTECTED_CTOR_PIMPL(Fill);
 };
 
 
@@ -897,8 +925,6 @@ struct TVG_API Fill
  */
 struct TVG_API Canvas
 {
-    virtual ~Canvas();
-
     /**
      * @brief Returns the list of paints currently held by the Canvas.
      *
@@ -1035,7 +1061,37 @@ struct TVG_API Canvas
      */
     Result sync() noexcept;
 
-    _TVG_DECLARE_PRIVATE_BASE(Canvas);
+    /**
+     * @brief Returns the number of dirty regions of the canvas.
+     *
+     * @return The number of regions available for retrieval.
+     *
+     * @note If the active rendering backend does not support @c EngineOption::SmartRender, this function returns 1.
+     * @note This function must be called after @ref Canvas::draw() and before @ref Canvas::sync().
+     * @note Experimental API
+     *
+     * @see Canvas::dirtyRegions(Region*, uint32_t)
+     */
+    uint32_t dirtyRegions() const noexcept;
+
+    /**
+     * @brief Retrieves the dirty regions of the canvas.
+     *
+     * @param[out] regions An array to receive the dirty regions.
+     * @param[in] cnt The number of Region elements that the array can hold.
+     *
+     * @retval Result::InvalidArguments If @p regions is @c nullptr or @p cnt is zero.
+     * @retval Result::InsufficientCondition If called outside the interval after Canvas::draw() and before Canvas::sync().
+     *
+     * @note If the active rendering backend does not support @c EngineOption::SmartRender,
+     *       a single region covering the entire render target is returned.
+     * @note Experimental API
+     *
+     * @see Canvas::dirtyRegions()
+     */
+    Result dirtyRegions(Region* regions, uint32_t cnt) const noexcept;
+
+    _TVG_PUBLIC_DTOR_PIMPL(Canvas);
 };
 
 
@@ -1100,7 +1156,7 @@ struct TVG_API LinearGradient : Fill
      */
     Type type() const noexcept override;
 
-    _TVG_DECLARE_PRIVATE(LinearGradient);
+    _TVG_PROTECTED_CTOR(LinearGradient);
 };
 
 
@@ -1172,7 +1228,67 @@ struct TVG_API RadialGradient : Fill
      */
     Type type() const noexcept override;
 
-    _TVG_DECLARE_PRIVATE(RadialGradient);
+    _TVG_PROTECTED_CTOR(RadialGradient);
+};
+
+
+/**
+ * @class ConicGradient
+ *
+ * @brief A class representing the conic gradient fill of the Shape object.
+ *
+ * The gradient color transitions by the angle measured around a center point,
+ * completing a full clockwise turn from the start angle.
+ *
+ * @warning This class is not designed for inheritance.
+ *
+ * @note FillSpread options are ignored because the gradient always sweeps a full turn.
+ * @note Experimental API
+ */
+struct TVG_API ConicGradient : Fill
+{
+    /**
+     * @brief Sets the conic gradient attributes.
+     *
+     * The gradient sweeps a full turn clockwise around the center (@p cx, @p cy), beginning at @p angle.
+     * Color stop offsets from 0% to 100% map clockwise over one full turn from @p angle.
+     *
+     * @param[in] cx The horizontal coordinate of the center of the gradient.
+     * @param[in] cy The vertical coordinate of the center of the gradient.
+     * @param[in] angle The initial angle in degrees, measured clockwise from the 3 o'clock direction (positive x-axis). The default is 0.0f.
+     *
+     * @see ConicGradient::conic(float* cx, float* cy, float* angle)
+     */
+    Result conic(float cx, float cy, float angle = 0.0f) noexcept;
+
+    /**
+     * @brief Gets the conic gradient attributes.
+     *
+     * @param[out] cx The horizontal coordinate of the center of the gradient.
+     * @param[out] cy The vertical coordinate of the center of the gradient.
+     * @param[out] angle The start angle in degrees.
+     *
+     * @see ConicGradient::conic(float cx, float cy, float angle)
+     */
+    Result conic(float* cx, float* cy, float* angle = nullptr) const noexcept;
+
+    /**
+     * @brief Creates a new ConicGradient object.
+     *
+     * @return A new ConicGradient object.
+     */
+    static ConicGradient* gen() noexcept;
+
+    /**
+     * @brief Returns the ID value of this class.
+     *
+     * This method can be used to check the current concrete instance type.
+     *
+     * @return The class type ID of the ConicGradient instance.
+     */
+    Type type() const noexcept override;
+
+    _TVG_PROTECTED_CTOR(ConicGradient);
 };
 
 
@@ -1236,7 +1352,7 @@ struct TVG_API Shape : Paint
      * @param[in] x The horizontal coordinate of the end-point of the curve.
      * @param[in] y The vertical coordinate of the end-point of the curve.
      *
-     * @note In case this is the first command in the path, no data from the path are rendered.
+     * @warning cubicTo must not be the first command in the path. Otherwise, rendering is not guaranteed.
      */
     Result cubicTo(float cx1, float cy1, float cx2, float cy2, float x, float y) noexcept;
 
@@ -1315,7 +1431,7 @@ struct TVG_API Shape : Paint
      * in the path object. A stroke is the outline drawn along the edges of the
      * path's geometry.
      *
-     * @param[in] width The width of the stroke in pixels. Must be positive value. (The default is 0)
+     * @param[in] width The width of the stroke in pixels. Must be positive value. (The initial value is 0)
      *
      * @note A value of @p width 0 disables the stroke.
      *
@@ -1330,12 +1446,12 @@ struct TVG_API Shape : Paint
      * in the path object. The stroke color is used when rendering the outline
      * of the path geometry.
      *
-     * @param[in] r The red color channel value in the range [0 ~ 255]. The default value is 0.
-     * @param[in] g The green color channel value in the range [0 ~ 255]. The default value is 0.
-     * @param[in] b The blue color channel value in the range [0 ~ 255]. The default value is 0.
-     * @param[in] a The alpha channel value in the range [0 ~ 255], where 0 is completely transparent and 255 is opaque. The default value is 255.
+     * @param[in] r The red color channel value in the range [0 ~ 255]. The initial value is 0.
+     * @param[in] g The green color channel value in the range [0 ~ 255]. The initial value is 0.
+     * @param[in] b The blue color channel value in the range [0 ~ 255]. The initial value is 0.
+     * @param[in] a The alpha channel value in the range [0 ~ 255], where 0 is completely transparent and 255 is opaque. The initial value is 0.
      *
-     * @note If the stroke width is 0 (default), the stroke will not be visible regardless of the color.
+     * @note If the stroke width is 0 (initial value), the stroke will not be visible regardless of the color.
      * @note Either a solid color or a gradient fill is applied, depending on what was set as last.
      *
      * @see strokeWidth()
@@ -1350,7 +1466,7 @@ struct TVG_API Shape : Paint
      *
      * @retval Result::InvalidArgument In case a @c nullptr is passed as the argument.
      *
-     * @note If the stroke width is 0 (default), the stroke will not be visible regardless of the color.
+     * @note If the stroke width is 0 (initial value), the stroke will not be visible regardless of the color.
      * @note Either a solid color or a gradient fill is applied, depending on what was set as last.
      *
      * @see strokeFill(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
@@ -1379,7 +1495,7 @@ struct TVG_API Shape : Paint
     /**
      * @brief Sets the cap style of the stroke in the open sub-paths.
      *
-     * @param[in] cap The cap style value. The default value is @c StrokeCap::Square.
+     * @param[in] cap The cap style value. The initial value is @c StrokeCap::Square.
      *
      */
     Result strokeCap(StrokeCap cap) noexcept;
@@ -1389,7 +1505,7 @@ struct TVG_API Shape : Paint
      *
      * The join style is used for joining the two line segment while stroking the path.
      *
-     * @param[in] join The join style value. The default value is @c StrokeJoin::Bevel.
+     * @param[in] join The join style value. The initial value is @c StrokeJoin::Bevel.
      *
      */
     Result strokeJoin(StrokeJoin join) noexcept;
@@ -1397,7 +1513,7 @@ struct TVG_API Shape : Paint
     /**
      * @brief Sets the stroke miterlimit.
      *
-     * @param[in] miterlimit The miterlimit imposes a limit on the extent of the stroke join, when the @c StrokeJoin::Miter join style is set. The default value is 4.
+     * @param[in] miterlimit The miterlimit imposes a limit on the extent of the stroke join, when the @c StrokeJoin::Miter join style is set. The initial value is 4.
      *
      * @retval Result::InvalidArgument for @p miterlimit values less than zero.
      * 
@@ -1424,10 +1540,10 @@ struct TVG_API Shape : Paint
      *
      * The parts of the shape defined as inner are colored.
      *
-     * @param[in] r The red color channel value in the range [0 ~ 255]. The default value is 0.
-     * @param[in] g The green color channel value in the range [0 ~ 255]. The default value is 0.
-     * @param[in] b The blue color channel value in the range [0 ~ 255]. The default value is 0.
-     * @param[in] a The alpha channel value in the range [0 ~ 255], where 0 is completely transparent and 255 is opaque. The default value is 255.
+     * @param[in] r The red color channel value in the range [0 ~ 255]. The initial value is 0.
+     * @param[in] g The green color channel value in the range [0 ~ 255]. The initial value is 0.
+     * @param[in] b The blue color channel value in the range [0 ~ 255]. The initial value is 0.
+     * @param[in] a The alpha channel value in the range [0 ~ 255], where 0 is completely transparent and 255 is opaque. The initial value is 0.
      *
      * @note Either a solid color or a gradient fill is applied, depending on what was set as last.
      */
@@ -1448,7 +1564,7 @@ struct TVG_API Shape : Paint
      * @brief Sets the fill rule for the shape.
      *
      * Specifies how the interior of the shape is determined when its path intersects itself.
-     * The default fill rule is @c FillRule::NonZero.
+     * The initial fill rule is @c FillRule::NonZero.
      *
      * @param[in] r The fill rule to apply to the shape.
      */
@@ -1457,7 +1573,7 @@ struct TVG_API Shape : Paint
     /**
      * @brief Sets the rendering order of the stroke and the fill.
      *
-     * @param[in] strokeFirst If @c true the stroke is rendered before the fill, otherwise the stroke is rendered as the second one (the default option).
+     * @param[in] strokeFirst If @c true the stroke is rendered before the fill, otherwise the stroke is rendered as the second one (the initial option).
      *
      * @since 0.10
      */
@@ -1592,7 +1708,7 @@ struct TVG_API Shape : Paint
      */
     Type type() const noexcept override;
 
-    _TVG_DECLARE_PRIVATE_DERIVE(Shape);
+    _TVG_PROTECTED_CTOR(Shape);
 };
 
 
@@ -1730,6 +1846,7 @@ struct TVG_API Picture : Paint
      * @param[in] copy If @c true, the data is copied into the engine's local buffer. If @c false, the data is not copied.
      *
      * @note If the memory data pointed to by @p data is modified, calling this API will re-upload the updated content to the canvas.
+     * @note @c ColorSpace::XBGR8888 and @c ColorSpace::XRGB8888 overwrite fully covered pixels without alpha blending.
      *
      * @since 0.9
      */
@@ -1765,7 +1882,7 @@ struct TVG_API Picture : Paint
      * Specifies how the image data should be filtered when it is scaled or transformed
      * during rendering. This affects the visual quality and performance of the output.
      *
-     * @param[in] method The filtering method to apply. Default is @c FilterMethod::Bilinear.
+     * @param[in] method The filtering method to apply. The initial value is @c FilterMethod::Bilinear.
      *
      * @return Always returns @c Result::Success.
      *
@@ -1832,8 +1949,8 @@ struct TVG_API Picture : Paint
      */
     bool accessible = false;
 
-    _TVG_DECLARE_ACCESSOR(Animation);
-    _TVG_DECLARE_PRIVATE_DERIVE(Picture);
+    _TVG_FRIEND(Animation);
+    _TVG_PROTECTED_CTOR(Picture);
 };
 
 
@@ -1954,7 +2071,7 @@ struct TVG_API Scene : Paint
      */
     Type type() const noexcept override;
 
-    _TVG_DECLARE_PRIVATE_DERIVE(Scene);
+    _TVG_PROTECTED_CTOR(Scene);
 };
 
 
@@ -2042,8 +2159,8 @@ struct TVG_API Text : Paint
      * Otherwise, treat it as an anchor within the text bounds which point of
      * the text box is pinned to the paint position.
      *
-     * @param[in] x Horizontal alignment/anchor in [0..1]: 0=left/start, 0.5=center, 1=right/end. (Default is 0)
-     * @param[in] y Vertical alignment/anchor in [0..1]: 0=top, 0.5=middle, 1=bottom. (Default is 0)
+     * @param[in] x Horizontal alignment/anchor in [0..1]: 0=left/start, 0.5=center, 1=right/end. (The initial value is 0)
+     * @param[in] y Vertical alignment/anchor in [0..1]: 0=top, 0.5=middle, 1=bottom. (The initial value is 0)
      *
      * @since 1.0
      *
@@ -2058,8 +2175,8 @@ struct TVG_API Text : Paint
      * the text may wrap/align inside it. If width/height == 0, the axis is
      * unconstrained and @ref align() acts as an anchor on that axis.
      *
-     * @param[in] w Layout width in user space. Use 0 for no horizontal constraint. (Default is 0)
-     * @param[in] h Layout height in user space. Use 0 for no vertical constraint. (Default is 0)
+     * @param[in] w Layout width in user space. Use 0 for no horizontal constraint. (The initial value is 0)
+     * @param[in] h Layout height in user space. Use 0 for no vertical constraint. (The initial value is 0)
      *
      * @note This defines constraints only; alignment/anchoring is controlled by @ref align().
      * @since 1.0
@@ -2076,7 +2193,7 @@ struct TVG_API Text : Paint
      * The wrapping mode determines whether text is truncated, wrapped by character or word,
      * or adjusted automatically. An ellipsis mode is also available for truncation with "...".
      *
-     * @param[in] mode The wrapping strategy to apply. Default is @c TextWrap::None
+     * @param[in] mode The wrapping strategy to apply. The initial value is @c TextWrap::None
      *
      * @see TextWrap
      * @see Text::lines()
@@ -2126,7 +2243,7 @@ struct TVG_API Text : Paint
      * This function adds an outline to the text with the specified width and RGB color.
      * The outline enhances the visibility of the text by rendering a stroke around its glyphs.
      *
-     * @param width The width of the outline. Must be positive value. (The default is 0)
+     * @param width The width of the outline. Must be positive value. (The initial value is 0)
      * @param r     Red component of the outline color (0–255).
      * @param g     Green component of the outline color (0–255).
      * @param b     Blue component of the outline color (0–255).
@@ -2141,9 +2258,9 @@ struct TVG_API Text : Paint
     /**
      * @brief Sets the text color.
      *
-     * @param[in] r The red color channel value in the range [0 ~ 255]. The default value is 0.
-     * @param[in] g The green color channel value in the range [0 ~ 255]. The default value is 0.
-     * @param[in] b The blue color channel value in the range [0 ~ 255]. The default value is 0.
+     * @param[in] r The red color channel value in the range [0 ~ 255]. The initial value is 0.
+     * @param[in] g The green color channel value in the range [0 ~ 255]. The initial value is 0.
+     * @param[in] b The blue color channel value in the range [0 ~ 255]. The initial value is 0.
      *
      * @see Text::font()
      * @see Text::outline()
@@ -2178,11 +2295,11 @@ struct TVG_API Text : Paint
      *
      * @param[in] letter The scale factor for letter spacing.
      *                   Values > 1.0 increase spacing, values < 1.0 decrease it.
-     *                   Must be greater than or equal to 0.0. (default: 1.0)
+     *                   Must be greater than or equal to 0.0. The initial value is 1.0.
      *
      * @param[in] line The scale factor for line spacing.
      *                 Values > 1.0 increase line spacing, values < 1.0 decrease it.
-     *                 Must be greater than or equal to 0.0. (default: 1.0)
+     *                 Must be greater than or equal to 0.0. The initial value is 1.0.
      *
      * @since 1.0
      */
@@ -2232,7 +2349,7 @@ struct TVG_API Text : Paint
     Result metrics(const char* ch, GlyphMetrics& metrics, const char** next = nullptr) const noexcept;
 
     /**
-     * @brief Loads a scalable font data (ttf) from a file.
+     * @brief Loads a scalable font data (ttf/otf) from a file.
      *
      * ThorVG efficiently caches the loaded data using the specified @p path as a key.
      * This means that loading the same file again will not result in duplicate operations;
@@ -2250,7 +2367,7 @@ struct TVG_API Text : Paint
     static Result load(const char* filename) noexcept;
 
     /**
-     * @brief Loads a scalable font data (ttf) from a memory block of a given size.
+     * @brief Loads a scalable font data (ttf/otf) from a memory block of a given size.
      *
      * ThorVG efficiently caches the loaded font data using the specified @p name as a key.
      * This means that loading the same fonts again will not result in duplicate operations.
@@ -2317,7 +2434,7 @@ struct TVG_API Text : Paint
      */
     Type type() const noexcept override;
 
-    _TVG_DECLARE_PRIVATE_DERIVE(Text);
+    _TVG_PROTECTED_CTOR(Text);
 };
 
 
@@ -2368,7 +2485,7 @@ struct TVG_API SwCanvas final : Canvas
      */
     static SwCanvas* gen(EngineOption op = EngineOption::Default) noexcept;
 
-    _TVG_DECLARE_PRIVATE(SwCanvas);
+    _TVG_PROTECTED_CTOR(SwCanvas);
 };
 
 
@@ -2428,7 +2545,7 @@ struct TVG_API GlCanvas final : Canvas
      */
     static GlCanvas* gen(EngineOption op = EngineOption::Default) noexcept;
 
-    _TVG_DECLARE_PRIVATE(GlCanvas);
+    _TVG_PROTECTED_CTOR(GlCanvas);
 };
 
 
@@ -2436,8 +2553,6 @@ struct TVG_API GlCanvas final : Canvas
  * @class WgCanvas
  *
  * @brief A class for the rendering graphic elements with a WebGPU raster engine.
- *
- * @warning Please do not use it. This class is not fully supported yet.
  *
  * @since 0.15
  */
@@ -2467,13 +2582,14 @@ struct TVG_API WgCanvas final : Canvas
      * @param[in] target Either WGPUSurface or WGPUTexture, serving as handles to a presentable surface or texture.
      * @param[in] w The width of the target.
      * @param[in] h The height of the target.
-     * @param[in] cs Specifies how the pixel values should be interpreted. Currently, it allows @c ColorSpace::ABGR8888 and @c ColorSpace::ABGR8888S.
+     * @param[in] cs Specifies how the pixel values should be interpreted. Currently, it allows @c ColorSpace::ABGR8888, @c ColorSpace::ABGR8888S, and @c ColorSpace::XBGR8888.
      * @param[in] type @c 0: surface, @c 1: texture are used as pesentable target.
      *
      * @retval Result::InsufficientCondition if the canvas is performing rendering. Please ensure the canvas is synced.
      * @retval Result::NonSupport In case the wg engine is not supported.
      *
-     * @warning Regardless of the value of @p cs, this target API uses the default alpha mode.
+     * @warning For alpha formats, this target API uses the default alpha mode.
+     * @note @c ColorSpace::XBGR8888 selects opaque surface composition and ignores output alpha. This format requires @p type to be @c 0.
      *
      * @see WgCanvas::target(const Context&, void*, uint32_t, uint32_t, ColorSpace, int)
      * @see Canvas::viewport()
@@ -2490,7 +2606,7 @@ struct TVG_API WgCanvas final : Canvas
      * @param[in] target Either WGPUSurface or WGPUTexture, serving as handles to a presentable surface or texture.
      * @param[in] w The width of the target.
      * @param[in] h The height of the target.
-     * @param[in] cs Specifies how the pixel values should be interpreted. Currently, it allows @c ColorSpace::ABGR8888 and @c ColorSpace::ABGR8888S.
+     * @param[in] cs Specifies how the pixel values should be interpreted. Currently, it allows @c ColorSpace::ABGR8888, @c ColorSpace::ABGR8888S, and @c ColorSpace::XBGR8888.
      * @param[in] type @c 0: surface, @c 1: texture are used as pesentable target.
      *
      * @retval Result::InsufficientCondition if the canvas is performing rendering. Please ensure the canvas is synced.
@@ -2499,6 +2615,7 @@ struct TVG_API WgCanvas final : Canvas
      * @see Canvas::viewport()
      * @see Canvas::sync()
      *
+     * @note @c ColorSpace::XBGR8888 selects opaque surface composition and ignores output alpha. This format requires @p type to be @c 0.
      * @note Experimental API
      */
     Result target(const Context& context, void* target, uint32_t w, uint32_t h, ColorSpace cs, int type = 0) noexcept;
@@ -2521,7 +2638,7 @@ struct TVG_API WgCanvas final : Canvas
      */
     static WgCanvas* gen(EngineOption op = EngineOption::Default) noexcept;
 
-    _TVG_DECLARE_PRIVATE(WgCanvas);
+    _TVG_PROTECTED_CTOR(WgCanvas);
 };
 
 
@@ -2535,18 +2652,19 @@ struct TVG_API Initializer final
     /**
      * @brief Initializes the ThorVG engine runtime.
      *
-     * ThorVG requires an active runtime environment for rendering operations.
-     * This function sets up an internal task scheduler and creates a specified number
-     * of worker threads to enable parallel rendering.
+     * Sets up the internal task scheduler and launches the specified
+     * number of worker threads for parallel rendering operations.
      *
-     * @param[in] threads The number of worker threads to launch.
-     *                    A value of 0 indicates that only the main thread will be used.
+     * @param[in] threads The number of worker threads to create.
+     *                    A value of 0 disables worker threads, executing rendering tasks on the calling thread.
      *
      * @return Result indicating success or failure of initialization.
      *
-     * @note This function uses internal reference counting to allow multiple init() calls.
-     *       However, the number of threads is fixed during the first successful initialization
-     *       and cannot be changed in subsequent calls.
+     * @note Initialization is reference-counted. Each successful call increments the reference count.
+     *       The worker thread count is determined by the first successful initialization and remains
+     *       unchanged until the engine is fully terminated.
+     *
+     * @warning Each pair of init() and term() calls must be made from the same thread.
      *
      * @see Initializer::term()
      */
@@ -2555,12 +2673,15 @@ struct TVG_API Initializer final
     /**
      * @brief Terminates the ThorVG engine.
      *
-     * Cleans up resources and stops any internal threads initialized by init().
+     * Releases internal resources and shuts down worker threads initialized by Initializer::init().
      *
-     * @retval Result::InsufficientCondition Returned if there is nothing to terminate (e.g., init() was not called).
+     * @retval Result::InsufficientCondition If the engine is not initialized.
      *
-     * @note The initializer maintains a reference count for safe repeated use.
-     *       Only the final call to term() will fully shut down the engine.
+     * @note Initialization is reference-counted. Each call to term() decrements the reference count,
+     *       and the engine is fully terminated only when the count reaches zero.
+     *
+     * @warning Each pair of init() and term() calls must be made from the same thread.
+     *
      * @see Initializer::init()
      */
     static Result term() noexcept;
@@ -2578,7 +2699,7 @@ struct TVG_API Initializer final
      */
     static const char* version(uint32_t* major, uint32_t* minor, uint32_t* micro) noexcept;
 
-    _TVG_DISABLE_CTOR(Initializer);
+    _TVG_DISABLE_INST(Initializer);
 };
 
 
@@ -2593,8 +2714,6 @@ struct TVG_API Initializer final
  */
 struct TVG_API Animation
 {
-    virtual ~Animation();
-
     /**
      * @brief Specifies the current frame in the animation.
      *
@@ -2700,9 +2819,8 @@ struct TVG_API Animation
      */
     static Animation* gen() noexcept;
 
-    _TVG_DECLARE_PRIVATE_BASE(Animation);
+    _TVG_PUBLIC_DTOR_PIMPL(Animation);
 };
-
 
 /**
  * @class Saver
@@ -2719,12 +2837,12 @@ struct TVG_API Animation
  *
  * @see Picture::load()
  *
+ * @warning This class is not designed for inheritance.
+ *
  * @since 0.5
  */
-struct TVG_API Saver final
+struct TVG_API Saver
 {
-    ~Saver();
-
     /**
      * @brief Sets the base background content for the saved image.
      *
@@ -2802,7 +2920,7 @@ struct TVG_API Saver final
      */
     static Saver* gen() noexcept;
 
-    _TVG_DECLARE_PRIVATE_BASE(Saver);
+    _TVG_PUBLIC_DTOR(Saver);
 };
 
 /**
@@ -2819,8 +2937,6 @@ struct TVG_API Saver final
  */
 struct TVG_API Accessor
 {
-    virtual ~Accessor();
-
     /**
      * @brief Set the access function for traversing the Picture scene tree nodes.
      *
@@ -2880,7 +2996,7 @@ struct TVG_API Accessor
      */
     static Accessor* gen() noexcept;
 
-    _TVG_DECLARE_PRIVATE_BASE(Accessor);
+    _TVG_PUBLIC_DTOR(Accessor);
 };
 
 /** @}*/

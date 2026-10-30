@@ -24,26 +24,32 @@
 #define _TVG_GL_STENCIL_COVER_BATCH_H_
 
 #include "tvgGlCommon.h"
+#include "tvgGlGpuBuffer.h"
+#include "tvgGlProgram.h"
+#include "tvgGlRenderTask.h"
+#include "tvgGlRenderPass.h"
 
-class GlRenderPass;
-class GlRenderTask;
-class GlStencilCoverTask;
-class GlProgram;
-class GlStageBuffer;
+struct GlRenderer;
 
-class GlStencilCoverBatch
+struct GlStencilCoverBatch
 {
-public:
+    // Short-lived state consumed by draw() after binding the cover resources.
+    struct Preparation
+    {
+        GlRenderTask* stencil = nullptr;
+        const GlGeometryBuffer* buffer = nullptr;
+        uint32_t* indices = nullptr;
+        RenderRegion bounds = {};
+        RenderRegion viewBounds = {};
+        GlStencilMode mode = GlStencilMode::None;
+        bool clipped = false;
+        bool merge = false;
+    };
+
     void clear();
-    GlRenderTask* prepare(GlProgram* stencilProgram, GlRenderPass* pass, GlRenderTask* coverTask,
-                          const GlGeometry& geometry, GlStageBuffer* gpuBuffer, RenderUpdateFlag flag,
-                          GlStencilMode stencilMode, bool clipped, int32_t depth, const Matrix& viewMatrix,
-                          const RenderRegion& passViewport, const RenderColor* color,
-                          const RenderRegion& viewBounds, RenderRegion& geometryBounds,
-                          const GlGeometryBuffer*& stencilBuffer, uint32_t*& stencilIndices,
-                          bool& merge);
+    Preparation prepare(GlRenderer& renderer, GlRenderTask* cover, const GlShape& shape, RenderUpdateFlag flag, GlStencilMode mode, const RenderColor* color, const RenderRegion& viewBounds);
     bool mergeable(const GlRenderPass* pass, GlStencilMode mode, bool clipped, const RenderRegion& bounds, const GlGeometryBuffer* stencilBuffer) const;
-    void draw(GlRenderPass* pass, GlRenderTask* stencil, GlRenderTask* cover, bool merge, GlStencilMode mode, bool clipped, const RenderRegion& bounds, const RenderRegion& viewBounds, const GlGeometryBuffer* stencilBuffer, uint32_t* stencilIndices);
+    void draw(GlRenderPass* pass, GlRenderTask* cover, const Preparation& preparation);
 
 private:
     void emitSingle(GlRenderPass* pass, GlRenderTask* stencil, GlRenderTask* cover, GlStencilMode mode, bool clipped, const RenderRegion& bounds, const RenderRegion& viewBounds, const GlGeometryBuffer* stencilBuffer);

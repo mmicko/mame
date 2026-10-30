@@ -105,7 +105,7 @@ const char* cShaderSrc_Linear = R"(
 struct VertexInput { @location(0) position: vec2f };
 struct VertexOutput { @builtin(position) position : vec4f, @location(0) vGradCoord : vec4f };
 struct GradSettings  { transform: mat4x4f, coords: vec4f, focal: vec4f };
-struct PaintSettings { options: vec4f, color: vec4f, gradient: GradSettings };
+struct PaintSettings { options: vec4f, gradient: GradSettings };
 
 // uniforms
 @group(0) @binding(0) var<uniform> uViewMat : mat4x4f;
@@ -142,7 +142,7 @@ const char* cShaderSrc_Radial = R"(
 struct VertexInput { @location(0) position: vec2f };
 struct VertexOutput { @builtin(position) position : vec4f, @location(0) vGradCoord : vec4f };
 struct GradSettings  { transform: mat4x4f, coords: vec4f, focal: vec4f };
-struct PaintSettings { options: vec4f, color: vec4f, gradient: GradSettings };
+struct PaintSettings { options: vec4f, gradient: GradSettings };
 
 @group(0) @binding(0) var<uniform> uViewMat : mat4x4f;
 @group(1) @binding(0) var<uniform> uPaintSettings : PaintSettings;
@@ -178,6 +178,57 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4f {
 )";
 
 //************************************************************************
+// graphics shader source: conic normal blend
+// Linear, radial, and conic shaders, including custom blends, all sample
+// the 512 x 1 RGBA8 color maps defined by WgShaderTypeGradientData.
+//************************************************************************
+
+const char* cShaderSrc_Conic = R"(
+struct VertexInput { @location(0) position: vec2f };
+struct VertexOutput { @builtin(position) position : vec4f, @location(0) vGradCoord : vec4f };
+struct GradSettings  { transform: mat4x4f, coords: vec4f, focal: vec4f };
+struct PaintSettings { options: vec4f, gradient: GradSettings };
+
+@group(0) @binding(0) var<uniform> uViewMat : mat4x4f;
+@group(1) @binding(0) var<uniform> uPaintSettings : PaintSettings;
+@group(2) @binding(0) var uSamplerGrad : sampler;
+@group(2) @binding(1) var uTextureGrad : texture_2d<f32>;
+
+const GRADIENT_SIZE: f32 = 512.0;
+const INV_TAU: f32 = 0.15915494309189535;
+
+@vertex
+fn vs_main(in: VertexInput) -> VertexOutput {
+    var out: VertexOutput;
+    out.position = uViewMat * vec4f(in.position.xy, 0.0, 1.0);
+    out.vGradCoord = uPaintSettings.gradient.transform * vec4f(in.position.xy, 0.0, 1.0);
+    return out;
+}
+
+@fragment
+fn fs_main(in: VertexOutput) -> @location(0) vec4f {
+    let pos = in.vGradCoord.xy;
+    let width = fwidth(pos.y);
+    var Sc: vec4f;
+    if (pos.x >= 0.0 && abs(pos.y) < 0.5 * width) {
+        let first = textureLoad(uTextureGrad, vec2<i32>(0, 0), 0);
+        let last = textureLoad(uTextureGrad, vec2<i32>(i32(GRADIENT_SIZE) - 1, 0), 0);
+        let coverage = pos.y / width + 0.5;
+        // Mix coverage after premultiplication so transparent stops cannot tint the seam.
+        Sc = mix(vec4f(last.rgb * last.a, last.a), vec4f(first.rgb * first.a, first.a), coverage);
+    } else {
+        let t = fract(atan2(pos.y, pos.x) * INV_TAU);
+        let u = (t * (GRADIENT_SIZE - 1.0) + 0.5) / GRADIENT_SIZE;
+        // Explicit LOD avoids an anisotropic footprint across the wrapped seam coordinate.
+        let color = textureSampleLevel(uTextureGrad, uSamplerGrad, vec2f(u, 0.5), 0.0);
+        Sc = vec4f(color.rgb * color.a, color.a);
+    }
+    let So = uPaintSettings.options.a;
+    return Sc * So;
+}
+)";
+
+//************************************************************************
 // graphics shader source: image normal blend
 //************************************************************************
 
@@ -203,7 +254,7 @@ fn vs_main(in: VertexInput) -> VertexOutput {
 fn fs_main(in: VertexOutput) -> @location(0) vec4f {
     var Sc: vec4f = textureSample(uTextureView, uSampler, in.vTexCoord.xy);
     let So: f32 = uPaintSettings.options.a;
-    return vec4f(Sc.rgb * Sc.a * So, Sc.a * So);
+    return vec4f(Sc.rgb * So, Sc.a * So);
 };
 )";
 
@@ -280,7 +331,7 @@ const char* cShaderSrc_Linear_Blend = R"(
 struct VertexInput { @location(0) position: vec2f };
 struct VertexOutput { @builtin(position) position: vec4f, @location(0) vGradCoord : vec4f, @location(1) vScrCoord: vec2f };
 struct GradSettings  { transform: mat4x4f, coords: vec4f, focal: vec4f };
-struct PaintSettings { options: vec4f, color: vec4f, gradient: GradSettings };
+struct PaintSettings { options: vec4f, gradient: GradSettings };
 
 @group(0) @binding(0) var<uniform> uViewMat : mat4x4f;
 @group(1) @binding(0) var<uniform> uPaintSettings : PaintSettings;
@@ -328,7 +379,7 @@ const char* cShaderSrc_Radial_Blend = R"(
 struct VertexInput { @location(0) position: vec2f };
 struct VertexOutput { @builtin(position) position: vec4f, @location(0) vGradCoord : vec4f, @location(1) vScrCoord: vec2f };
 struct GradSettings  { transform: mat4x4f, coords: vec4f, focal: vec4f };
-struct PaintSettings { options: vec4f, color: vec4f, gradient: GradSettings };
+struct PaintSettings { options: vec4f, gradient: GradSettings };
 
 @group(0) @binding(0) var<uniform> uViewMat : mat4x4f;
 @group(1) @binding(0) var<uniform> uPaintSettings : PaintSettings;
@@ -370,6 +421,65 @@ fn getFragData(in: VertexOutput) -> FragData {
     data.Dc = colorDst.rgb;
     data.Da = colorDst.a;
     data.Sc = mix(data.Dc, data.Sc, data.Sa * data.So);
+    data.Sa = mix(data.Da,     1.0, data.Sa * data.So);
+    return data;
+};
+
+fn postProcess(d: FragData, R: vec4f) -> vec4f { return R; };
+)";
+
+const char* cShaderSrc_Conic_Blend = R"(
+struct VertexInput { @location(0) position: vec2f };
+struct VertexOutput { @builtin(position) position: vec4f, @location(0) vGradCoord : vec4f, @location(1) vScrCoord: vec2f };
+struct GradSettings  { transform: mat4x4f, coords: vec4f, focal: vec4f };
+struct PaintSettings { options: vec4f, gradient: GradSettings };
+
+@group(0) @binding(0) var<uniform> uViewMat : mat4x4f;
+@group(1) @binding(0) var<uniform> uPaintSettings : PaintSettings;
+@group(2) @binding(0) var uSamplerGrad : sampler;
+@group(2) @binding(1) var uTextureGrad : texture_2d<f32>;
+@group(3) @binding(0) var uSamplerDst : sampler;
+@group(3) @binding(1) var uTextureDst : texture_2d<f32>;
+
+const GRADIENT_SIZE: f32 = 512.0;
+const INV_TAU: f32 = 0.15915494309189535;
+
+@vertex
+fn vs_main(in: VertexInput) -> VertexOutput {
+    var out: VertexOutput;
+    let pos = uViewMat * vec4f(in.position.xy, 0.0, 1.0);
+    out.position = pos;
+    out.vGradCoord = uPaintSettings.gradient.transform * vec4f(in.position.xy, 0.0, 1.0);
+    out.vScrCoord = vec2f(0.5 + pos.x * 0.5, 0.5 - pos.y * 0.5);
+    return out;
+}
+
+struct FragData { Sc: vec3f, Sa: f32, So: f32, Dc: vec3f, Da: f32 };
+fn getFragData(in: VertexOutput) -> FragData {
+    let pos = in.vGradCoord.xy;
+    let width = fwidth(pos.y);
+    var colorSrc: vec4f;
+    if (pos.x >= 0.0 && abs(pos.y) < 0.5 * width) {
+        let first = textureLoad(uTextureGrad, vec2<i32>(0, 0), 0);
+        let last = textureLoad(uTextureGrad, vec2<i32>(i32(GRADIENT_SIZE) - 1, 0), 0);
+        let coverage = pos.y / width + 0.5;
+        // Mix coverage after premultiplication so transparent stops cannot tint the seam.
+        colorSrc = mix(vec4f(last.rgb * last.a, last.a), vec4f(first.rgb * first.a, first.a), coverage);
+    } else {
+        let t = fract(atan2(pos.y, pos.x) * INV_TAU);
+        let u = (t * (GRADIENT_SIZE - 1.0) + 0.5) / GRADIENT_SIZE;
+        // Explicit LOD avoids an anisotropic footprint across the wrapped seam coordinate.
+        let color = textureSampleLevel(uTextureGrad, uSamplerGrad, vec2f(u, 0.5), 0.0);
+        colorSrc = vec4f(color.rgb * color.a, color.a);
+    }
+    let colorDst = textureSample(uTextureDst, uSamplerDst, in.vScrCoord.xy);
+    var data: FragData;
+    data.Sc = colorSrc.rgb;
+    data.Sa = colorSrc.a;
+    data.So = uPaintSettings.options.a;
+    data.Dc = colorDst.rgb;
+    data.Da = colorDst.a;
+    data.Sc = data.Dc * (1.0 - data.Sa * data.So) + data.Sc * data.So;
     data.Sa = mix(data.Da,     1.0, data.Sa * data.So);
     return data;
 };
@@ -930,6 +1040,23 @@ fn fs_main_horz(in: VertexOutput) -> @location(0) vec4f {
 };
 
 @fragment
+fn fs_main_motion(in: VertexOutput) -> @location(0) vec4f {
+    // Clamp sampling coordinates to the region's outermost texel centers.
+    let invTextureSize = 1.0 / vec2f(textureDimensions(uTextureSrc));
+    let minCoord = settings[1].xy + vec2f(0.5);
+    let maxCoord = settings[1].xy + settings[1].zw - vec2f(0.5);
+    let samples = i32(settings[0].z);
+    let invSamples = 1.0 / f32(samples);
+    var color = vec4f(0.0);
+    for (var i: i32 = 0; i < samples; i++) {
+        let t = (f32(i) + 0.5) * invSamples - 0.5;
+        let p = clamp(in.position.xy + settings[0].xy * t, minCoord, maxCoord);
+        color += textureSampleLevel(uTextureSrc, uSamplerSrc, p * invTextureSize, 0.0);
+    }
+    return color * invSamples;
+};
+
+@fragment
 fn fs_main_fill(in: VertexOutput) -> @location(0) vec4f {
     let orig = textureSample(uTextureSrc, uSamplerSrc, in.texCoord.xy);
     let fill = settings[0];
@@ -956,4 +1083,28 @@ fn fs_main_tritone(in: VertexOutput) -> @location(0) vec4f {
     if (settings[2].a > 0.0f) { tmp = mix(tmp, orig, settings[2].a); }
     return tmp * orig.a;
 };
+)";
+
+// compute shaders
+const char* cShaderSrc_Texture_Preprocess = R"(
+@group(0) @binding(1) var uTextureSrc : texture_2d<f32>;
+@group(1) @binding(0) var uTextureDst : texture_storage_2d<rgba8unorm, write>;
+
+@compute @workgroup_size(16, 16, 1)
+fn cs_main_premult_bgr(@builtin(global_invocation_id) gid: vec3<u32>) {
+    let size = textureDimensions(uTextureSrc);
+    if (gid.x >= size.x || gid.y >= size.y) { return; }
+    let pos = vec2<i32>(gid.xy);
+    let Sc = textureLoad(uTextureSrc, pos, 0);
+    textureStore(uTextureDst, pos, vec4f(Sc.bgr * Sc.a, Sc.a));
+}
+
+@compute @workgroup_size(16, 16, 1)
+fn cs_main_premult(@builtin(global_invocation_id) gid: vec3<u32>) {
+    let size = textureDimensions(uTextureSrc);
+    if (gid.x >= size.x || gid.y >= size.y) { return; }
+    let pos = vec2<i32>(gid.xy);
+    let Sc = textureLoad(uTextureSrc, pos, 0);
+    textureStore(uTextureDst, pos, vec4f(Sc.rgb * Sc.a, Sc.a));
+}
 )";

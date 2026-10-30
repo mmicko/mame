@@ -26,39 +26,40 @@
 #include "tvgRender.h"
 #include "tvgGlProgram.h"
 
-
-class GlEffect
+struct GlEffect
 {
-private:
-    GlStageBuffer* gpuBuffer; //shared resource with GlRenderer
-
-    GlProgram* pBlurV{};
-    GlProgram* pBlurH{};
-    GlProgram* pDropShadow{};
-    GlProgram* pFill{};
-    GlProgram* pTint{};
-    GlProgram* pTritone{};
-
-    void update(RenderEffectGaussianBlur* effect, const Matrix& transform);
-    void update(RenderEffectDropShadow* effect, const Matrix& transform);
-    void update(RenderEffectFill* effect, const Matrix& transform);
-    void update(RenderEffectTint* effect, const Matrix& transform);
-    void update(RenderEffectTritone* effect, const Matrix& transform);
-
-    bool region(RenderEffectGaussianBlur* effect);
-    bool region(RenderEffectDropShadow* effect);
-
-    GlRenderTask* render(RenderEffectGaussianBlur* effect, GlRenderTarget* dstFbo, Array<GlRenderTargetPool*>& blendPool, const RenderRegion& vp, uint32_t voffset, uint32_t ioffset);
-    GlRenderTask* render(RenderEffectDropShadow* effect, GlRenderTarget* dstFbo, Array<GlRenderTargetPool*>& blendPool, const RenderRegion& vp, uint32_t voffset, uint32_t ioffset);
-    GlRenderTask* render(RenderEffect* effect, GlRenderTarget* dstFbo, Array<GlRenderTargetPool*>& blendPool, const RenderRegion& vp, uint32_t voffset, uint32_t ioffset);
-
-public:
     GlEffect(GlStageBuffer* buffer);
     ~GlEffect();
 
     void update(RenderEffect* effect, const Matrix& transform);
     bool region(RenderEffect* effect);
     bool render(RenderEffect* effect, GlRenderPass* pass, Array<GlRenderTargetPool*>& blendPool);
+
+private:
+    GlStageBuffer* gpuBuffer; //shared resource with GlRenderer
+    GlProgram* pBlurV{};
+    GlProgram* pBlurH{};
+    GlProgram* pDropShadow{};
+    GlProgram* pMotionBlur{};
+    GlProgram* pFill{};
+    GlProgram* pTint{};
+    GlProgram* pTritone{};
+
+    void update(RenderEffectMotionBlur* effect, const Matrix& transform);
+    void update(RenderEffectGaussianBlur* effect, const Matrix& transform);
+    void update(RenderEffectDropShadow* effect, const Matrix& transform);
+    void update(RenderEffectFill* effect, const Matrix& transform);
+    void update(RenderEffectTint* effect, const Matrix& transform);
+    void update(RenderEffectTritone* effect, const Matrix& transform);
+
+    bool region(RenderEffectMotionBlur* effect);
+    bool region(RenderEffectGaussianBlur* effect);
+    bool region(RenderEffectDropShadow* effect);
+
+    GlRenderTask* render(RenderEffectMotionBlur* effect, GlRenderTarget* dstFbo, Array<GlRenderTargetPool*>& blendPool, const RenderRegion& vp, uint32_t voffset, uint32_t ioffset);
+    GlRenderTask* render(RenderEffectGaussianBlur* effect, GlRenderTarget* dstFbo, Array<GlRenderTargetPool*>& blendPool, const RenderRegion& vp, uint32_t voffset, uint32_t ioffset);
+    GlRenderTask* render(RenderEffectDropShadow* effect, GlRenderTarget* dstFbo, Array<GlRenderTargetPool*>& blendPool, const RenderRegion& vp, uint32_t voffset, uint32_t ioffset);
+    GlRenderTask* render(RenderEffect* effect, GlRenderTarget* dstFbo, Array<GlRenderTargetPool*>& blendPool, const RenderRegion& vp, uint32_t voffset, uint32_t ioffset);
 };
 
 #endif /* _TVG_GL_EFFECT_H_ */

@@ -27,6 +27,9 @@
 #ifdef THORVG_LOTTIE_LOADER_SUPPORT
 #include <thorvg_lottie.h>
 #endif
+#ifdef THORVG_MEDIA_LOADER_SUPPORT
+#include <thorvg_media.h>
+#endif
 
 using namespace std;
 using namespace tvg;
@@ -160,6 +163,17 @@ TVG_API Tvg_Result tvg_canvas_sync(Tvg_Canvas canvas)
     return TVG_RESULT_INVALID_ARGUMENT;
 }
 
+TVG_API uint32_t tvg_canvas_get_dirty_regions_cnt(Tvg_Canvas canvas)
+{
+    if (canvas) return reinterpret_cast<const Canvas*>(canvas)->dirtyRegions();
+    return 0;
+}
+
+TVG_API Tvg_Result tvg_canvas_get_dirty_regions(Tvg_Canvas canvas, Tvg_Region* regions, uint32_t cnt)
+{
+    if (canvas) return (Tvg_Result) reinterpret_cast<const Canvas*>(canvas)->dirtyRegions(reinterpret_cast<Region*>(regions), cnt);
+    return TVG_RESULT_INVALID_ARGUMENT;
+}
 
 TVG_API Tvg_Result tvg_canvas_set_viewport(Tvg_Canvas canvas, int32_t x, int32_t y, int32_t w, int32_t h)
 {
@@ -208,6 +222,21 @@ TVG_API Tvg_Result tvg_paint_set_id(Tvg_Paint paint, uint32_t id)
 {
     if (paint) {
         reinterpret_cast<Paint*>(paint)->id = id;
+        return TVG_RESULT_SUCCESS;
+    }
+    return TVG_RESULT_INVALID_ARGUMENT;
+}
+
+TVG_API void* tvg_paint_get_data(const Tvg_Paint paint)
+{
+    if (paint) return reinterpret_cast<const Paint*>(paint)->data;
+    return nullptr;
+}
+
+TVG_API Tvg_Result tvg_paint_set_data(Tvg_Paint paint, void* data)
+{
+    if (paint) {
+        reinterpret_cast<Paint*>(paint)->data = data;
         return TVG_RESULT_SUCCESS;
     }
     return TVG_RESULT_INVALID_ARGUMENT;
@@ -674,7 +703,7 @@ TVG_API Tvg_Result tvg_picture_get_size(const Tvg_Paint picture, float* w, float
 }
 
 
-TVG_API const Tvg_Paint tvg_picture_get_paint(Tvg_Paint picture, uint32_t id)
+TVG_API Tvg_Paint tvg_picture_get_paint(Tvg_Paint picture, uint32_t id)
 {
     if (picture) return (Tvg_Paint) reinterpret_cast<Picture*>(picture)->paint(id);
     return nullptr;
@@ -725,6 +754,12 @@ TVG_API Tvg_Gradient tvg_radial_gradient_new()
 }
 
 
+TVG_API Tvg_Gradient tvg_conic_gradient_new()
+{
+    return (Tvg_Gradient)ConicGradient::gen();
+}
+
+
 TVG_API Tvg_Gradient tvg_gradient_duplicate(Tvg_Gradient grad)
 {
     if (grad) return (Tvg_Gradient) reinterpret_cast<Fill*>(grad)->duplicate();
@@ -766,6 +801,20 @@ TVG_API Tvg_Result tvg_radial_gradient_set(Tvg_Gradient grad, float cx, float cy
 TVG_API Tvg_Result tvg_radial_gradient_get(Tvg_Gradient grad, float* cx, float* cy, float* r, float* fx, float* fy, float* fr)
 {
     if (grad) return (Tvg_Result) reinterpret_cast<RadialGradient*>(grad)->radial(cx, cy, r, fx, fy, fr);
+    return TVG_RESULT_INVALID_ARGUMENT;
+}
+
+
+TVG_API Tvg_Result tvg_conic_gradient_set(Tvg_Gradient grad, float cx, float cy, float angle)
+{
+    if (grad) return (Tvg_Result) reinterpret_cast<ConicGradient*>(grad)->conic(cx, cy, angle);
+    return TVG_RESULT_INVALID_ARGUMENT;
+}
+
+
+TVG_API Tvg_Result tvg_conic_gradient_get(const Tvg_Gradient grad, float* cx, float* cy, float* angle)
+{
+    if (grad) return (Tvg_Result) reinterpret_cast<const ConicGradient*>(grad)->conic(cx, cy, angle);
     return TVG_RESULT_INVALID_ARGUMENT;
 }
 
@@ -882,6 +931,11 @@ TVG_API Tvg_Result tvg_scene_add_effect_gaussian_blur(Tvg_Paint scene, double si
     return TVG_RESULT_INVALID_ARGUMENT;
 }
 
+TVG_API Tvg_Result tvg_scene_add_effect_motion_blur(Tvg_Paint scene, double distance, double angle, int quality)
+{
+    if (scene) return (Tvg_Result) reinterpret_cast<Scene*>(scene)->add(SceneEffect::MotionBlur, distance, angle, quality);
+    return TVG_RESULT_INVALID_ARGUMENT;
+}
 
 TVG_API Tvg_Result tvg_scene_add_effect_fill(Tvg_Paint scene, int r, int g, int b, int a)
 {
@@ -1315,6 +1369,15 @@ TVG_API Tvg_Result tvg_lottie_animation_set_quality(Tvg_Animation animation, uin
 }
 
 
+TVG_API bool tvg_lottie_animation_expressions_supported(void)
+{
+#ifdef THORVG_LOTTIE_LOADER_SUPPORT
+    return LottieAnimation::expressions();
+#endif
+    return false;
+}
+
+
 TVG_API Tvg_Result tvg_lottie_animation_set_audio_resolver(Tvg_Animation animation, Tvg_Audio_Resolver resolver, void* data)
 {
 #ifdef THORVG_LOTTIE_LOADER_SUPPORT
@@ -1328,6 +1391,157 @@ TVG_API Tvg_Result tvg_lottie_animation_set_audio_resolver(Tvg_Animation animati
 #endif
     return TVG_RESULT_NOT_SUPPORTED;
 }
+
+TVG_API Tvg_Result tvg_lottie_animation_set_volume(Tvg_Animation animation, float volume)
+{
+#ifdef THORVG_LOTTIE_LOADER_SUPPORT
+    if (animation) return (Tvg_Result) reinterpret_cast<LottieAnimation*>(animation)->volume(volume);
+    return TVG_RESULT_INVALID_ARGUMENT;
+#endif
+    return TVG_RESULT_NOT_SUPPORTED;
+}
+
+TVG_API float tvg_lottie_animation_get_volume(const Tvg_Animation animation)
+{
+#ifdef THORVG_LOTTIE_LOADER_SUPPORT
+    if (animation) return reinterpret_cast<LottieAnimation*>(animation)->volume();
+#endif
+    return 0.0f;
+}
+
+/************************************************************************/
+/* Video API                                                            */
+/************************************************************************/
+
+TVG_API Tvg_Video tvg_video_new()
+{
+#ifdef THORVG_MEDIA_LOADER_SUPPORT
+    return (Tvg_Video)Video::gen();
+#endif
+    return nullptr;
+}
+
+TVG_API Tvg_Result tvg_video_del(Tvg_Video video)
+{
+#ifdef THORVG_MEDIA_LOADER_SUPPORT
+    if (!video) return TVG_RESULT_INVALID_ARGUMENT;
+    delete (reinterpret_cast<Video*>(video));
+    return TVG_RESULT_SUCCESS;
+#endif
+    return TVG_RESULT_NOT_SUPPORTED;
+}
+
+TVG_API Tvg_Paint tvg_video_get_picture(Tvg_Video video)
+{
+#ifdef THORVG_MEDIA_LOADER_SUPPORT
+    if (video) return (Tvg_Paint) reinterpret_cast<Video*>(video)->picture();
+#endif
+    return nullptr;
+}
+
+TVG_API Tvg_Result tvg_video_play(Tvg_Video video)
+{
+#ifdef THORVG_MEDIA_LOADER_SUPPORT
+    if (video) return (Tvg_Result) reinterpret_cast<Video*>(video)->play();
+    return TVG_RESULT_INVALID_ARGUMENT;
+#endif
+    return TVG_RESULT_NOT_SUPPORTED;
+}
+
+TVG_API Tvg_Result tvg_video_pause(Tvg_Video video)
+{
+#ifdef THORVG_MEDIA_LOADER_SUPPORT
+    if (video) return (Tvg_Result) reinterpret_cast<Video*>(video)->pause();
+    return TVG_RESULT_INVALID_ARGUMENT;
+#endif
+    return TVG_RESULT_NOT_SUPPORTED;
+}
+
+TVG_API Tvg_Result tvg_video_stop(Tvg_Video video)
+{
+#ifdef THORVG_MEDIA_LOADER_SUPPORT
+    if (video) return (Tvg_Result) reinterpret_cast<Video*>(video)->stop();
+    return TVG_RESULT_INVALID_ARGUMENT;
+#endif
+    return TVG_RESULT_NOT_SUPPORTED;
+}
+
+TVG_API Tvg_Result tvg_video_seek(Tvg_Video video, float seconds)
+{
+#ifdef THORVG_MEDIA_LOADER_SUPPORT
+    if (video) return (Tvg_Result) reinterpret_cast<Video*>(video)->seek(seconds);
+    return TVG_RESULT_INVALID_ARGUMENT;
+#endif
+    return TVG_RESULT_NOT_SUPPORTED;
+}
+
+TVG_API Tvg_Result tvg_video_set_loop(Tvg_Video video, bool on)
+{
+#ifdef THORVG_MEDIA_LOADER_SUPPORT
+    if (video) return (Tvg_Result) reinterpret_cast<Video*>(video)->loop(on);
+    return TVG_RESULT_INVALID_ARGUMENT;
+#endif
+    return TVG_RESULT_NOT_SUPPORTED;
+}
+
+TVG_API bool tvg_video_get_loop(Tvg_Video video)
+{
+#ifdef THORVG_MEDIA_LOADER_SUPPORT
+    if (video) return reinterpret_cast<Video*>(video)->loop();
+#endif
+    return false;
+}
+
+TVG_API Tvg_Result tvg_video_set_volume(Tvg_Video video, float volume)
+{
+#ifdef THORVG_MEDIA_LOADER_SUPPORT
+    if (video) return (Tvg_Result) reinterpret_cast<Video*>(video)->volume(volume);
+    return TVG_RESULT_INVALID_ARGUMENT;
+#endif
+    return TVG_RESULT_NOT_SUPPORTED;
+}
+
+TVG_API float tvg_video_get_volume(Tvg_Video video)
+{
+#ifdef THORVG_MEDIA_LOADER_SUPPORT
+    if (video) return reinterpret_cast<Video*>(video)->volume();
+#endif
+    return 0.0f;
+}
+
+TVG_API Tvg_Result tvg_video_set_mute(Tvg_Video video, bool on)
+{
+#ifdef THORVG_MEDIA_LOADER_SUPPORT
+    if (video) return (Tvg_Result) reinterpret_cast<Video*>(video)->mute(on);
+    return TVG_RESULT_INVALID_ARGUMENT;
+#endif
+    return TVG_RESULT_NOT_SUPPORTED;
+}
+
+TVG_API bool tvg_video_get_muted(Tvg_Video video)
+{
+#ifdef THORVG_MEDIA_LOADER_SUPPORT
+    if (video) return reinterpret_cast<Video*>(video)->muted();
+#endif
+    return false;
+}
+
+TVG_API float tvg_video_get_time(Tvg_Video video)
+{
+#ifdef THORVG_MEDIA_LOADER_SUPPORT
+    if (video) return reinterpret_cast<Video*>(video)->time();
+#endif
+    return 0.0f;
+}
+
+TVG_API float tvg_video_get_duration(Tvg_Video video)
+{
+#ifdef THORVG_MEDIA_LOADER_SUPPORT
+    if (video) return reinterpret_cast<Video*>(video)->duration();
+#endif
+    return 0.0f;
+}
+
 
 #ifdef __cplusplus
 }

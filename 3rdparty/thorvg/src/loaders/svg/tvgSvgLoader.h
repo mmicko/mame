@@ -33,13 +33,12 @@ struct SvgLoader : ImageLoader, Task
     char* content = nullptr;
     uint32_t size = 0;
     Scene* root = nullptr;
-    bool copy = false;
 
-    SvgLoader();
+    SvgLoader() : ImageLoader(FileType::Svg) {}
     ~SvgLoader();
 
-    bool open(const char* path, const LoaderOps* ops) override;
-    bool open(const char* data, uint32_t size, const LoaderOps* ops, bool copy) override;
+    Result open(const char* path, const LoaderOps& ops) override;
+    Result open(const char* data, uint32_t size, const LoaderOps& ops) override;
     bool resize(Paint* paint, float w, float h) override;
     bool read() override;
     bool close() override;
@@ -55,7 +54,7 @@ private:
     AspectRatioMeetOrSlice meetOrSlice = AspectRatioMeetOrSlice::Meet;
     Box vbox{};
 
-    bool header();
+    Result header();
     void clear(bool all = true);
     void run(unsigned tid) override;
 };

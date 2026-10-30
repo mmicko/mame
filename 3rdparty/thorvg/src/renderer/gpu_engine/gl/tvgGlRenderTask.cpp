@@ -21,14 +21,13 @@
  */
 
 #include "tvgGlRenderTask.h"
-#include "tvgGlProgram.h"
 #include "tvgGlRenderPass.h"
 
 #if !defined(THORVG_GL_TARGET_GL)
-static void clearColorTarget(uint32_t width, uint32_t height)
+static void clearColorTarget(GlStateCache& state, uint32_t width, uint32_t height)
 {
-    GL_CHECK(glScissor(0, 0, width, height));
-    GL_CHECK(glClearColor(0, 0, 0, 0));
+    state.scissor(0, 0, width, height);
+    state.clearColor(0.0f, 0.0f, 0.0f, 0.0f);
     GL_CHECK(glClear(GL_COLOR_BUFFER_BIT));
 }
 #endif
@@ -37,112 +36,99 @@ static void clearColorTarget(uint32_t width, uint32_t height)
 /* GlRenderTask Class Implementation                                    */
 /************************************************************************/
 
-void GlRenderTask::run()
+void GlRenderTask::run(GlStateCache& state)
 {
     // bind shader
-    mProgram->load();
+    state.useProgram(program->getProgramId());
 
-    int32_t dLoc = mProgram->getUniformLocation("uDepth");
+    int32_t dLoc = program->getUniformLocation(GlShaderUniform::Depth);
     if (dLoc >= 0) {
-        // fixme: prevent compiler warning: macro expands to multiple statements [-Wmultistatement-macros]
-        GL_CHECK(glUniform1f(dLoc, mDrawDepth));
+        GL_CHECK(glUniform1f(dLoc, drawDepth));
     }
 
-    int32_t vLoc = mProgram->getUniformLocation("uViewMatrix");
+    int32_t vLoc = program->getUniformLocation(GlShaderUniform::ViewMatrix);
     if (vLoc >= 0) {
-        const auto& viewMatrix = mUseViewMatrix ? mViewMatrix : tvg::identity();
+        const auto& matrix = useViewMatrix ? viewMatrix : tvg::identity();
         float viewMat3[9];
-        getMatrix3(viewMatrix, viewMat3);
+        getMatrix3(matrix, viewMat3);
         GL_CHECK(glUniformMatrix3fv(vLoc, 1, GL_FALSE, viewMat3));
     }
 
     // setup scissor rect
-    GL_CHECK(glScissor(mViewport.sx(), mViewport.sy(), mViewport.sw(), mViewport.sh()));
-
-    if (mUseVertexColor) {
-        GL_CHECK(glDisableVertexAttribArray(1));
-        GL_CHECK(glVertexAttrib4f(1, mVertexColor[0], mVertexColor[1], mVertexColor[2], mVertexColor[3]));
-    }
-
-    GLint defaultArrayBuffer = 0;
-    GL_CHECK(glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &defaultArrayBuffer));
+    state.scissor(viewport.sx(), viewport.sy(), viewport.sw(), viewport.sh());
 
     // setup attribute layout
-    for (uint32_t i = 0; i < mVertexLayout.count; i++) {
-        const auto &layout = mVertexLayout[i];
-        auto sourceBuffer = layout.arrayBufferId ? layout.arrayBufferId : static_cast<GLuint>(defaultArrayBuffer);
-        GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, sourceBuffer));
-        GL_CHECK(glEnableVertexAttribArray(layout.index));
-        GL_CHECK(glVertexAttribPointer(layout.index, layout.size, layout.type,
-                                       layout.normalized, layout.stride,
-                                       reinterpret_cast<void*>(layout.offset)));
+    state.beginVertexLayout();
+    bool hasVertexColorLayout = false;
+    for (uint32_t i = 0; i < vertexLayout.count; i++) {
+        const auto& layout = vertexLayout[i];
+        assert(layout.arrayBufferId);
+        if (layout.index == 1) hasVertexColorLayout = true;
+        state.setVertexAttribPointer(layout.index, layout.size, layout.type, layout.normalized, layout.stride, layout.offset, layout.arrayBufferId);
     }
+    if (useVertexColor && !hasVertexColorLayout) state.setVertexAttrib4f(1, vertexColor[0], vertexColor[1], vertexColor[2], vertexColor[3]);
+    state.endVertexLayout();
 
     // binding uniforms
-    for (uint32_t i = 0; i < mBindingResources.count; i++) {
-        const auto& binding = mBindingResources[i];
+    for (uint32_t i = 0; i < bindResources.count; i++) {
+        const auto& binding = bindResources[i];
         if (binding.type == GlBindingType::kTexture) {
-            GL_CHECK(glActiveTexture(GL_TEXTURE0 + binding.bindPoint));
-            GL_CHECK(glBindTexture(GL_TEXTURE_2D, binding.resourceId));
-
-            mProgram->setUniform1Value(binding.location, 1, (int32_t*)&binding.bindPoint);
+            state.bindTexture2D(GL_TEXTURE0 + binding.bindPoint, binding.resourceId);
+            program->setSampler(binding.uniform, static_cast<int32_t>(binding.bindPoint));
         } else if (binding.type == GlBindingType::kUniformBuffer) {
-
-            GL_CHECK(glUniformBlockBinding(mProgram->getProgramId(), binding.location, binding.bindPoint));
-            GL_CHECK(glBindBufferRange(GL_UNIFORM_BUFFER, binding.bindPoint, binding.resourceId,
-                                       binding.bufferOffset, binding.bufferRange));
+            GL_CHECK(glBindBufferRange(GL_UNIFORM_BUFFER, binding.bindPoint, binding.resourceId, binding.bufferOffset, binding.bufferRange));
         }
     }
 
-    if (mUseDrawArrays) {
-        GL_CHECK(glDrawArrays(mArrayMode, mArrayOffset, mIndexCount));
+    if (useDrawArrays) {
+        GL_CHECK(glDrawArrays(arrayMode, arrayOffset, indexCnt));
     } else {
-        GL_CHECK(glDrawElements(GL_TRIANGLES, mIndexCount, GL_UNSIGNED_INT, reinterpret_cast<void*>(mIndexOffset)));
+        GL_CHECK(glDrawElements(GL_TRIANGLES, indexCnt, GL_UNSIGNED_INT, reinterpret_cast<void*>(indexOffset)));
     }
 
-    // setup attribute layout
-    for (uint32_t i = 0; i < mVertexLayout.count; i++) {
-        const auto &layout = mVertexLayout[i];
-        GL_CHECK(glDisableVertexAttribArray(layout.index));
-    }
-
-    GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, static_cast<GLuint>(defaultArrayBuffer)));
 }
 
-
-void GlRenderTask::addVertexLayout(const GlVertexLayout &layout)
+void GlRenderTask::addVertexLayout(const GlVertexLayout& layout)
 {
-    mVertexLayout.push(layout);
+    assert(layout.arrayBufferId);
+    vertexLayout.push(layout);
 }
 
 void GlRenderTask::setVertexColor(float r, float g, float b, float a)
 {
-    mUseVertexColor = true;
-    mVertexColor[0] = r;
-    mVertexColor[1] = g;
-    mVertexColor[2] = b;
-    mVertexColor[3] = a;
+    useVertexColor = true;
+    vertexColor[0] = r;
+    vertexColor[1] = g;
+    vertexColor[2] = b;
+    vertexColor[3] = a;
 }
 
-void GlRenderTask::addBindResource(const GlBindingResource &binding)
+void GlRenderTask::addBindResource(const GlBindingResource& binding)
 {
-    mBindingResources.push(binding);
+    if (binding.type == GlBindingType::kUniformBuffer) {
+        assert(program);
+        if (program->getUniformBlockIndex(binding.uniformBlock) < 0) return;
+        if (!program->setUniformBlockBinding(binding.uniformBlock, binding.bindPoint)) {
+            TVGERR("GL_ENGINE", "Conflicting uniform block binding for program %u", program->getProgramId());
+            return;
+        }
+    }
+    bindResources.push(binding);
 }
-
 
 void GlRenderTask::setDrawRange(uint32_t offset, uint32_t count)
 {
-    mUseDrawArrays = false;
-    mIndexOffset = offset;
-    mIndexCount = count;
+    useDrawArrays = false;
+    indexOffset = offset;
+    indexCnt = count;
 }
 
 
 void GlRenderTask::setViewport(const RenderRegion &viewport)
 {
-    mViewport = viewport;
-    if (mViewport.max.x < mViewport.min.x) mViewport.max.x = mViewport.min.x;
-    if (mViewport.max.y < mViewport.min.y) mViewport.max.y = mViewport.min.y;
+    this->viewport = viewport;
+    this->viewport.xMax = std::max(viewport.xMin, viewport.xMax);
+    this->viewport.yMax = std::max(viewport.yMin, viewport.yMax);
 }
 
 
@@ -150,61 +136,60 @@ void GlRenderTask::setViewport(const RenderRegion &viewport)
 /* GlStencilCoverTask Class Implementation                              */
 /************************************************************************/
 
-GlStencilCoverTask::GlStencilCoverTask(GlRenderTask* stencil, GlRenderTask* cover, GlStencilMode mode)
- :GlRenderTask(nullptr), mStencilMode(mode)
+GlStencilCoverTask::GlStencilCoverTask(GlRenderTask* stencil, GlRenderTask* cover, GlStencilMode mode) :
+    GlRenderTask(nullptr), stencilMode(mode)
 {
-    mStencilTasks.push(stencil);
-    mCoverTasks.push(cover);
+    stencilTasks.push(stencil);
+    coverTasks.push(cover);
 }
 
 
 GlStencilCoverTask::~GlStencilCoverTask()
 {
-    ARRAY_FOREACH(p, mStencilTasks) delete(*p);
-    ARRAY_FOREACH(p, mCoverTasks) delete(*p);
-    mStencilTasks.clear();
-    mCoverTasks.clear();
+    ARRAY_FOREACH(p, stencilTasks) delete (*p);
+    ARRAY_FOREACH(p, coverTasks) delete (*p);
+    stencilTasks.clear();
+    coverTasks.clear();
 }
 
-
-void GlStencilCoverTask::run()
+void GlStencilCoverTask::run(GlStateCache& state)
 {
-    GL_CHECK(glEnable(GL_STENCIL_TEST));
+    state.enable(GL_STENCIL_TEST);
 
-    if (mStencilMode == GlStencilMode::Stroke) {
-        GL_CHECK(glStencilFunc(GL_NOTEQUAL, 0x1, 0xFF));
-        GL_CHECK(glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE));
+    if (stencilMode == GlStencilMode::Stroke) {
+        state.stencilFunc(GL_NOTEQUAL, 0x1, 0xFF);
+        state.stencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
     } else {
-        GL_CHECK(glStencilFuncSeparate(GL_FRONT, GL_ALWAYS, 0x0, 0xFF));
-        GL_CHECK(glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_KEEP, GL_INCR_WRAP));
+        state.stencilFuncSeparate(GL_FRONT, GL_ALWAYS, 0x0, 0xFF);
+        state.stencilOpSeparate(GL_FRONT, GL_KEEP, GL_KEEP, GL_INCR_WRAP);
 
-        GL_CHECK(glStencilFuncSeparate(GL_BACK, GL_ALWAYS, 0x0, 0xFF));
-        GL_CHECK(glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_DECR_WRAP));
+        state.stencilFuncSeparate(GL_BACK, GL_ALWAYS, 0x0, 0xFF);
+        state.stencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_DECR_WRAP);
     }
-    GL_CHECK(glColorMask(0, 0, 0, 0));
+    state.colorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
-    ARRAY_FOREACH(p, mStencilTasks) (*p)->run();
+    ARRAY_FOREACH(p, stencilTasks) (*p)->run(state);
 
-    if (mStencilMode == GlStencilMode::FillEvenOdd) {
-        GL_CHECK(glStencilFunc(GL_NOTEQUAL, 0x00, 0x01));
-        GL_CHECK(glStencilOp(GL_REPLACE, GL_KEEP, GL_REPLACE));
+    if (stencilMode == GlStencilMode::FillEvenOdd) {
+        state.stencilFunc(GL_NOTEQUAL, 0x00, 0x01);
+        state.stencilOp(GL_REPLACE, GL_KEEP, GL_REPLACE);
     } else {
-        GL_CHECK(glStencilFunc(GL_NOTEQUAL, 0x0, 0xFF));
-        GL_CHECK(glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE));
+        state.stencilFunc(GL_NOTEQUAL, 0x0, 0xFF);
+        state.stencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
     }
 
-    GL_CHECK(glColorMask(1, 1, 1, 1));
+    state.colorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
-    ARRAY_FOREACH(p, mCoverTasks) (*p)->run();
+    ARRAY_FOREACH(p, coverTasks) (*p)->run(state);
 
-    GL_CHECK(glDisable(GL_STENCIL_TEST));
+    state.disable(GL_STENCIL_TEST);
 }
 
 
 void GlStencilCoverTask::normalizeDrawDepth(int32_t maxDepth)
 {
-    ARRAY_FOREACH(p, mCoverTasks) (*p)->normalizeDrawDepth(maxDepth);
-    ARRAY_FOREACH(p, mStencilTasks) (*p)->normalizeDrawDepth(maxDepth);
+    ARRAY_FOREACH(p, coverTasks) (*p)->normalizeDrawDepth(maxDepth);
+    ARRAY_FOREACH(p, stencilTasks) (*p)->normalizeDrawDepth(maxDepth);
 }
 
 
@@ -212,46 +197,37 @@ void GlStencilCoverTask::normalizeDrawDepth(int32_t maxDepth)
 /* GlComposeTask Class Implementation                                   */
 /************************************************************************/
 
-GlComposeTask::GlComposeTask(GlProgram* program, GLuint target, GlRenderTarget* fbo, Array<GlRenderTask*>&& tasks)
- :GlRenderTask(program) ,mTargetFbo(target), mFbo(fbo), mTasks()
+GlComposeTask::GlComposeTask(GlProgram* program, GLuint target, GlRenderTarget* fbo, Array<GlRenderTask*>&& tasks) :
+    GlRenderTask(program), targetFbo(target), fbo(fbo)
 {
-    mTasks.push(tasks);
+    this->tasks.push(tasks);
     tasks.clear();
 }
 
-
 GlComposeTask::~GlComposeTask()
 {
-    ARRAY_FOREACH(p, mTasks) delete(*p);
-    mTasks.clear();
+    ARRAY_FOREACH(p, tasks) delete (*p);
+    tasks.clear();
 }
 
-
-void GlComposeTask::run()
+void GlComposeTask::run(GlStateCache& state)
 {
-    GL_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, getSelfFbo()));
+    state.bindFramebuffer(GL_FRAMEBUFFER, getSelfFbo());
 
     // we must clear all area of fbo
-    GL_CHECK(glViewport(0, 0, mFbo->width, mFbo->height));
-    GL_CHECK(glScissor(0, 0, mFbo->width, mFbo->height));
-    GL_CHECK(glClearColor(0, 0, 0, 0));
-    GL_CHECK(glClearStencil(0));
-#ifdef THORVG_GL_TARGET_GLES
-    GL_CHECK(glClearDepthf(0.0));
-#else
-    GL_CHECK(glClearDepth(0.0));
-#endif
-    GL_CHECK(glDepthMask(1));
+    state.viewport(0, 0, fbo->width, fbo->height);
+    state.scissor(0, 0, fbo->width, fbo->height);
+    state.clearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    state.clearStencil(0);
+    state.clearDepth(0.0);
+    state.depthMask(GL_TRUE);
 
     GL_CHECK(glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-    GL_CHECK(glDepthMask(0));
+    state.depthMask(GL_FALSE);
+    state.viewport(0, 0, renderWidth, renderHeight);
+    state.scissor(0, 0, renderWidth, renderHeight);
 
-    GL_CHECK(glViewport(0, 0, mRenderWidth, mRenderHeight));
-    GL_CHECK(glScissor(0, 0, mRenderWidth, mRenderHeight));
-
-    ARRAY_FOREACH(p, mTasks) {
-        (*p)->run();
-    }
+    ARRAY_FOREACH(p, tasks) (*p)->run(state);
 
 #if defined(THORVG_GL_TARGET_GLES)
     // only OpenGLES has tiled base framebuffer and discard function
@@ -259,59 +235,40 @@ void GlComposeTask::run()
     GL_CHECK(glInvalidateFramebuffer(GL_FRAMEBUFFER, 2, attachments));
 #endif
     // reset scissor box
-    GL_CHECK(glScissor(0, 0, mFbo->width, mFbo->height));
-    onResolve();
+    state.scissor(0, 0, fbo->width, fbo->height);
+    onResolve(state);
 }
 
 
-GLuint GlComposeTask::getSelfFbo()
+void GlComposeTask::onResolve(GlStateCache& state)
 {
-    return mFbo->fbo;
+    state.bindFramebuffer(GL_READ_FRAMEBUFFER, getSelfFbo());
+    state.bindFramebuffer(GL_DRAW_FRAMEBUFFER, getResolveFboId());
+    GL_CHECK(glBlitFramebuffer(0, 0, renderWidth, renderHeight, 0, 0, renderWidth, renderHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST));
 }
-
-
-GLuint GlComposeTask::getResolveFboId()
-{
-    return mFbo->resolvedFbo;
-}
-
-
-void GlComposeTask::onResolve()
-{
-    GL_CHECK(glBindFramebuffer(GL_READ_FRAMEBUFFER, getSelfFbo()));
-    GL_CHECK(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, getResolveFboId()));
-    GL_CHECK(glBlitFramebuffer(0, 0, mRenderWidth, mRenderHeight, 0, 0, mRenderWidth, mRenderHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST));
-}
-
 
 /************************************************************************/
 /* GlBlitTask Class Implementation                                      */
 /************************************************************************/
 
-GlBlitTask::GlBlitTask(GlProgram* program, GLuint target, GlRenderTarget* fbo, Array<GlRenderTask*>&& tasks)
- : GlComposeTask(program, target, fbo, std::move(tasks)), mColorTex(fbo->colorTex)
+void GlBlitTask::run(GlStateCache& state)
 {
-}
+    GlComposeTask::run(state);
 
+    state.bindFramebuffer(GL_FRAMEBUFFER, targetFbo);
+    state.viewport(targetViewport.x(), targetViewport.y(), targetViewport.w(), targetViewport.h());
 
-void GlBlitTask::run()
-{
-    GlComposeTask::run();
-
-    GL_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, getTargetFbo()));
-    GL_CHECK(glViewport(mTargetViewport.x(), mTargetViewport.y(), mTargetViewport.w(), mTargetViewport.h()));
-
-    if (mClearBuffer) {
-        GL_CHECK(glClearColor(0, 0, 0, 0));
+    if (clearBuffer) {
+        state.clearColor(0.0f, 0.0f, 0.0f, 0.0f);
         GL_CHECK(glClear(GL_COLOR_BUFFER_BIT));
     }
 
-    GL_CHECK(glDisable(GL_DEPTH_TEST));
+    state.disable(GL_DEPTH_TEST);
     // make sure the blending is correct
-    GL_CHECK(glEnable(GL_BLEND));
-    GL_CHECK(glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA));
+    state.enable(GL_BLEND);
+    state.blendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-    GlRenderTask::run();
+    GlRenderTask::run(state);
 }
 
 
@@ -319,30 +276,17 @@ void GlBlitTask::run()
 /* GlDrawBlitTask Class Implementation                                  */
 /************************************************************************/
 
-
-GlDrawBlitTask::GlDrawBlitTask(GlProgram* program, GLuint target, GlRenderTarget* fbo, Array<GlRenderTask*>&& tasks)
- : GlComposeTask(program, target, fbo, std::move(tasks))
+void GlDrawBlitTask::run(GlStateCache& state)
 {
-}
+    if (prevTask) prevTask->run(state);
 
+    GlComposeTask::run(state);
 
-GlDrawBlitTask::~GlDrawBlitTask()
-{
-    if (mPrevTask) delete mPrevTask;
-}
+    state.bindFramebuffer(GL_FRAMEBUFFER, targetFbo);
+    state.viewport(0, 0, parentWidth, parentHeight);
+    state.scissor(0, 0, parentWidth, parentHeight);
 
-
-void GlDrawBlitTask::run()
-{
-    if (mPrevTask) mPrevTask->run();
-
-    GlComposeTask::run();
-
-    GL_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, getTargetFbo()));
-
-    GL_CHECK(glViewport(0, 0, mParentWidth, mParentHeight));
-    GL_CHECK(glScissor(0, 0, mParentWidth, mParentHeight));
-    GlRenderTask::run();
+    GlRenderTask::run(state);
 }
 
 
@@ -350,52 +294,40 @@ void GlDrawBlitTask::run()
 /* GlSceneBlendTask Class Implementation                                  */
 /************************************************************************/
 
-
-GlSceneBlendTask::GlSceneBlendTask(GlProgram* program, GLuint target, GlRenderTarget* fbo, Array<GlRenderTask*>&& tasks)
- : GlComposeTask(program, target, fbo, std::move(tasks))
+void GlSceneBlendTask::run(GlStateCache& state)
 {
-}
+    GlComposeTask::run(state);
 
-
-GlSceneBlendTask::~GlSceneBlendTask()
-{
-}
-
-
-void GlSceneBlendTask::run()
-{
-    GlComposeTask::run();
-
-    const auto& vp = getViewport();
-    const auto width = mSrcFbo->width;
-    const auto height = mSrcFbo->height;
+    const auto width = srcFbo->width;
+    const auto height = srcFbo->height;
     if (width <= 0 || height <= 0) return;
 
+    const auto& vp = viewport;
 
 #if defined(THORVG_GL_TARGET_GL)
-    GL_CHECK(glBindFramebuffer(GL_READ_FRAMEBUFFER, getTargetFbo()));
-    GL_CHECK(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mDstCopyFbo->resolvedFbo));
-    GL_CHECK(glViewport(0, 0, mDstCopyFbo->width, mDstCopyFbo->height));
-    GL_CHECK(glScissor(0, 0, mDstCopyFbo->width, mDstCopyFbo->height));
-    GL_CHECK(glBlitFramebuffer(vp.min.x, vp.min.y, vp.max.x, vp.max.y, 0, 0, vp.w(), vp.h(), GL_COLOR_BUFFER_BIT, GL_LINEAR));
+    state.bindFramebuffer(GL_READ_FRAMEBUFFER, targetFbo);
+    state.bindFramebuffer(GL_DRAW_FRAMEBUFFER, dstCopyFbo->resolvedFbo);
+    state.viewport(0, 0, dstCopyFbo->width, dstCopyFbo->height);
+    state.scissor(0, 0, dstCopyFbo->width, dstCopyFbo->height);
+    GL_CHECK(glBlitFramebuffer(vp.xMin, vp.yMin, vp.xMax, vp.yMax, 0, 0, vp.w(), vp.h(), GL_COLOR_BUFFER_BIT, GL_LINEAR));
 #else // TODO: create partial buffer when MSAA is disabled
-    GL_CHECK(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mDstCopyFbo->resolvedFbo));
-    if (vp.min.x != 0 || vp.min.y != 0 || mDstCopyFbo->width != static_cast<uint32_t>(vp.w()) || mDstCopyFbo->height != static_cast<uint32_t>(vp.h())) clearColorTarget(mDstCopyFbo->width, mDstCopyFbo->height);
-    GL_CHECK(glBindFramebuffer(GL_READ_FRAMEBUFFER, mSrcFbo->fbo));
-    GL_CHECK(glViewport(0, 0, width, height));
-    GL_CHECK(glScissor(vp.min.x, vp.min.y, vp.w(), vp.h()));
-    GL_CHECK(glBlitFramebuffer(vp.min.x, vp.min.y, vp.max.x, vp.max.y, vp.min.x, vp.min.y, vp.max.x, vp.max.y, GL_COLOR_BUFFER_BIT, GL_NEAREST));
+    state.bindFramebuffer(GL_DRAW_FRAMEBUFFER, dstCopyFbo->resolvedFbo);
+    if (vp.xMin != 0 || vp.yMin != 0 || dstCopyFbo->width != static_cast<uint32_t>(vp.w()) || dstCopyFbo->height != static_cast<uint32_t>(vp.h())) clearColorTarget(state, dstCopyFbo->width, dstCopyFbo->height);
+    state.bindFramebuffer(GL_READ_FRAMEBUFFER, srcFbo->fbo);
+    state.viewport(0, 0, width, height);
+    state.scissor(vp.xMin, vp.yMin, vp.w(), vp.h());
+    GL_CHECK(glBlitFramebuffer(vp.xMin, vp.yMin, vp.xMax, vp.yMax, vp.xMin, vp.yMin, vp.xMax, vp.yMax, GL_COLOR_BUFFER_BIT, GL_NEAREST));
 #endif
 
-    GL_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, getTargetFbo()));
-    GL_CHECK(glViewport(0, 0, mParentWidth, mParentHeight));
-    GL_CHECK(glScissor(0, 0, mParentWidth, mParentHeight));
+    state.bindFramebuffer(GL_FRAMEBUFFER, targetFbo);
+    state.viewport(0, 0, parentWidth, parentHeight);
+    state.scissor(0, 0, parentWidth, parentHeight);
 
-    GL_CHECK(glDisable(GL_DEPTH_TEST));
-    GL_CHECK(glBlendFunc(GL_ONE, GL_ZERO));
-    GlRenderTask::run();
-    GL_CHECK(glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA));
-    GL_CHECK(glEnable(GL_DEPTH_TEST));
+    state.disable(GL_DEPTH_TEST);
+    state.blendFunc(GL_ONE, GL_ZERO);
+    GlRenderTask::run(state);
+    state.blendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    state.enable(GL_DEPTH_TEST);
 }
 
 
@@ -403,91 +335,74 @@ void GlSceneBlendTask::run()
 /* GlClipTask Class Implementation                                      */
 /************************************************************************/
 
-GlClipTask::GlClipTask(GlRenderTask* clip, GlRenderTask* mask)
- :GlRenderTask(nullptr), mClipTask(clip), mMaskTask(mask) {}
-
-
-GlClipTask::~GlClipTask()
+void GlClipTask::run(GlStateCache& state)
 {
-    delete mClipTask;
-    delete mMaskTask;
-}
-
-
-void GlClipTask::run()
-{
-    GL_CHECK(glEnable(GL_STENCIL_TEST));
-    GL_CHECK(glColorMask(0, 0, 0, 0));
+    state.enable(GL_STENCIL_TEST);
+    state.colorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
     // draw clip path as normal stencil mask
-    GL_CHECK(glStencilFuncSeparate(GL_FRONT, GL_ALWAYS, 0x1, 0xFF));
-    GL_CHECK(glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_KEEP, GL_INCR_WRAP));
+    state.stencilFuncSeparate(GL_FRONT, GL_ALWAYS, 0x1, 0xFF);
+    state.stencilOpSeparate(GL_FRONT, GL_KEEP, GL_KEEP, GL_INCR_WRAP);
 
-    GL_CHECK(glStencilFuncSeparate(GL_BACK, GL_ALWAYS, 0x1, 0xFF));
-    GL_CHECK(glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_DECR_WRAP));
+    state.stencilFuncSeparate(GL_BACK, GL_ALWAYS, 0x1, 0xFF);
+    state.stencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_DECR_WRAP);
 
-    mClipTask->run();
-
+    clipTask->run(state);
 
     // draw clip mask
-    GL_CHECK(glDepthMask(1));
-    GL_CHECK(glStencilFunc(GL_EQUAL, 0x0, 0xFF));
-    GL_CHECK(glStencilOp(GL_REPLACE, GL_KEEP, GL_REPLACE));
+    state.depthMask(GL_TRUE);
+    state.stencilFunc(GL_EQUAL, 0x0, 0xFF);
+    state.stencilOp(GL_REPLACE, GL_KEEP, GL_REPLACE);
 
-    mMaskTask->run();
+    maskTask->run(state);
 
-    GL_CHECK(glColorMask(1, 1, 1, 1));
-    GL_CHECK(glDepthMask(0));
-    GL_CHECK(glDisable(GL_STENCIL_TEST));
+    state.colorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+    state.depthMask(GL_FALSE);
+    state.disable(GL_STENCIL_TEST);
 }
 
 
 void GlClipTask::normalizeDrawDepth(int32_t maxDepth)
 {
-    mClipTask->normalizeDrawDepth(maxDepth);
-    mMaskTask->normalizeDrawDepth(maxDepth);
+    clipTask->normalizeDrawDepth(maxDepth);
+    maskTask->normalizeDrawDepth(maxDepth);
 }
 
 /************************************************************************/
 /* GlDirectBlendTask Class Implementation                               */
 /************************************************************************/
 
-GlDirectBlendTask::GlDirectBlendTask(GlProgram* program, GlRenderTarget* dstFbo, GlRenderTarget* dstCopyFbo, const RenderRegion& copyRegion)
-    : GlRenderTask(program), mDstFbo(dstFbo), mDstCopyFbo(dstCopyFbo), mCopyRegion(copyRegion)
+void GlDirectBlendTask::run(GlStateCache& state)
 {
-}
-
-
-void GlDirectBlendTask::run()
-{
-    auto width = mCopyRegion.w();
-    auto height = mCopyRegion.h();
+    auto width = copyRegion.w();
+    auto height = copyRegion.h();
     if (width <= 0 || height <= 0) return;
-    auto x = mCopyRegion.sx();
-    auto y = mCopyRegion.sy();
-    const auto fboW = mDstFbo->width;
-    const auto fboH = mDstFbo->height;
+
+    auto x = copyRegion.sx();
+    auto y = copyRegion.sy();
+    const auto fboW = dstFbo->width;
+    const auto fboH = dstFbo->height;
     if (fboW <= 0 || fboH <= 0) return;
 
-    GL_CHECK(glBindFramebuffer(GL_READ_FRAMEBUFFER, mDstFbo->fbo));
-    GL_CHECK(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mDstCopyFbo->resolvedFbo));
+    state.bindFramebuffer(GL_READ_FRAMEBUFFER, dstFbo->fbo);
+    state.bindFramebuffer(GL_DRAW_FRAMEBUFFER, dstCopyFbo->resolvedFbo);
 
 #if defined(THORVG_GL_TARGET_GL)
-    GL_CHECK(glViewport(0, 0, width, height));
-    GL_CHECK(glScissor(0, 0, width, height));
+    state.viewport(0, 0, width, height);
+    state.scissor(0, 0, width, height);
     GL_CHECK(glBlitFramebuffer(x, y, x + width, y + height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_LINEAR));
 #else // TODO: create partial buffer when MSAA is disabled
-    if (x != 0 || y != 0 || mDstCopyFbo->width != static_cast<uint32_t>(width) || mDstCopyFbo->height != static_cast<uint32_t>(height)) clearColorTarget(mDstCopyFbo->width, mDstCopyFbo->height);
-    GL_CHECK(glViewport(0, 0, fboW, fboH));
-    GL_CHECK(glScissor(x, y, width, height));
+    if (x != 0 || y != 0 || dstCopyFbo->width != static_cast<uint32_t>(width) || dstCopyFbo->height != static_cast<uint32_t>(height)) clearColorTarget(state, dstCopyFbo->width, dstCopyFbo->height);
+    state.viewport(0, 0, fboW, fboH);
+    state.scissor(x, y, width, height);
     GL_CHECK(glBlitFramebuffer(x, y, x + width, y + height, x, y, x + width, y + height, GL_COLOR_BUFFER_BIT, GL_NEAREST));
 #endif
-    GL_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, mDstFbo->fbo));
-    const auto& dstVp = mDstFbo->viewport;
-    GL_CHECK(glViewport(0, 0, dstVp.w(), dstVp.h()));
+    state.bindFramebuffer(GL_FRAMEBUFFER, dstFbo->fbo);
+    const auto& dstVp = dstFbo->viewport;
+    state.viewport(0, 0, dstVp.w(), dstVp.h());
 
-    GL_CHECK(glBlendFunc(GL_ONE, GL_ZERO));
-    GlRenderTask::run();
-    GL_CHECK(glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA));
+    state.blendFunc(GL_ONE, GL_ZERO);
+    GlRenderTask::run(state);
+    state.blendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 
@@ -495,74 +410,60 @@ void GlDirectBlendTask::run()
 /* GlComplexBlendTask Class Implementation                              */
 /************************************************************************/
 
-
-GlComplexBlendTask::GlComplexBlendTask(GlProgram* program, GlRenderTarget* dstFbo, GlRenderTarget* dstCopyFbo, GlRenderTask* stencilTask, GlComposeTask* composeTask)
- : GlRenderTask(program), mDstFbo(dstFbo), mDstCopyFbo(dstCopyFbo), mStencilTask(stencilTask), mComposeTask(composeTask)
- {
- }
-
-
-GlComplexBlendTask::~GlComplexBlendTask()
+void GlComplexBlendTask::run(GlStateCache& state)
 {
-    delete mStencilTask;
-    delete mComposeTask;
-}
+    composeTask->run(state);
 
-
-void GlComplexBlendTask::run()
-{
-    mComposeTask->run();
-
-    const auto& vp = getViewport();
-    const auto width = mDstFbo->width;
-    const auto height = mDstFbo->height;
+    const auto width = dstFbo->width;
+    const auto height = dstFbo->height;
     if (width <= 0 || height <= 0) return;
 
-    GL_CHECK(glBindFramebuffer(GL_READ_FRAMEBUFFER, mDstFbo->fbo));
-    GL_CHECK(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mDstCopyFbo->resolvedFbo));
+    state.bindFramebuffer(GL_READ_FRAMEBUFFER, dstFbo->fbo);
+    state.bindFramebuffer(GL_DRAW_FRAMEBUFFER, dstCopyFbo->resolvedFbo);
+
+    const auto& vp = viewport;
 
 #if defined(THORVG_GL_TARGET_GL)
-    const auto& dstVp = mDstFbo->viewport;
+    const auto& dstVp = dstFbo->viewport;
     // copy the current fbo to the dstCopyFbo
-    GL_CHECK(glViewport(0, 0, dstVp.w(), dstVp.h()));
-    GL_CHECK(glScissor(0, 0, dstVp.w(), dstVp.h()));
-    GL_CHECK(glBlitFramebuffer(vp.min.x, vp.min.y, vp.max.x, vp.max.y, 0, 0, vp.w(), vp.h(), GL_COLOR_BUFFER_BIT, GL_LINEAR));
+    state.viewport(0, 0, dstVp.w(), dstVp.h());
+    state.scissor(0, 0, dstVp.w(), dstVp.h());
+    GL_CHECK(glBlitFramebuffer(vp.xMin, vp.yMin, vp.xMax, vp.yMax, 0, 0, vp.w(), vp.h(), GL_COLOR_BUFFER_BIT, GL_LINEAR));
 #else // TODO: create partial buffer when MSAA is disabled
-    if (vp.min.x != 0 || vp.min.y != 0 || mDstCopyFbo->width != static_cast<uint32_t>(vp.w()) || mDstCopyFbo->height != static_cast<uint32_t>(vp.h())) clearColorTarget(mDstCopyFbo->width, mDstCopyFbo->height);
-    GL_CHECK(glViewport(0, 0, width, height));
-    GL_CHECK(glScissor(vp.min.x, vp.min.y, vp.w(), vp.h()));
-    GL_CHECK(glBlitFramebuffer(vp.min.x, vp.min.y, vp.max.x, vp.max.y, vp.min.x, vp.min.y, vp.max.x, vp.max.y, GL_COLOR_BUFFER_BIT, GL_NEAREST));
+    if (vp.xMin != 0 || vp.yMin != 0 || dstCopyFbo->width != static_cast<uint32_t>(vp.w()) || dstCopyFbo->height != static_cast<uint32_t>(vp.h())) clearColorTarget(state, dstCopyFbo->width, dstCopyFbo->height);
+    state.viewport(0, 0, width, height);
+    state.scissor(vp.xMin, vp.yMin, vp.w(), vp.h());
+    GL_CHECK(glBlitFramebuffer(vp.xMin, vp.yMin, vp.xMax, vp.yMax, vp.xMin, vp.yMin, vp.xMax, vp.yMax, GL_COLOR_BUFFER_BIT, GL_NEAREST));
 #endif
 
-    GL_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, mDstFbo->fbo));
+    state.bindFramebuffer(GL_FRAMEBUFFER, dstFbo->fbo);
 
-    GL_CHECK(glEnable(GL_STENCIL_TEST));
-    GL_CHECK(glColorMask(0, 0, 0, 0));
-    GL_CHECK(glStencilFuncSeparate(GL_FRONT, GL_ALWAYS, 0x0, 0xFF));
-    GL_CHECK(glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_KEEP, GL_INCR_WRAP));
+    state.enable(GL_STENCIL_TEST);
+    state.colorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+    state.stencilFuncSeparate(GL_FRONT, GL_ALWAYS, 0x0, 0xFF);
+    state.stencilOpSeparate(GL_FRONT, GL_KEEP, GL_KEEP, GL_INCR_WRAP);
 
-    GL_CHECK(glStencilFuncSeparate(GL_BACK, GL_ALWAYS, 0x0, 0xFF));
-    GL_CHECK(glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_DECR_WRAP));
+    state.stencilFuncSeparate(GL_BACK, GL_ALWAYS, 0x0, 0xFF);
+    state.stencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_DECR_WRAP);
 
+    stencilTask->run(state);
 
-    mStencilTask->run();
+    state.colorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+    state.stencilFunc(GL_NOTEQUAL, 0x0, 0xFF);
+    state.stencilOp(GL_REPLACE, GL_KEEP, GL_REPLACE);
 
-    GL_CHECK(glColorMask(1, 1, 1, 1));
-    GL_CHECK(glStencilFunc(GL_NOTEQUAL, 0x0, 0xFF));
-    GL_CHECK(glStencilOp(GL_REPLACE, GL_KEEP, GL_REPLACE));
+    state.blendFunc(GL_ONE, GL_ZERO);
 
-    GL_CHECK(glBlendFunc(GL_ONE, GL_ZERO));
+    GlRenderTask::run(state);
 
-    GlRenderTask::run();
-
-    GL_CHECK(glDisable(GL_STENCIL_TEST));
-    GL_CHECK(glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA));
+    state.disable(GL_STENCIL_TEST);
+    state.blendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 
 void GlComplexBlendTask::normalizeDrawDepth(int32_t maxDepth)
 {
-    mStencilTask->normalizeDrawDepth(maxDepth);
+    stencilTask->normalizeDrawDepth(maxDepth);
     GlRenderTask::normalizeDrawDepth(maxDepth);
 }
 
@@ -570,146 +471,122 @@ void GlComplexBlendTask::normalizeDrawDepth(int32_t maxDepth)
 /* GlGaussianBlurTask Class Implementation                              */
 /************************************************************************/
 
-void GlGaussianBlurTask::run()
+void GlGaussianBlurTask::run(GlStateCache& state)
 {
-    const auto vp = getViewport();
-    const auto width = mDstFbo->width;
-    const auto height = mDstFbo->height;
+    const auto width = dstFbo->width;
+    const auto height = dstFbo->height;
 
-    // get targets handles
-    GLuint dstCopyTexId0 = mDstCopyFbo0->colorTex;
-    GLuint dstCopyTexId1 = mDstCopyFbo1->colorTex;
-    // get programs properties
-    GlProgram* programHorz = horzTask->getProgram();
-    GlProgram* programVert = vertTask->getProgram();
-    GLint horzSrcTextureLoc = programHorz->getUniformLocation("uSrcTexture");
-    GLint vertSrcTextureLoc = programVert->getUniformLocation("uSrcTexture");
-
-    GL_CHECK(glViewport(0, 0, width, height));
-    GL_CHECK(glScissor(0, 0, width, height));
+    state.viewport(0, 0, width, height);
+    state.scissor(0, 0, width, height);
     // we need to make a full copy of dst to intermediate buffers to be sure that they don’t contain prev data.
-    GL_CHECK(glBindFramebuffer(GL_READ_FRAMEBUFFER, mDstFbo->fbo));
-    GL_CHECK(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mDstCopyFbo0->resolvedFbo));
+    state.bindFramebuffer(GL_READ_FRAMEBUFFER, dstFbo->fbo);
+    state.bindFramebuffer(GL_DRAW_FRAMEBUFFER, dstCopyFbo0->resolvedFbo);
     GL_CHECK(glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST));
-    GL_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, mDstFbo->fbo));
+    state.bindFramebuffer(GL_FRAMEBUFFER, dstFbo->fbo);
 
-    GL_CHECK(glDisable(GL_BLEND));
-    GL_CHECK(glDepthFunc(GL_ALWAYS));
+    state.disable(GL_BLEND);
+    state.depthFunc(GL_ALWAYS);
     if (effect->direction == 0) {
-        GL_CHECK(glBindFramebuffer(GL_READ_FRAMEBUFFER, mDstFbo->fbo));
-        GL_CHECK(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mDstCopyFbo1->resolvedFbo));
+        state.bindFramebuffer(GL_READ_FRAMEBUFFER, dstFbo->fbo);
+        state.bindFramebuffer(GL_DRAW_FRAMEBUFFER, dstCopyFbo1->resolvedFbo);
         GL_CHECK(glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST));
         // horizontal blur
-        GL_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, mDstCopyFbo1->resolvedFbo));
-        horzTask->setViewport(vp);
-        horzTask->addBindResource({ 0, dstCopyTexId0, horzSrcTextureLoc });
-        horzTask->run();
+        state.bindFramebuffer(GL_FRAMEBUFFER, dstCopyFbo1->resolvedFbo);
+        horzTask->setViewport(viewport);
+        horzTask->addBindResource({0, dstCopyFbo0->colorTex, GlShaderUniform::SourceTexture});
+        horzTask->run(state);
         // vertical blur
-        GL_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, mDstFbo->fbo));
-        vertTask->setViewport(vp);
-        vertTask->addBindResource({ 0, dstCopyTexId1, vertSrcTextureLoc });
-        vertTask->run();
+        state.bindFramebuffer(GL_FRAMEBUFFER, dstFbo->fbo);
+        vertTask->setViewport(viewport);
+        vertTask->addBindResource({0, dstCopyFbo1->colorTex, GlShaderUniform::SourceTexture});
+        vertTask->run(state);
     } // horizontal
     else if (effect->direction == 1) {
-        horzTask->setViewport(vp);
-        horzTask->addBindResource({ 0, dstCopyTexId0, horzSrcTextureLoc });
-        horzTask->run();
+        horzTask->setViewport(viewport);
+        horzTask->addBindResource({0, dstCopyFbo0->colorTex, GlShaderUniform::SourceTexture});
+        horzTask->run(state);
     } // vertical
     else if (effect->direction == 2) {
-        vertTask->setViewport(vp);
-        vertTask->addBindResource({ 0, dstCopyTexId0, vertSrcTextureLoc });
-        vertTask->run();
+        vertTask->setViewport(viewport);
+        vertTask->addBindResource({0, dstCopyFbo0->colorTex, GlShaderUniform::SourceTexture});
+        vertTask->run(state);
     }
-    GL_CHECK(glDepthFunc(GL_GREATER));
-    GL_CHECK(glEnable(GL_BLEND));
+    state.depthFunc(GL_GREATER);
+    state.enable(GL_BLEND);
 }
 
 /************************************************************************/
 /* GlEffectDropShadowTask Class Implementation                          */
 /************************************************************************/
 
-void GlEffectDropShadowTask::run()
+void GlEffectDropShadowTask::run(GlStateCache& state)
 {
-    const auto vp = getViewport();
-    const auto width = mDstFbo->width;
-    const auto height = mDstFbo->height;
+    const auto width = dstFbo->width;
+    const auto height = dstFbo->height;
+;
+    addBindResource({0, dstCopyFbo0->colorTex, GlShaderUniform::SourceTexture});
+    addBindResource({1, dstCopyFbo1->colorTex, GlShaderUniform::BlurTexture});
 
-    // get targets handles
-    GLuint dstCopyTexId0 = mDstCopyFbo0->colorTex;
-    GLuint dstCopyTexId1 = mDstCopyFbo1->colorTex;
-    // get programs properties
-    GlProgram* programHorz = horzTask->getProgram();
-    GlProgram* programVert = vertTask->getProgram();
-    GLint horzSrcTextureLoc = programHorz->getUniformLocation("uSrcTexture");
-    GLint vertSrcTextureLoc = programVert->getUniformLocation("uSrcTexture");
-
-    GLint srcTextureLoc = getProgram()->getUniformLocation("uSrcTexture");
-    GLint blrTextureLoc = getProgram()->getUniformLocation("uBlrTexture");
-    addBindResource({ 0, dstCopyTexId0, srcTextureLoc });
-    addBindResource({ 1, dstCopyTexId1, blrTextureLoc });
-
-    GL_CHECK(glViewport(0, 0, width, height));
-    GL_CHECK(glScissor(0, 0, width, height));
+    state.viewport(0, 0, width, height);
+    state.scissor(0, 0, width, height);
 
     // we need to make a full copy of dst to intermediate buffers to be sure that they don’t contain prev data.
-    GL_CHECK(glBindFramebuffer(GL_READ_FRAMEBUFFER, mDstFbo->fbo));
-    GL_CHECK(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mDstCopyFbo0->resolvedFbo));
+    state.bindFramebuffer(GL_READ_FRAMEBUFFER, dstFbo->fbo);
+    state.bindFramebuffer(GL_DRAW_FRAMEBUFFER, dstCopyFbo0->resolvedFbo);
     GL_CHECK(glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST));
-    GL_CHECK(glBindFramebuffer(GL_READ_FRAMEBUFFER, mDstFbo->fbo));
-    GL_CHECK(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mDstCopyFbo1->resolvedFbo));
+    state.bindFramebuffer(GL_READ_FRAMEBUFFER, dstFbo->fbo);
+    state.bindFramebuffer(GL_DRAW_FRAMEBUFFER, dstCopyFbo1->resolvedFbo);
     GL_CHECK(glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST));
-    
-    GL_CHECK(glDisable(GL_BLEND));
-    GL_CHECK(glDepthFunc(GL_ALWAYS));
+
+    state.disable(GL_BLEND);
+    state.depthFunc(GL_ALWAYS);
     // when sigma is 0, no blur is applied, and the original image is used directly as the shadow.
     if (!tvg::zero(effect->sigma)) {
         // horizontal blur
-        GL_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, mDstCopyFbo0->resolvedFbo));
-        horzTask->setViewport(vp);
-        horzTask->addBindResource({ 0, dstCopyTexId1, horzSrcTextureLoc });
-        horzTask->run();
+        state.bindFramebuffer(GL_FRAMEBUFFER, dstCopyFbo0->resolvedFbo);
+        horzTask->setViewport(viewport);
+        horzTask->addBindResource({0, dstCopyFbo1->colorTex, GlShaderUniform::SourceTexture});
+        horzTask->run(state);
         // vertical blur
-        GL_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, mDstCopyFbo1->resolvedFbo));
-        vertTask->setViewport(vp);
-        vertTask->addBindResource({ 0, dstCopyTexId0, vertSrcTextureLoc });
-        vertTask->run();
+        state.bindFramebuffer(GL_FRAMEBUFFER, dstCopyFbo1->resolvedFbo);
+        vertTask->setViewport(viewport);
+        vertTask->addBindResource({0, dstCopyFbo0->colorTex, GlShaderUniform::SourceTexture});
+        vertTask->run(state);
         // copy original image to intermediate buffer
-        GL_CHECK(glBindFramebuffer(GL_READ_FRAMEBUFFER, mDstFbo->fbo));
-        GL_CHECK(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mDstCopyFbo0->resolvedFbo));
+        state.bindFramebuffer(GL_READ_FRAMEBUFFER, dstFbo->fbo);
+        state.bindFramebuffer(GL_DRAW_FRAMEBUFFER, dstCopyFbo0->resolvedFbo);
         GL_CHECK(glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST));
     }
     // run drop shadow effect
-    GL_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, mDstFbo->fbo));
-    GlRenderTask::run();
-    GL_CHECK(glDepthFunc(GL_GREATER));
-    GL_CHECK(glEnable(GL_BLEND));
+    state.bindFramebuffer(GL_FRAMEBUFFER, dstFbo->fbo);
+    GlRenderTask::run(state);
+    state.depthFunc(GL_GREATER);
+    state.enable(GL_BLEND);
 }
 
 /************************************************************************/
-/* GlEffectColorTransformTask Class Implementation                      */
+/* GlEffectTask Class Implementation                                    */
 /************************************************************************/
 
-void GlEffectColorTransformTask::run()
+void GlEffectTask::run(GlStateCache& state)
 {
-    const auto width = mDstFbo->width;
-    const auto height = mDstFbo->height;
+    const auto width = dstFbo->width;
+    const auto height = dstFbo->height;
     // get targets handles and pass to shader
-    GLuint dstCopyTexId = mDstCopyFbo->colorTex;
-    GLint srcTextureLoc = getProgram()->getUniformLocation("uSrcTexture");
-    addBindResource({ 0, dstCopyTexId, srcTextureLoc });
+    addBindResource({0, dstCopyFbo->colorTex, GlShaderUniform::SourceTexture});
 
-    GL_CHECK(glViewport(0, 0, width, height));
-    GL_CHECK(glScissor(0, 0, width, height));
+    state.viewport(0, 0, width, height);
+    state.scissor(0, 0, width, height);
     // we need to make a full copy of dst to intermediate buffers to be sure that they don’t contain prev data.
-    GL_CHECK(glBindFramebuffer(GL_READ_FRAMEBUFFER, mDstFbo->fbo));
-    GL_CHECK(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mDstCopyFbo->resolvedFbo));
+    state.bindFramebuffer(GL_READ_FRAMEBUFFER, dstFbo->fbo);
+    state.bindFramebuffer(GL_DRAW_FRAMEBUFFER, dstCopyFbo->resolvedFbo);
     GL_CHECK(glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST));
-    GL_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, mDstFbo->fbo));
+    state.bindFramebuffer(GL_FRAMEBUFFER, dstFbo->fbo);
 
-    // run transform
-    GL_CHECK(glDisable(GL_BLEND));
-    GL_CHECK(glDepthFunc(GL_ALWAYS));
-    GlRenderTask::run();
-    GL_CHECK(glDepthFunc(GL_GREATER));
-    GL_CHECK(glEnable(GL_BLEND));
+    // run the single-pass effect
+    state.disable(GL_BLEND);
+    state.depthFunc(GL_ALWAYS);
+    GlRenderTask::run(state);
+    state.depthFunc(GL_GREATER);
+    state.enable(GL_BLEND);
 }

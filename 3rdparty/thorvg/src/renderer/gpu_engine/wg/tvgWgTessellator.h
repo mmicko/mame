@@ -24,7 +24,8 @@
 #define _TVG_WG_TESSELLATOR_H_
 
 #include "tvgRender.h"
-#include "tvgWgGeometry.h"
+#include "tvgGpuCommon.h"
+#include "tvgWgMesh.h"
 
 #define MIN_WG_STROKE_WIDTH 1.0f
 #define MIN_WG_STROKE_ALPHA 0.25f
@@ -37,12 +38,18 @@ class WgStroker
         Point firstPtDir;
         Point prevPt;
         Point prevPtDir;
+        float firstLength;
+        float prevLength;
+        uint32_t firstIndex;
+        uint32_t prevIndex;
     };
 public:
-    WgStroker(WgMeshData* buffer, float width, StrokeCap cap, StrokeJoin join = StrokeJoin::Bevel, float miterLimit = 4.0f, float qualityScale = 1.0f);
-    void run(const RenderPath& path);
+    WgStroker(WgMesh* buffer, float width, StrokeCap cap, StrokeJoin join = StrokeJoin::Bevel, float miterLimit = 4.0f, float qualityScale = 1.0f);
+    void run(const RenderPath& path, bool thinFill = false);
     RenderRegion bounds() const;
     BBox getBBox() const;
+    bool overlapFree;
+
 private:
     float radius() const
     {
@@ -53,21 +60,24 @@ private:
     void lineTo(const Point& curr);
     void cubicTo(const Point& cnt1, const Point& cnt2, const Point& end);
     void close();
-    void join(const Point& dir);
-    void round(const Point& prev, const Point& curr, const Point& center);
-    void miter(const Point& prev, const Point& curr, const Point& center);
-    void bevel(const Point& prev, const Point& curr, const Point& center);
+    void join(const Point& dir, float len, uint32_t index);
+    void round(const Point& prev, const Point& curr, const Point& center, const Point& apex);
+    void miter(const Point& prev, const Point& curr, const Point& center, const Point& apex);
+    void bevel(const Point& prev, const Point& curr, const Point& apex);
     void square(const Point& p, const Point& outDir);
     void squarePoint(const Point& p);
     void round(const Point& p, const Point& outDir);
     void roundPoint(const Point& p);
 
-    WgMeshData* mBuffer;
+    WgMesh* mBuffer;
     float mWidth = 0.0f;
     float mMiterLimit = 4.f;
     float mQualityScale = 1.0f;
     StrokeCap mCap = StrokeCap::Square;
     StrokeJoin mJoin = StrokeJoin::Bevel;
+    bool mThinFill;
+    uint8_t mDirections;  // +x, -x, +y, -y of the tessellated edges
+    GpuConvexProbe mProbe;
     State mState = {};
     Point mLeftTop = {0.0f, 0.0f};
     Point mRightBottom = {0.0f, 0.0f};
@@ -76,7 +86,7 @@ private:
 class WgBWTessellator
 {
 public:
-    WgBWTessellator(WgMeshData* buffer);
+    WgBWTessellator(WgMesh* buffer);
     void tessellate(const RenderPath& path);
     RenderRegion bounds() const;
     BBox getBBox() const;
@@ -85,7 +95,7 @@ private:
     uint32_t pushVertex(float x, float y);
     void pushTriangle(uint32_t a, uint32_t b, uint32_t c);
 
-    WgMeshData* mBuffer;
+    WgMesh* mBuffer;
     BBox bbox = {};
 };
 

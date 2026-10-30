@@ -233,6 +233,32 @@ static int _toOpacity(const char* str)
     return 255;
 }
 
+static SvgFontWeight _toFontWeight(const char* str)
+{
+    if (STR_AS(str, "normal")) return SvgFontWeight::Normal;
+    if (STR_AS(str, "bold")) return SvgFontWeight::Bold;
+    if (STR_AS(str, "inherit")) return SvgFontWeight::Inherit;
+    if (STR_AS(str, "bolder")) return SvgFontWeight::Bolder;
+    if (STR_AS(str, "lighter")) return SvgFontWeight::Lighter;
+
+    char* end = nullptr;
+    auto weight = strtol(str, &end, 10);
+    end = (char*)svgUtilSkipWhiteSpace(end, nullptr);
+    if (*end) return SvgFontWeight::Invalid;
+
+    switch (weight) {
+        case 100: return SvgFontWeight::Weight100;
+        case 200: return SvgFontWeight::Weight200;
+        case 300: return SvgFontWeight::Weight300;
+        case 400: return SvgFontWeight::Normal;
+        case 500: return SvgFontWeight::Weight500;
+        case 600: return SvgFontWeight::Weight600;
+        case 700: return SvgFontWeight::Bold;
+        case 800: return SvgFontWeight::Weight800;
+        case 900: return SvgFontWeight::Weight900;
+        default: return SvgFontWeight::Invalid;
+    }
+}
 
 static SvgMaskType _toMaskType(const char* str)
 {
@@ -371,9 +397,9 @@ _PARSE_TAG(BlendMethod, blendMode, BlendMode, blendModeTags, BlendMethod::Normal
  * Initial:    none
  * https://www.w3.org/TR/SVG/painting.html
  */
-static void _parseDashArray(SvgParserContext* ctx, const char* str, SvgDash* dash)
+static bool _parseDashArray(SvgParserContext* ctx, const char* str, SvgDash* dash)
 {
-    if (!strncmp(str, "none", 4)) return;
+    if (STR_AS(str, "none")) return true;
 
     char *end = nullptr;
 
@@ -383,7 +409,7 @@ static void _parseDashArray(SvgParserContext* ctx, const char* str, SvgDash* das
         if (str == end) break;
         if (parsedValue < 0.0f) {
             dash->array.reset();
-            return;
+            return false;
         }
         if (*end == '%') {
             ++end;
@@ -394,6 +420,7 @@ static void _parseDashArray(SvgParserContext* ctx, const char* str, SvgDash* das
         dash->array.push(parsedValue);
         str = end;
     }
+    return !dash->array.empty();
 }
 
 
@@ -461,209 +488,226 @@ static unsigned char _parseColor(const char* value, char** end)
 }
 
 
+// sorted by name
 static constexpr struct
 {
     const char* name;
-    unsigned int value;
+    tvg::RGB value;
 } colors[] = {
-    { "aliceblue", 0xfff0f8ff },
-    { "antiquewhite", 0xfffaebd7 },
-    { "aqua", 0xff00ffff },
-    { "aquamarine", 0xff7fffd4 },
-    { "azure", 0xfff0ffff },
-    { "beige", 0xfff5f5dc },
-    { "bisque", 0xffffe4c4 },
-    { "black", 0xff000000 },
-    { "blanchedalmond", 0xffffebcd },
-    { "blue", 0xff0000ff },
-    { "blueviolet", 0xff8a2be2 },
-    { "brown", 0xffa52a2a },
-    { "burlywood", 0xffdeb887 },
-    { "cadetblue", 0xff5f9ea0 },
-    { "chartreuse", 0xff7fff00 },
-    { "chocolate", 0xffd2691e },
-    { "coral", 0xffff7f50 },
-    { "cornflowerblue", 0xff6495ed },
-    { "cornsilk", 0xfffff8dc },
-    { "crimson", 0xffdc143c },
-    { "cyan", 0xff00ffff },
-    { "darkblue", 0xff00008b },
-    { "darkcyan", 0xff008b8b },
-    { "darkgoldenrod", 0xffb8860b },
-    { "darkgray", 0xffa9a9a9 },
-    { "darkgrey", 0xffa9a9a9 },
-    { "darkgreen", 0xff006400 },
-    { "darkkhaki", 0xffbdb76b },
-    { "darkmagenta", 0xff8b008b },
-    { "darkolivegreen", 0xff556b2f },
-    { "darkorange", 0xffff8c00 },
-    { "darkorchid", 0xff9932cc },
-    { "darkred", 0xff8b0000 },
-    { "darksalmon", 0xffe9967a },
-    { "darkseagreen", 0xff8fbc8f },
-    { "darkslateblue", 0xff483d8b },
-    { "darkslategray", 0xff2f4f4f },
-    { "darkslategrey", 0xff2f4f4f },
-    { "darkturquoise", 0xff00ced1 },
-    { "darkviolet", 0xff9400d3 },
-    { "deeppink", 0xffff1493 },
-    { "deepskyblue", 0xff00bfff },
-    { "dimgray", 0xff696969 },
-    { "dimgrey", 0xff696969 },
-    { "dodgerblue", 0xff1e90ff },
-    { "firebrick", 0xffb22222 },
-    { "floralwhite", 0xfffffaf0 },
-    { "forestgreen", 0xff228b22 },
-    { "fuchsia", 0xffff00ff },
-    { "gainsboro", 0xffdcdcdc },
-    { "ghostwhite", 0xfff8f8ff },
-    { "gold", 0xffffd700 },
-    { "goldenrod", 0xffdaa520 },
-    { "gray", 0xff808080 },
-    { "grey", 0xff808080 },
-    { "green", 0xff008000 },
-    { "greenyellow", 0xffadff2f },
-    { "honeydew", 0xfff0fff0 },
-    { "hotpink", 0xffff69b4 },
-    { "indianred", 0xffcd5c5c },
-    { "indigo", 0xff4b0082 },
-    { "ivory", 0xfffffff0 },
-    { "khaki", 0xfff0e68c },
-    { "lavender", 0xffe6e6fa },
-    { "lavenderblush", 0xfffff0f5 },
-    { "lawngreen", 0xff7cfc00 },
-    { "lemonchiffon", 0xfffffacd },
-    { "lightblue", 0xffadd8e6 },
-    { "lightcoral", 0xfff08080 },
-    { "lightcyan", 0xffe0ffff },
-    { "lightgoldenrodyellow", 0xfffafad2 },
-    { "lightgray", 0xffd3d3d3 },
-    { "lightgrey", 0xffd3d3d3 },
-    { "lightgreen", 0xff90ee90 },
-    { "lightpink", 0xffffb6c1 },
-    { "lightsalmon", 0xffffa07a },
-    { "lightseagreen", 0xff20b2aa },
-    { "lightskyblue", 0xff87cefa },
-    { "lightslategray", 0xff778899 },
-    { "lightslategrey", 0xff778899 },
-    { "lightsteelblue", 0xffb0c4de },
-    { "lightyellow", 0xffffffe0 },
-    { "lime", 0xff00ff00 },
-    { "limegreen", 0xff32cd32 },
-    { "linen", 0xfffaf0e6 },
-    { "magenta", 0xffff00ff },
-    { "maroon", 0xff800000 },
-    { "mediumaquamarine", 0xff66cdaa },
-    { "mediumblue", 0xff0000cd },
-    { "mediumorchid", 0xffba55d3 },
-    { "mediumpurple", 0xff9370d8 },
-    { "mediumseagreen", 0xff3cb371 },
-    { "mediumslateblue", 0xff7b68ee },
-    { "mediumspringgreen", 0xff00fa9a },
-    { "mediumturquoise", 0xff48d1cc },
-    { "mediumvioletred", 0xffc71585 },
-    { "midnightblue", 0xff191970 },
-    { "mintcream", 0xfff5fffa },
-    { "mistyrose", 0xffffe4e1 },
-    { "moccasin", 0xffffe4b5 },
-    { "navajowhite", 0xffffdead },
-    { "navy", 0xff000080 },
-    { "oldlace", 0xfffdf5e6 },
-    { "olive", 0xff808000 },
-    { "olivedrab", 0xff6b8e23 },
-    { "orange", 0xffffa500 },
-    { "orangered", 0xffff4500 },
-    { "orchid", 0xffda70d6 },
-    { "palegoldenrod", 0xffeee8aa },
-    { "palegreen", 0xff98fb98 },
-    { "paleturquoise", 0xffafeeee },
-    { "palevioletred", 0xffd87093 },
-    { "papayawhip", 0xffffefd5 },
-    { "peachpuff", 0xffffdab9 },
-    { "peru", 0xffcd853f },
-    { "pink", 0xffffc0cb },
-    { "plum", 0xffdda0dd },
-    { "powderblue", 0xffb0e0e6 },
-    { "purple", 0xff800080 },
-    { "red", 0xffff0000 },
-    { "rosybrown", 0xffbc8f8f },
-    { "royalblue", 0xff4169e1 },
-    { "saddlebrown", 0xff8b4513 },
-    { "salmon", 0xfffa8072 },
-    { "sandybrown", 0xfff4a460 },
-    { "seagreen", 0xff2e8b57 },
-    { "seashell", 0xfffff5ee },
-    { "sienna", 0xffa0522d },
-    { "silver", 0xffc0c0c0 },
-    { "skyblue", 0xff87ceeb },
-    { "slateblue", 0xff6a5acd },
-    { "slategray", 0xff708090 },
-    { "slategrey", 0xff708090 },
-    { "snow", 0xfffffafa },
-    { "springgreen", 0xff00ff7f },
-    { "steelblue", 0xff4682b4 },
-    { "tan", 0xffd2b48c },
-    { "teal", 0xff008080 },
-    { "thistle", 0xffd8bfd8 },
-    { "tomato", 0xffff6347 },
-    { "turquoise", 0xff40e0d0 },
-    { "violet", 0xffee82ee },
-    { "wheat", 0xfff5deb3 },
-    { "white", 0xffffffff },
-    { "whitesmoke", 0xfff5f5f5 },
-    { "yellow", 0xffffff00 },
-    { "yellowgreen", 0xff9acd32 }
+    {"aliceblue", {0xf0, 0xf8, 0xff}},
+    {"antiquewhite", {0xfa, 0xeb, 0xd7}},
+    {"aqua", {0x00, 0xff, 0xff}},
+    {"aquamarine", {0x7f, 0xff, 0xd4}},
+    {"azure", {0xf0, 0xff, 0xff}},
+    {"beige", {0xf5, 0xf5, 0xdc}},
+    {"bisque", {0xff, 0xe4, 0xc4}},
+    {"black", {0x00, 0x00, 0x00}},
+    {"blanchedalmond", {0xff, 0xeb, 0xcd}},
+    {"blue", {0x00, 0x00, 0xff}},
+    {"blueviolet", {0x8a, 0x2b, 0xe2}},
+    {"brown", {0xa5, 0x2a, 0x2a}},
+    {"burlywood", {0xde, 0xb8, 0x87}},
+    {"cadetblue", {0x5f, 0x9e, 0xa0}},
+    {"chartreuse", {0x7f, 0xff, 0x00}},
+    {"chocolate", {0xd2, 0x69, 0x1e}},
+    {"coral", {0xff, 0x7f, 0x50}},
+    {"cornflowerblue", {0x64, 0x95, 0xed}},
+    {"cornsilk", {0xff, 0xf8, 0xdc}},
+    {"crimson", {0xdc, 0x14, 0x3c}},
+    {"cyan", {0x00, 0xff, 0xff}},
+    {"darkblue", {0x00, 0x00, 0x8b}},
+    {"darkcyan", {0x00, 0x8b, 0x8b}},
+    {"darkgoldenrod", {0xb8, 0x86, 0x0b}},
+    {"darkgray", {0xa9, 0xa9, 0xa9}},
+    {"darkgreen", {0x00, 0x64, 0x00}},
+    {"darkgrey", {0xa9, 0xa9, 0xa9}},
+    {"darkkhaki", {0xbd, 0xb7, 0x6b}},
+    {"darkmagenta", {0x8b, 0x00, 0x8b}},
+    {"darkolivegreen", {0x55, 0x6b, 0x2f}},
+    {"darkorange", {0xff, 0x8c, 0x00}},
+    {"darkorchid", {0x99, 0x32, 0xcc}},
+    {"darkred", {0x8b, 0x00, 0x00}},
+    {"darksalmon", {0xe9, 0x96, 0x7a}},
+    {"darkseagreen", {0x8f, 0xbc, 0x8f}},
+    {"darkslateblue", {0x48, 0x3d, 0x8b}},
+    {"darkslategray", {0x2f, 0x4f, 0x4f}},
+    {"darkslategrey", {0x2f, 0x4f, 0x4f}},
+    {"darkturquoise", {0x00, 0xce, 0xd1}},
+    {"darkviolet", {0x94, 0x00, 0xd3}},
+    {"deeppink", {0xff, 0x14, 0x93}},
+    {"deepskyblue", {0x00, 0xbf, 0xff}},
+    {"dimgray", {0x69, 0x69, 0x69}},
+    {"dimgrey", {0x69, 0x69, 0x69}},
+    {"dodgerblue", {0x1e, 0x90, 0xff}},
+    {"firebrick", {0xb2, 0x22, 0x22}},
+    {"floralwhite", {0xff, 0xfa, 0xf0}},
+    {"forestgreen", {0x22, 0x8b, 0x22}},
+    {"fuchsia", {0xff, 0x00, 0xff}},
+    {"gainsboro", {0xdc, 0xdc, 0xdc}},
+    {"ghostwhite", {0xf8, 0xf8, 0xff}},
+    {"gold", {0xff, 0xd7, 0x00}},
+    {"goldenrod", {0xda, 0xa5, 0x20}},
+    {"gray", {0x80, 0x80, 0x80}},
+    {"green", {0x00, 0x80, 0x00}},
+    {"greenyellow", {0xad, 0xff, 0x2f}},
+    {"grey", {0x80, 0x80, 0x80}},
+    {"honeydew", {0xf0, 0xff, 0xf0}},
+    {"hotpink", {0xff, 0x69, 0xb4}},
+    {"indianred", {0xcd, 0x5c, 0x5c}},
+    {"indigo", {0x4b, 0x00, 0x82}},
+    {"ivory", {0xff, 0xff, 0xf0}},
+    {"khaki", {0xf0, 0xe6, 0x8c}},
+    {"lavender", {0xe6, 0xe6, 0xfa}},
+    {"lavenderblush", {0xff, 0xf0, 0xf5}},
+    {"lawngreen", {0x7c, 0xfc, 0x00}},
+    {"lemonchiffon", {0xff, 0xfa, 0xcd}},
+    {"lightblue", {0xad, 0xd8, 0xe6}},
+    {"lightcoral", {0xf0, 0x80, 0x80}},
+    {"lightcyan", {0xe0, 0xff, 0xff}},
+    {"lightgoldenrodyellow", {0xfa, 0xfa, 0xd2}},
+    {"lightgray", {0xd3, 0xd3, 0xd3}},
+    {"lightgreen", {0x90, 0xee, 0x90}},
+    {"lightgrey", {0xd3, 0xd3, 0xd3}},
+    {"lightpink", {0xff, 0xb6, 0xc1}},
+    {"lightsalmon", {0xff, 0xa0, 0x7a}},
+    {"lightseagreen", {0x20, 0xb2, 0xaa}},
+    {"lightskyblue", {0x87, 0xce, 0xfa}},
+    {"lightslategray", {0x77, 0x88, 0x99}},
+    {"lightslategrey", {0x77, 0x88, 0x99}},
+    {"lightsteelblue", {0xb0, 0xc4, 0xde}},
+    {"lightyellow", {0xff, 0xff, 0xe0}},
+    {"lime", {0x00, 0xff, 0x00}},
+    {"limegreen", {0x32, 0xcd, 0x32}},
+    {"linen", {0xfa, 0xf0, 0xe6}},
+    {"magenta", {0xff, 0x00, 0xff}},
+    {"maroon", {0x80, 0x00, 0x00}},
+    {"mediumaquamarine", {0x66, 0xcd, 0xaa}},
+    {"mediumblue", {0x00, 0x00, 0xcd}},
+    {"mediumorchid", {0xba, 0x55, 0xd3}},
+    {"mediumpurple", {0x93, 0x70, 0xdb}},
+    {"mediumseagreen", {0x3c, 0xb3, 0x71}},
+    {"mediumslateblue", {0x7b, 0x68, 0xee}},
+    {"mediumspringgreen", {0x00, 0xfa, 0x9a}},
+    {"mediumturquoise", {0x48, 0xd1, 0xcc}},
+    {"mediumvioletred", {0xc7, 0x15, 0x85}},
+    {"midnightblue", {0x19, 0x19, 0x70}},
+    {"mintcream", {0xf5, 0xff, 0xfa}},
+    {"mistyrose", {0xff, 0xe4, 0xe1}},
+    {"moccasin", {0xff, 0xe4, 0xb5}},
+    {"navajowhite", {0xff, 0xde, 0xad}},
+    {"navy", {0x00, 0x00, 0x80}},
+    {"oldlace", {0xfd, 0xf5, 0xe6}},
+    {"olive", {0x80, 0x80, 0x00}},
+    {"olivedrab", {0x6b, 0x8e, 0x23}},
+    {"orange", {0xff, 0xa5, 0x00}},
+    {"orangered", {0xff, 0x45, 0x00}},
+    {"orchid", {0xda, 0x70, 0xd6}},
+    {"palegoldenrod", {0xee, 0xe8, 0xaa}},
+    {"palegreen", {0x98, 0xfb, 0x98}},
+    {"paleturquoise", {0xaf, 0xee, 0xee}},
+    {"palevioletred", {0xdb, 0x70, 0x93}},
+    {"papayawhip", {0xff, 0xef, 0xd5}},
+    {"peachpuff", {0xff, 0xda, 0xb9}},
+    {"peru", {0xcd, 0x85, 0x3f}},
+    {"pink", {0xff, 0xc0, 0xcb}},
+    {"plum", {0xdd, 0xa0, 0xdd}},
+    {"powderblue", {0xb0, 0xe0, 0xe6}},
+    {"purple", {0x80, 0x00, 0x80}},
+    {"red", {0xff, 0x00, 0x00}},
+    {"rosybrown", {0xbc, 0x8f, 0x8f}},
+    {"royalblue", {0x41, 0x69, 0xe1}},
+    {"saddlebrown", {0x8b, 0x45, 0x13}},
+    {"salmon", {0xfa, 0x80, 0x72}},
+    {"sandybrown", {0xf4, 0xa4, 0x60}},
+    {"seagreen", {0x2e, 0x8b, 0x57}},
+    {"seashell", {0xff, 0xf5, 0xee}},
+    {"sienna", {0xa0, 0x52, 0x2d}},
+    {"silver", {0xc0, 0xc0, 0xc0}},
+    {"skyblue", {0x87, 0xce, 0xeb}},
+    {"slateblue", {0x6a, 0x5a, 0xcd}},
+    {"slategray", {0x70, 0x80, 0x90}},
+    {"slategrey", {0x70, 0x80, 0x90}},
+    {"snow", {0xff, 0xfa, 0xfa}},
+    {"springgreen", {0x00, 0xff, 0x7f}},
+    {"steelblue", {0x46, 0x82, 0xb4}},
+    {"tan", {0xd2, 0xb4, 0x8c}},
+    {"teal", {0x00, 0x80, 0x80}},
+    {"thistle", {0xd8, 0xbf, 0xd8}},
+    {"tomato", {0xff, 0x63, 0x47}},
+    {"turquoise", {0x40, 0xe0, 0xd0}},
+    {"violet", {0xee, 0x82, 0xee}},
+    {"wheat", {0xf5, 0xde, 0xb3}},
+    {"white", {0xff, 0xff, 0xff}},
+    {"whitesmoke", {0xf5, 0xf5, 0xf5}},
+    {"yellow", {0xff, 0xff, 0x00}},
+    {"yellowgreen", {0x9a, 0xcd, 0x32}}
 };
 
+static bool _parseHexColor(const char* str, size_t len, uint8_t& r, uint8_t& g, uint8_t& b)
+{
+    if (len != 4 && len != 7) return false;
 
-static bool _toColor(const char* str, uint8_t& r, uint8_t&g, uint8_t& b, char** ref)
+    auto value = [](char c) {
+        if (c >= '0' && c <= '9') return c - '0';
+        if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+        if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+        return -1;
+    };
+
+    int8_t hex[6];
+    auto count = len - 1;
+    for (size_t i = 0; i < count; ++i) {
+        hex[i] = value(str[i + 1]);
+        if (hex[i] < 0) return false;
+    }
+
+    if (len == 4) {
+        r = hex[0] * 17;
+        g = hex[1] * 17;
+        b = hex[2] * 17;
+    } else {
+        r = (hex[0] << 4) | hex[1];
+        g = (hex[2] << 4) | hex[3];
+        b = (hex[4] << 4) | hex[5];
+    }
+    return true;
+}
+
+static bool _parseColor(const char* str, bool alpha, uint8_t& r, uint8_t& g, uint8_t& b, uint8_t* a)
+{
+    char *red, *green, *blue;
+    auto tr = _parseColor(str + (alpha ? 5 : 4), &red);
+    if (!red || *red != ',') return false;
+    auto tg = _parseColor(red + 1, &green);
+    if (!green || *green != ',') return false;
+    auto tb = _parseColor(green + 1, &blue);
+
+    if (alpha) {
+        if (!blue || *blue != ',') return false;
+        char* end;
+        auto value = toFloat(blue + 1, &end);
+        end = (char*)svgUtilSkipWhiteSpace(end, nullptr);
+        if (!end || end[0] != ')' || end[1] != '\0' || value < 0.0f || value > 1.0f) return false;
+        if (a) *a = static_cast<uint8_t>(lrintf(value * 255.0f));
+    } else if (!blue || blue[0] != ')' || blue[1] != '\0') return false;
+
+    r = tr;
+    g = tg;
+    b = tb;
+
+    return true;
+}
+
+static bool _toColor(const char* str, uint8_t& r, uint8_t& g, uint8_t& b, uint8_t* a, char** ref = nullptr)
 {
     auto len = strlen(str);
 
-    if (len == 4 && str[0] == '#') {
-        //Case for "#456" should be interpreted as "#445566"
-        if (isxdigit(str[1]) && isxdigit(str[2]) && isxdigit(str[3])) {
-            char tmp[3] = { '\0', '\0', '\0' };
-            tmp[0] = str[1];
-            tmp[1] = str[1];
-            r = strtol(tmp, nullptr, 16);
-            tmp[0] = str[2];
-            tmp[1] = str[2];
-            g = strtol(tmp, nullptr, 16);
-            tmp[0] = str[3];
-            tmp[1] = str[3];
-            b = strtol(tmp, nullptr, 16);
-        }
-        return true;
-    } else if (len == 7 && str[0] == '#') {
-        if (isxdigit(str[1]) && isxdigit(str[2]) && isxdigit(str[3]) && isxdigit(str[4]) && isxdigit(str[5]) && isxdigit(str[6])) {
-            char tmp[3] = { '\0', '\0', '\0' };
-            tmp[0] = str[1];
-            tmp[1] = str[2];
-            r = strtol(tmp, nullptr, 16);
-            tmp[0] = str[3];
-            tmp[1] = str[4];
-            g = strtol(tmp, nullptr, 16);
-            tmp[0] = str[5];
-            tmp[1] = str[6];
-            b = strtol(tmp, nullptr, 16);
-        }
-        return true;
-    } else if (len >= 10 && (str[0] == 'r' || str[0] == 'R') && (str[1] == 'g' || str[1] == 'G') && (str[2] == 'b' || str[2] == 'B') && str[3] == '(' && str[len - 1] == ')') {
-        char *red, *green, *blue;
-        auto tr = _parseColor(str + 4, &red);
-        if (red && *red == ',') {
-            auto tg = _parseColor(red + 1, &green);
-            if (green && *green == ',') {
-                auto tb = _parseColor(green + 1, &blue);
-                if (blue && blue[0] == ')' && blue[1] == '\0') {
-                    r = tr;
-                    g = tg;
-                    b = tb;
-                }
-            }
-        }
-        return true;
+    if (str[0] == '#') {
+        return _parseHexColor(str, len, r, g, b);
+    } else if (len >= 10 && !strncasecmp(str, "rgb(", 4) && str[len - 1] == ')') {
+        return _parseColor(str, false, r, g, b, a);
+    } else if (len >= 12 && !strncasecmp(str, "rgba(", 5) && str[len - 1] == ')') {
+        return _parseColor(str, true, r, g, b, a);
     } else if (ref && len >= 3 && !strncmp(str, "url", 3)) {
         tvg::free(*ref);
         *ref = _idFromUrl((const char*)(str + 3));
@@ -694,14 +738,19 @@ static bool _toColor(const char* str, uint8_t& r, uint8_t&g, uint8_t& b, char** 
             }
         }
     } else {
-        //Handle named color
-        for (unsigned int i = 0; i < (sizeof(colors) / sizeof(colors[0])); i++) {
-            if (!strcasecmp(colors[i].name, str)) {
-                r = ((uint8_t*)(&(colors[i].value)))[2];
-                g = ((uint8_t*)(&(colors[i].value)))[1];
-                b = ((uint8_t*)(&(colors[i].value)))[0];
+        // Handle named color (binary search) - colors[] must remain sorted
+        int low = 0, high = static_cast<int>(sizeof(colors) / sizeof(colors[0])) - 1;
+        while (low <= high) {
+            auto mid = (low + high) / 2;
+            auto cmp = strcasecmp(str, colors[mid].name);
+            if (cmp == 0) {
+                r = colors[mid].value.r;
+                g = colors[mid].value.g;
+                b = colors[mid].value.b;
                 return true;
             }
+            if (cmp < 0) high = mid - 1;
+            else low = mid + 1;
         }
     }
     return false;
@@ -929,13 +978,17 @@ static void _handlePaintAttr(SvgPaint* paint, const char* value)
         paint->none = false;
         return;
     }
-    if (_toColor(value, paint->color.r, paint->color.g, paint->color.b, &paint->url)) paint->none = false;
+    paint->color.a = 255;
+    if (_toColor(value, paint->color.r, paint->color.g, paint->color.b, &paint->color.a, &paint->url)) {
+        paint->none = false;
+    }
 }
 
 static void _handleColorAttr(TVG_UNUSED SvgParserContext* ctx, SvgNode* node, const char* value)
 {
     auto style = node->style;
-    if (_toColor(value, style->color.r, style->color.g, style->color.b, nullptr)) {
+    style->color.a = 255;
+    if (_toColor(value, style->color.r, style->color.g, style->color.b, &style->color.a)) {
         style->curColorSet = true;
     }
 }
@@ -962,8 +1015,9 @@ static void _handleStrokeOpacityAttr(TVG_UNUSED SvgParserContext* ctx, SvgNode* 
 
 static void _handleStrokeDashArrayAttr(SvgParserContext* ctx, SvgNode* node, const char* value)
 {
-    node->style->stroke.flags = (node->style->stroke.flags | SvgStrokeFlags::Dash);
-    _parseDashArray(ctx, value, &node->style->stroke.dash);
+    if (_parseDashArray(ctx, value, &node->style->stroke.dash)) {
+        node->style->stroke.flags = (node->style->stroke.flags | SvgStrokeFlags::Dash);
+    }
 }
 
 static void _handleStrokeDashOffsetAttr(SvgParserContext* ctx, SvgNode* node, const char* value)
@@ -1061,6 +1115,7 @@ static void _handleFilterAttr(TVG_UNUSED SvgParserContext* ctx, SvgNode* node, c
 
 static void _handleMaskTypeAttr(TVG_UNUSED SvgParserContext* ctx, SvgNode* node, const char* value)
 {
+    if (node->type != SvgNodeType::Mask) return;
     node->node.mask.type = _toMaskType(value);
 }
 
@@ -1098,6 +1153,77 @@ static void _handleTextAnchorAttr(TVG_UNUSED SvgParserContext* ctx, SvgNode* nod
     else node->style->textAnchor = 0.0f;
 }
 
+static void _handleFontWeightAttr(TVG_UNUSED SvgParserContext* ctx, SvgNode* node, const char* value)
+{
+    node->style->fontWeight = _toFontWeight(value);
+    node->style->flags |= SvgStyleFlags::FontWeight;
+}
+
+static SvgBaseline _toBaseline(const char* str)
+{
+    if (STR_AS(str, "alphabetic")) return SvgBaseline::Alphabetic;
+    if (STR_AS(str, "before-edge") || STR_AS(str, "text-before-edge") || STR_AS(str, "text-top")) return SvgBaseline::BeforeEdge;
+    if (STR_AS(str, "after-edge") || STR_AS(str, "text-after-edge") || STR_AS(str, "ideographic") || STR_AS(str, "text-bottom")) return SvgBaseline::AfterEdge;
+    if (STR_AS(str, "central")) return SvgBaseline::Central;
+    if (STR_AS(str, "middle")) return SvgBaseline::Middle;
+    if (STR_AS(str, "hanging")) return SvgBaseline::Hanging;
+    if (STR_AS(str, "mathematical")) return SvgBaseline::Mathematical;
+    return SvgBaseline::Auto;
+}
+
+static void _handleAlignmentBaselineAttr(TVG_UNUSED SvgParserContext* ctx, SvgNode* node, const char* value)
+{
+    node->style->flags |= SvgStyleFlags::AlignmentBaseline;
+    node->style->alignmentBaseline = _toBaseline(value);
+}
+
+static void _handleDominantBaselineAttr(TVG_UNUSED SvgParserContext* ctx, SvgNode* node, const char* value)
+{
+    node->style->flags |= SvgStyleFlags::DominantBaseline;
+    node->style->dominantBaseline = _toBaseline(value);
+}
+
+//toFloat() consumes the "em" suffix, so detect font-relative units from the value's tail instead of its end pointer
+static bool _isFontRelativeUnit(const char* value)
+{
+    auto p = value + strlen(value);
+    while (p > value && isspace((unsigned char)p[-1])) --p;
+    auto end = p;
+    while (p > value && isalpha((unsigned char)p[-1])) --p;
+    if (end - p != 2) return false;  //so that "rem" is not mistaken for "em"
+    return !strncmp(p, "em", 2) || !strncmp(p, "ex", 2);
+}
+
+static void _handleLetterSpacingAttr(TVG_UNUSED SvgParserContext* ctx, SvgNode* node, const char* value)
+{
+    node->style->flags |= SvgStyleFlags::LetterSpacing;
+    node->style->letterSpacingRelative = false;
+    if (STR_AS(value, "normal")) {
+        node->style->letterSpacing = 0.0f;
+        return;
+    }
+    char* end = nullptr;
+    auto parsed = toFloat(value, &end);
+    auto percentage = _isPercentage(end);
+    node->style->letterSpacingRelative = percentage || _isFontRelativeUnit(value);
+    node->style->letterSpacing = parsed * (percentage ? 0.01f : _unitScale(value, 1.0f));
+}
+
+static void _handleWordSpacingAttr(TVG_UNUSED SvgParserContext* ctx, SvgNode* node, const char* value)
+{
+    node->style->flags |= SvgStyleFlags::WordSpacing;
+    node->style->wordSpacingRelative = false;
+    if (STR_AS(value, "normal")) {
+        node->style->wordSpacing = 0.0f;
+        return;
+    }
+    char* end = nullptr;
+    auto parsed = toFloat(value, &end);
+    auto percentage = _isPercentage(end);
+    node->style->wordSpacingRelative = percentage || _isFontRelativeUnit(value);
+    node->style->wordSpacing = parsed * (percentage ? 0.01f : _unitScale(value, 1.0f));
+}
+
 static void _handleCssClassAttr(SvgParserContext* ctx, SvgNode* node, const char* value)
 {
     auto cssClass = &node->style->cssClass;
@@ -1121,6 +1247,8 @@ static constexpr struct
     styleMethod tagHandler;
     SvgStyleFlags flag;
 } styleTags[] = {
+// hyphenated names below are macro identifiers, not subtraction; keep them intact
+// clang-format off
     STYLE_DEF(color, Color, SvgStyleFlags::Color),
     STYLE_DEF(fill, Fill, SvgStyleFlags::Fill),
     STYLE_DEF(fill-rule, FillRule, SvgStyleFlags::FillRule),
@@ -1142,7 +1270,14 @@ static constexpr struct
     STYLE_DEF(paint-order, PaintOrder, SvgStyleFlags::PaintOrder),
     STYLE_DEF(filter, Filter, SvgStyleFlags::Filter),
     STYLE_DEF(mix-blend-mode, MixBlendMode, SvgStyleFlags::BlendMode),
-    STYLE_DEF(text-anchor, TextAnchor, SvgStyleFlags::TextAnchor)};
+    STYLE_DEF(text-anchor, TextAnchor, SvgStyleFlags::TextAnchor),
+    STYLE_DEF(alignment-baseline, AlignmentBaseline, SvgStyleFlags::AlignmentBaseline),
+    STYLE_DEF(dominant-baseline, DominantBaseline, SvgStyleFlags::DominantBaseline),
+    STYLE_DEF(font-weight, FontWeight, SvgStyleFlags::FontWeight),
+    STYLE_DEF(letter-spacing, LetterSpacing, SvgStyleFlags::LetterSpacing),
+    STYLE_DEF(word-spacing, WordSpacing, SvgStyleFlags::WordSpacing)
+};
+// clang-format on
 
 static SvgXmlSpace _toXmlSpace(const char* str)
 {
@@ -1180,6 +1315,23 @@ static bool _parseStyleAttr(void* data, const char* key, const char* value, bool
                 value = duplicate(value, size);
                 importance = true;
             }
+            auto valid = true;
+            if (styleTags[i].flag == SvgStyleFlags::FontWeight) {
+                valid = _toFontWeight(value) != SvgFontWeight::Invalid;
+            } else if (styleTags[i].flag == SvgStyleFlags::DominantBaseline) {
+                // svg 1.1 keyword set only (https://www.w3.org/TR/SVG11/text.html#DominantBaselineProperty):
+                // browsers drop the css-level text-top/text-bottom (https://www.w3.org/TR/css-inline-3/#dominant-baseline-property)
+                if (STR_AS(value, "text-top") || STR_AS(value, "text-bottom")) valid = false;
+                else valid = _toBaseline(value) != SvgBaseline::Auto || STR_AS(value, "auto");
+            } else if (styleTags[i].flag == SvgStyleFlags::LetterSpacing || styleTags[i].flag == SvgStyleFlags::WordSpacing) {
+                char* end = nullptr;
+                toFloat(value, &end);
+                valid = end != value || STR_AS(value, "normal");
+            }
+            if (!valid) {
+                if (importance) tvg::free(const_cast<char*>(value));
+                return true;
+            }
             if (style) {
                 if (importance || !(node->style->flagsImportance & styleTags[i].flag)) {
                     styleTags[i].tagHandler(ctx, node, value);
@@ -1189,7 +1341,7 @@ static bool _parseStyleAttr(void* data, const char* key, const char* value, bool
                 styleTags[i].tagHandler(ctx, node, value);
             }
             if (importance) {
-                node->style->flagsImportance = (node->style->flags | styleTags[i].flag);
+                node->style->flagsImportance |= styleTags[i].flag;
                 tvg::free(const_cast<char*>(value));
             }
             return true;
@@ -1400,9 +1552,12 @@ static SvgNode* _createNode(SvgNode* parent, SvgNodeType type)
 
     //Set the default values other than 0/false: https://www.w3.org/TR/SVGTiny12/painting.html#SpecifyingPaint
     node->style->opacity = 255;
+    node->style->color.a = 255;
     node->style->fill.opacity = 255;
+    node->style->fill.paint.color.a = 255;
     node->style->fill.fillRule = FillRule::NonZero;
     node->style->stroke.paint.none = true;
+    node->style->stroke.paint.color.a = 255;
     node->style->stroke.opacity = 255;
     node->style->stroke.width = 1;
     node->style->stroke.cap = StrokeCap::Butt;
@@ -1411,6 +1566,7 @@ static SvgNode* _createNode(SvgNode* parent, SvgNodeType type)
     node->style->stroke.scale = 1.0;
     node->style->paintOrder = _toPaintOrder("fill stroke");
     node->style->display = true;
+    node->style->fontWeight = SvgFontWeight::Normal;
     node->parent = parent;
     node->type = type;
     node->xmlSpace = SvgXmlSpace::None;
@@ -1710,6 +1866,9 @@ static SvgNode* _createEllipseNode(SvgParserContext* ctx, SvgNode* parent, const
     ctx->parser->node = _createNode(parent, SvgNodeType::Ellipse);
 
     if (!ctx->parser->node) return nullptr;
+
+    // Unspecified radii default to 'auto(-1)'; resolved when building the path.
+    ctx->parser->node->node.ellipse.rx = ctx->parser->node->node.ellipse.ry = -1.0f;
 
     func(buf, bufLength, _attrParseEllipseNode, ctx);
     return ctx->parser->node;
@@ -2541,7 +2700,7 @@ static SvgStyleGradient* _createRadialGradient(SvgParserContext* ctx, const char
     return ctx->parser->styleGrad;
 }
 
-static SvgColor* _findLatestColor(const SvgParserContext* ctx)
+static tvg::RGBA* _findLatestColor(const SvgParserContext* ctx)
 {
     auto parent = ctx->stack.count > 0 ? ctx->stack.last() : ctx->doc;
 
@@ -2924,6 +3083,13 @@ static SvgStyleGradient* _cloneGradient(SvgStyleGradient* from)
 
 static void _styleInherit(SvgStyleProperty* child, const SvgStyleProperty* parent)
 {
+    auto parentWeight = parent ? parent->fontWeight : SvgFontWeight::Normal;
+    if (!(child->flags & SvgStyleFlags::FontWeight) || child->fontWeight == SvgFontWeight::Inherit) child->fontWeight = parentWeight;
+    else if (child->fontWeight == SvgFontWeight::Bolder) child->fontWeight = parentWeight <= SvgFontWeight::Weight300 ? SvgFontWeight::Normal : parentWeight <= SvgFontWeight::Weight500 ? SvgFontWeight::Bold
+                                                                                                                                                                                         : SvgFontWeight::Weight900;
+    else if (child->fontWeight == SvgFontWeight::Lighter) child->fontWeight = parentWeight <= SvgFontWeight::Weight500 ? SvgFontWeight::Weight100 : parentWeight <= SvgFontWeight::Bold ? SvgFontWeight::Normal
+                                                                                                                                                                                        : SvgFontWeight::Bold;
+
     if (!parent) return;
 
     //Inherit the property of parent if not present in child.
@@ -2966,6 +3132,9 @@ static void _styleInherit(SvgStyleProperty* child, const SvgStyleProperty* paren
     if (!(child->stroke.flags & SvgStrokeFlags::Join)) child->stroke.join = parent->stroke.join;
     if (!(child->stroke.flags & SvgStrokeFlags::Miterlimit)) child->stroke.miterlimit = parent->stroke.miterlimit;
     if (!(child->flags & SvgStyleFlags::TextAnchor)) child->textAnchor = parent->textAnchor;
+    if (!(child->flags & SvgStyleFlags::DominantBaseline)) child->dominantBaseline = parent->dominantBaseline;
+    if (!(child->flags & SvgStyleFlags::LetterSpacing)) child->letterSpacing = parent->letterSpacing;
+    if (!(child->flags & SvgStyleFlags::WordSpacing)) child->wordSpacing = parent->wordSpacing;
 }
 
 
@@ -2983,6 +3152,17 @@ static void _styleCopy(SvgStyleProperty* to, const SvgStyleProperty* from)
     if (from->flags & SvgStyleFlags::Display) to->display = from->display;
     if (from->flags & SvgStyleFlags::BlendMode) to->blendMode = from->blendMode;
     if (from->flags & SvgStyleFlags::TextAnchor) to->textAnchor = from->textAnchor;
+    if (from->flags & SvgStyleFlags::AlignmentBaseline) to->alignmentBaseline = from->alignmentBaseline;
+    if (from->flags & SvgStyleFlags::DominantBaseline) to->dominantBaseline = from->dominantBaseline;
+    if (from->flags & SvgStyleFlags::FontWeight) to->fontWeight = from->fontWeight;
+    if (from->flags & SvgStyleFlags::LetterSpacing) {
+        to->letterSpacing = from->letterSpacing;
+        to->letterSpacingRelative = from->letterSpacingRelative;
+    }
+    if (from->flags & SvgStyleFlags::WordSpacing) {
+        to->wordSpacing = from->wordSpacing;
+        to->wordSpacingRelative = from->wordSpacingRelative;
+    }
 
     //Fill
     to->fill.flags = (to->fill.flags | from->fill.flags);
@@ -3280,22 +3460,13 @@ static void _svgLoaderParserXmlOpen(SvgParserContext* ctx, const char* content, 
     SvgNode *node = nullptr, *parent = nullptr;
     attrs = xmlFindAttributesTag(content, length);
 
-    if (!attrs) {
-        //Parse the empty tag
-        attrs = content;
-        while ((attrs != nullptr) && *attrs != '>') attrs++;
-        if (empty) attrs--;
-    }
-
-    if (attrs) {
-        //Find out the tag name starting from content till sz length
-        sz = attrs - content;
-        while ((sz > 0) && (isspace(content[sz - 1]))) sz--;
-        if ((unsigned)sz >= sizeof(tagName)) return;
-        strncpy(tagName, content, sz);
-        tagName[sz] = '\0';
-        attrsLength = length - sz;
-    }
+    //Find out the tag name starting from content till sz length
+    sz = attrs - content;
+    while ((sz > 0) && (isspace((unsigned char)content[sz - 1]))) sz--;
+    if ((unsigned)sz >= sizeof(tagName)) return;
+    strncpy(tagName, content, sz);
+    tagName[sz] = '\0';
+    attrsLength = length - sz;
 
     if (ctx->gradientStack.count > 0 && !ctx->gradientStack.last()) {
         if (!empty) ctx->gradientStack.push(nullptr);
@@ -3337,14 +3508,12 @@ static void _svgLoaderParserXmlOpen(SvgParserContext* ctx, const char* content, 
             if (ctx->stack.count > 0) parent = ctx->stack.last();
             else parent = ctx->doc;
             if (STR_AS(tagName, "style")) {
-                // TODO: For now only the first style node is saved. After the css id selector
-                // is introduced this if condition shouldn't be necessary any more
                 if (!ctx->cssStyle) {
                     node = method(ctx, nullptr, attrs, attrsLength, xmlParseAttributes);
                     ctx->cssStyle = node;
                     ctx->doc->node.doc.style = node;
-                    ctx->openedTag = OpenedTagType::Style;
-                }
+                } else node = ctx->cssStyle;
+                ctx->openedTag = OpenedTagType::Style;
             } else {
                 node = method(ctx, parent, attrs, attrsLength, xmlParseAttributes);
             }
@@ -3394,6 +3563,8 @@ static void _svgLoaderParserXmlOpen(SvgParserContext* ctx, const char* content, 
 static void _svgLoaderParserText(SvgParserContext* ctx, const char* content, unsigned int length)
 {
     auto node = ctx->parser->node;
+
+    if (node->type != SvgNodeType::Text && node->type != SvgNodeType::Tspan) return;
 
     if (_hasTspanChild(node)) {
         auto run = _createNode(node, SvgNodeType::Tspan);
@@ -3528,6 +3699,7 @@ static bool _cssApplyClass(SvgNode* node, const char* classString, SvgNode* styl
     tempNode->style = tvg::calloc<SvgStyleProperty>(1, sizeof(SvgStyleProperty));
     tempNode->type = node->type;
     tempNode->style->opacity = 255;
+    tempNode->style->color.a = 255;
     tempNode->style->fill.opacity = 255;
     tempNode->style->stroke.opacity = 255;
 
@@ -3576,8 +3748,8 @@ static bool _cssApplyClass(SvgNode* node, const char* classString, SvgNode* styl
 static void _cssApplyStyleToPostponeds(Array<SvgNodeIdPair>& postponeds, SvgNode* style)
 {
     ARRAY_FOREACH(p, postponeds) {
-        auto nodeIdPair = *p;
-        _cssApplyClass(nodeIdPair.node, nodeIdPair.id, style);
+        auto node = p->node;
+        _cssApplyClass(node, node->style->cssClass, style);
     }
 }
 
@@ -3677,6 +3849,14 @@ static bool _svgLoaderParser(void* data, XMLType type, const char* content, unsi
 static void _updateStyle(SvgNode* node, SvgStyleProperty* parentStyle)
 {
     _styleInherit(node->style, parentStyle);
+    if (node->style->letterSpacingRelative) {
+        node->style->letterSpacing *= _findEmBaseFontSize(node);
+        node->style->letterSpacingRelative = false;
+    }
+    if (node->style->wordSpacingRelative) {
+        node->style->wordSpacing *= _findEmBaseFontSize(node);
+        node->style->wordSpacingRelative = false;
+    }
     ARRAY_FOREACH(p, node->child) {
         _updateStyle(*p, node->style);
     }
@@ -3789,20 +3969,12 @@ static bool _svgLoaderParserForValidCheckXmlOpen(SvgParserContext* ctx, const ch
     int attrsLength = 0;
     attrs = xmlFindAttributesTag(content, length);
 
-    if (!attrs) {
-        //Parse the empty tag
-        attrs = content;
-        while ((attrs != nullptr) && *attrs != '>') attrs++;
-    }
-
-    if (attrs) {
-        sz = attrs - content;
-        while ((sz > 0) && (isspace((unsigned char)content[sz - 1]))) sz--;
-        if ((unsigned)sz >= sizeof(tagName)) return false;
-        strncpy(tagName, content, sz);
-        tagName[sz] = '\0';
-        attrsLength = length - sz;
-    }
+    sz = attrs - content;
+    while ((sz > 0) && (isspace((unsigned char)content[sz - 1]))) sz--;
+    if ((unsigned)sz >= sizeof(tagName)) return false;
+    strncpy(tagName, content, sz);
+    tagName[sz] = '\0';
+    attrsLength = length - sz;
 
     if ((method = _findGroupFactory(tagName))) {
         if (!ctx->doc) {
@@ -3836,7 +4008,7 @@ void SvgLoader::clear(bool all)
 
     if (!all) return;
 
-    if (copy) tvg::free((char*)content);
+    if (owner != Ownership::Borrow) tvg::free((char*)content);
 
     if (root) {
         root->unref();
@@ -3845,7 +4017,7 @@ void SvgLoader::clear(bool all)
 
     size = 0;
     content = nullptr;
-    copy = false;
+    owner = Ownership::Borrow;
 }
 
 
@@ -3939,11 +4111,6 @@ void SvgParserContext::clear(bool all)
     }
 }
 
-SvgLoader::SvgLoader() : ImageLoader(FileType::Svg)
-{
-}
-
-
 SvgLoader::~SvgLoader()
 {
     done();
@@ -3951,7 +4118,7 @@ SvgLoader::~SvgLoader()
 }
 
 
-bool SvgLoader::header()
+Result SvgLoader::header()
 {
     //For valid check, only <svg> tag is parsed first.
     //If the <svg> tag is found, the loaded file is valid and stores viewbox information.
@@ -3964,7 +4131,7 @@ bool SvgLoader::header()
 
     if (!ctx.doc || ctx.doc->type != SvgNodeType::Doc) {
         TVGLOG("SVG", "No SVG File. There is no <svg/>");
-        return false;
+        return Result::InvalidArguments;
     }
 
     viewFlag = ctx.doc->node.doc.viewFlag;
@@ -4017,39 +4184,40 @@ bool SvgLoader::header()
 
         run(0);
     }
-    return true;
+    return Result::Success;
 }
 
-bool SvgLoader::open(const char* data, uint32_t size, const LoaderOps* ops, bool copy)
+Result SvgLoader::open(const char* data, uint32_t size, const LoaderOps& ops)
 {
-    if (ops->caller != tvg::Type::Picture) return false;
+    if (ops.caller != tvg::Type::Picture) return Result::InvalidArguments;
 
-    if (copy) {
+    if (ops.owner == Ownership::Copy) {
         content = tvg::malloc<char>(size + 1);
         memcpy((char*)content, data, size);
         content[size] = '\0';
     } else content = (char*)data;
 
     this->size = size;
-    this->copy = copy;
-
-    ctx.accessible = static_cast<const PictureOps*>(ops)->accessible;
+    owner = ops.owner;
+    ctx.accessible = static_cast<const PictureOps*>(&ops)->accessible;
 
     return header();
 }
 
-bool SvgLoader::open(const char* path, TVG_UNUSED const LoaderOps* ops)
+Result SvgLoader::open(const char* path, const LoaderOps& ops)
 {
 #ifdef THORVG_FILE_IO_SUPPORT
-    if (ops->caller != tvg::Type::Picture) return false;
+    if (ops.caller != tvg::Type::Picture) return Result::InvalidArguments;
 
     if ((content = Loader::open(path, size, true))) {
-        ctx.accessible = static_cast<const PictureOps*>(ops)->accessible;
-        copy = true;
+        ctx.accessible = static_cast<const PictureOps*>(&ops)->accessible;
+        owner = Ownership::Transfer;
         return header();
     }
+    return Result::InvalidArguments;
+#else
+    return Result::NonSupport;
 #endif
-    return false;
 }
 
 

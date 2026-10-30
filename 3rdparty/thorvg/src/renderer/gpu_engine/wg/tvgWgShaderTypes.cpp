@@ -22,8 +22,10 @@
 
 #include "tvgWgShaderTypes.h"
 #include <cassert>
+#include <cstring>
 #include "tvgMath.h"
 #include "tvgFill.h"
+#include "tvgGpuCommon.h"
 
 //************************************************************************
 // WgShaderTypeMat4x4f
@@ -96,12 +98,6 @@ WgShaderTypeVec4f::WgShaderTypeVec4f(const ColorSpace colorSpace, uint8_t o)
 }
 
 
-WgShaderTypeVec4f::WgShaderTypeVec4f(const RenderColor& c)
-{
-    update(c);
-}
-
-
 void WgShaderTypeVec4f::update(const ColorSpace colorSpace, uint8_t o)
 {
     vec[0] = (uint32_t)colorSpace;
@@ -109,40 +105,39 @@ void WgShaderTypeVec4f::update(const ColorSpace colorSpace, uint8_t o)
 }
 
 
-void WgShaderTypeVec4f::update(const RenderColor& c)
-{
-    vec[0] = c.r / 255.0f; // red
-    vec[1] = c.g / 255.0f; // green
-    vec[2] = c.b / 255.0f; // blue
-    vec[3] = c.a / 255.0f; // alpha
-}
-
 void WgShaderTypeVec4f::update(const RenderRegion& r)
 {
-    vec[0] = r.min.x;
-    vec[1] = r.min.y;
-    vec[2] = r.max.x - 1;
-    vec[3] = r.max.y - 1;
+    vec[0] = r.xMin;
+    vec[1] = r.yMin;
+    vec[2] = r.xMax - 1;
+    vec[3] = r.yMax - 1;
 }
 
 //************************************************************************
 // WgShaderTypeGradSettings
 //************************************************************************
 
-void WgShaderTypeGradSettings::update(const Fill* fill, const Matrix* modelTransform)
+void WgShaderTypeGradSettings::update(const Fill* fill, const Matrix* transform)
 {
-    assert(fill);
     // update transform matrix
-    Matrix invTransform;
-    if (inverse(&fill->transform(), &invTransform)) {
-        Matrix invModel;
-        if (modelTransform && inverse(modelTransform, &invModel)) invTransform = invTransform * invModel;
-        transform.update(invTransform);
-    } else transform.identity();
+    Matrix result;
+    if (inverse(&fill->transform(), &result)) {
+        Matrix itransform;
+        if (transform && inverse(transform, &itransform)) result *= itransform;
+        if (fill->type() == Type::ConicGradient) {
+            float cx, cy, angle;
+            static_cast<const ConicGradient*>(fill)->conic(&cx, &cy, &angle);
+            result = tvg::gpuConicTransform({cx, cy}, angle) * result;
+        }
+        this->transform.update(result);
+    } else {
+        this->transform.identity();
+    }
+
     // update gradient base points
-    if (fill->type() == Type::LinearGradient)
+    if (fill->type() == Type::LinearGradient) {
         ((LinearGradient*)fill)->linear(&coords.vec[0], &coords.vec[1], &coords.vec[2], &coords.vec[3]);
-    else if (fill->type() == Type::RadialGradient) {
+    } else if (fill->type() == Type::RadialGradient) {
         ((RadialGradient*)fill)->radial(&coords.vec[0], &coords.vec[1], &coords.vec[2], &focal.vec[0], &focal.vec[1], &focal.vec[2]);
         CONST_RADIAL(fill)->correct(focal.vec[0], focal.vec[1], focal.vec[2]);
     }
@@ -152,93 +147,106 @@ void WgShaderTypeGradSettings::update(const Fill* fill, const Matrix* modelTrans
 // WgShaderTypeGradientData
 //************************************************************************
 
-void WgShaderTypeGradientData::update(const Fill* fill)
+bool WgShaderTypeGradientData::update(const Fill* fill)
 {
-    if (!fill) return;
     const Fill::ColorStop* stops = nullptr;
     auto stopCnt = fill->colorStops(&stops);
-    if (stopCnt == 0) return;
+    if (stopCnt == 0) {
+        std::memset(data, 0, sizeof(data));
+        return false;
+    }
+
+    auto assign = [](uint8_t* dst, const Fill::ColorStop& color) {
+        std::memcpy(dst, &color.r, 4);
+    };
+
     static Array<Fill::ColorStop> sstops(stopCnt);
     sstops.clear();
     sstops.push(stops[0]);
+    auto opaque = stops[0].a == 255;
+
     // filter by increasing offset
-    for (uint32_t i = 1; i < stopCnt; i++)
-        if (sstops.last().offset < stops[i].offset)
-            sstops.push(stops[i]);
-        else if (sstops.last().offset == stops[i].offset)
-            sstops.last() = stops[i];
+    for (uint32_t i = 1; i < stopCnt; i++) {
+        opaque &= stops[i].a == 255;
+        if (sstops.last().offset < stops[i].offset) sstops.push(stops[i]);
+        else if (sstops.last().offset == stops[i].offset) sstops.last() = stops[i];
+    }
+
     // head
     uint32_t range_s = 0;
     uint32_t range_e = uint32_t(sstops[0].offset * (WG_TEXTURE_GRADIENT_SIZE-1));
-    for (uint32_t ti = range_s; (ti < range_e) && (ti < WG_TEXTURE_GRADIENT_SIZE); ti++) {
-        data[ti * 4 + 0] = sstops[0].r;
-        data[ti * 4 + 1] = sstops[0].g;
-        data[ti * 4 + 2] = sstops[0].b;
-        data[ti * 4 + 3] = sstops[0].a;
+    auto dst = data + range_s * 4;
+    for (uint32_t ti = range_s; (ti < range_e) && (ti < WG_TEXTURE_GRADIENT_SIZE); ti++, dst += 4) {
+        assign(dst, sstops[0]);
     }
+
     // body
     for (uint32_t di = 1; di < sstops.count; di++) {
-        range_s = uint32_t(sstops[di-1].offset * (WG_TEXTURE_GRADIENT_SIZE-1));
-        range_e = uint32_t(sstops[di-0].offset * (WG_TEXTURE_GRADIENT_SIZE-1));
+        range_s = uint32_t(sstops[di - 1].offset * (WG_TEXTURE_GRADIENT_SIZE - 1));
+        range_e = uint32_t(sstops[di - 0].offset * (WG_TEXTURE_GRADIENT_SIZE - 1));
         float delta = 1.0f/(range_e - range_s);
-        for (uint32_t ti = range_s; (ti < range_e) && (ti < WG_TEXTURE_GRADIENT_SIZE); ti++) {
-            float t = (ti - range_s) * delta;
-            data[ti * 4 + 0] = tvg::lerp(sstops[di-1].r, sstops[di].r, t);
-            data[ti * 4 + 1] = tvg::lerp(sstops[di-1].g, sstops[di].g, t);
-            data[ti * 4 + 2] = tvg::lerp(sstops[di-1].b, sstops[di].b, t);
-            data[ti * 4 + 3] = tvg::lerp(sstops[di-1].a, sstops[di].a, t);
+        dst = data + range_s * 4;
+        for (uint32_t ti = range_s; (ti < range_e) && (ti < WG_TEXTURE_GRADIENT_SIZE); ti++, dst += 4) {
+            assign(dst, tvg::lerp(sstops[di - 1], sstops[di], (ti - range_s) * delta));
         }
     }
+
     // tail
     const tvg::Fill::ColorStop& colorStopLast = sstops.last();
     range_s = uint32_t(colorStopLast.offset * (WG_TEXTURE_GRADIENT_SIZE-1));
     range_e = WG_TEXTURE_GRADIENT_SIZE;
-    for (uint32_t ti = range_s; ti < range_e; ti++) {
-        data[ti * 4 + 0] = colorStopLast.r;
-        data[ti * 4 + 1] = colorStopLast.g;
-        data[ti * 4 + 2] = colorStopLast.b;
-        data[ti * 4 + 3] = colorStopLast.a;
+    dst = data + range_s * 4;
+    for (uint32_t ti = range_s; ti < range_e; ti++, dst += 4) {
+        assign(dst, colorStopLast);
     }
+    return opaque;
 }
 
 //************************************************************************
 // WgShaderTypeEffectParams
 //************************************************************************
 
+bool WgShaderTypeEffectParams::update(RenderEffectMotionBlur* motion, const Matrix& transform)
+{
+    int samples;
+    if (!motion->update(transform, offset, samples)) return false;
+    params[0] = offset.x;
+    params[1] = offset.y;
+    params[2] = samples;
+    return true;
+}
+
 bool WgShaderTypeEffectParams::update(RenderEffectGaussianBlur* gaussian, const Matrix& transform)
 {
-    assert(gaussian);
     params[0] = gaussian->sigma;
     params[1] = std::sqrt(transform.e11 * transform.e11 + transform.e12 * transform.e12);
-    params[2] = 2 * gaussian->sigma * params[1];
-    extend = params[2] * 2; // kernel
-    gaussian->valid = (extend > 0);
+    params[2] = 2.0f * gaussian->sigma * params[1];
+    extend = params[2] * 2.0f; // kernel
+    gaussian->valid = !tvg::zero(extend);
     return gaussian->valid;
 }
 
 
 bool WgShaderTypeEffectParams::update(RenderEffectDropShadow* dropShadow, const Matrix& transform)
 {
-    assert(dropShadow);
+    if (!dropShadow->update(transform, offset)) return false;
+
     const auto scale = std::sqrt(transform.e11 * transform.e11 + transform.e12 * transform.e12);
-    const auto kernel = 2 * dropShadow->sigma * scale;
-    const auto radian = tvg::deg2rad(90.0f - dropShadow->angle) - tvg::radian(transform);
-    const Point offset = {dropShadow->distance * cosf(radian) * scale, -dropShadow->distance * sinf(radian) * scale};
+    extend = 2 * std::max(dropShadow->sigma * scale + std::abs(offset.x), dropShadow->sigma * scale + std::abs(offset.y));
+
     params[0] = dropShadow->sigma;
     params[1] = scale;
-    params[2] = kernel;
+    params[2] = 2 * dropShadow->sigma * scale;
     params[3] = 0.0f;
     params[7] = dropShadow->color[3] / 255.0f; // alpha
+
     //Color is premultiplied to avoid multiplication in the fragment shader:
     params[4] = dropShadow->color[0] / 255.0f * params[7]; // red
     params[5] = dropShadow->color[1] / 255.0f * params[7]; // green
     params[6] = dropShadow->color[2] / 255.0f * params[7]; // blue
     params[8] = offset.x;
     params[9] = offset.y;
-    extend = 2 * std::max(dropShadow->sigma * scale + std::abs(offset.x), dropShadow->sigma * scale + std::abs(offset.y));
-
-    dropShadow->valid = (extend >= 0);
-    return dropShadow->valid;
+    return true;
 }
 
 

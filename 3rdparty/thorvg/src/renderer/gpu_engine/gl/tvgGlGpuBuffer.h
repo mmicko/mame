@@ -24,31 +24,26 @@
 #define _TVG_GL_GPU_BUFFER_H_
 
 #include "tvgGlCommon.h"
+#include "tvgGlStateCache.h"
 
-class GlGpuBuffer
+struct GlGpuBuffer
 {
-public:
     enum class Target
     {
         ARRAY_BUFFER = GL_ARRAY_BUFFER,
         ELEMENT_ARRAY_BUFFER = GL_ELEMENT_ARRAY_BUFFER,
-        UNIFORM_BUFFER = GL_UNIFORM_BUFFER,
     };
 
     GlGpuBuffer();
     ~GlGpuBuffer();
     void updateBufferData(Target target, uint32_t size, const void* data);
-    void bind(Target target);
-    void unbind(Target target);
     uint32_t getBufferId() { return mGlBufferId; }
-
 private:
     uint32_t    mGlBufferId = 0;
-
 };
 
-class GlStageBuffer {
-public:
+struct GlStageBuffer
+{
     GlStageBuffer();
     ~GlStageBuffer();
 
@@ -58,9 +53,9 @@ public:
     uint32_t reserve(uint32_t size, void** dst, bool alignGpuOffset = false);
     uint32_t reserveAux(uint32_t size, void** dst);
     uint32_t reserveIndex(uint32_t size, void** dst);
-    bool flushToGPU();
-    void bind();
-    void unbind();
+    bool flushToGPU(GlStateCache& state);
+    void bind(GlStateCache& state);
+    void unbind(GlStateCache& state);
     GLuint getBufferId();
     GLuint getAuxBufferId();
 
@@ -77,4 +72,3 @@ private:
 };
 
 #endif /* _TVG_GL_GPU_BUFFER_H_ */
-

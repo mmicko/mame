@@ -417,6 +417,31 @@ TEST_CASE("GL Scene Effects", "[tvgGlEngine]")
         REQUIRE(canvas->draw() == Result::Success);
         REQUIRE(canvas->sync() == Result::Success);
 
+        // Motion Blur
+        REQUIRE(scene->add(SceneEffect::Clear) == Result::Success);
+        REQUIRE(scene->add(SceneEffect::MotionBlur, 10.0, 0.0, 75) == Result::Success);
+        REQUIRE(canvas->update() == Result::Success);
+        REQUIRE(canvas->draw() == Result::Success);
+        REQUIRE(canvas->sync() == Result::Success);
+
+        REQUIRE(scene->add(SceneEffect::Clear) == Result::Success);
+        REQUIRE(scene->add(SceneEffect::MotionBlur, 10.0, 45.0, 75) == Result::Success);
+        REQUIRE(canvas->update() == Result::Success);
+        REQUIRE(canvas->draw() == Result::Success);
+        REQUIRE(canvas->sync() == Result::Success);
+
+        REQUIRE(scene->add(SceneEffect::Clear) == Result::Success);
+        REQUIRE(scene->add(SceneEffect::MotionBlur, 10.0, 90.0, 75) == Result::Success);
+        REQUIRE(canvas->update() == Result::Success);
+        REQUIRE(canvas->draw() == Result::Success);
+        REQUIRE(canvas->sync() == Result::Success);
+
+        REQUIRE(scene->add(SceneEffect::Clear) == Result::Success);
+        REQUIRE(scene->add(SceneEffect::MotionBlur, 0.0, 45.0, 75) == Result::Success);
+        REQUIRE(canvas->update() == Result::Success);
+        REQUIRE(canvas->draw() == Result::Success);
+        REQUIRE(canvas->sync() == Result::Success);
+
         // Drop Shadow
         REQUIRE(scene->add(SceneEffect::Clear) == Result::Success);
         REQUIRE(scene->add(SceneEffect::DropShadow, 128, 128, 128, 200, 45.0, 5.0, 2.0, 60) == Result::Success);
@@ -451,8 +476,9 @@ TEST_CASE("GL Scene Effects", "[tvgGlEngine]")
         REQUIRE(canvas->draw() == Result::Success);
         REQUIRE(canvas->sync() == Result::Success);
 
-        // Tritone + Gaussian Blur + Drop Shadow
+        // Tritone + Gaussian Blur + Motion Blur + Drop Shadow
         REQUIRE(scene->add(SceneEffect::GaussianBlur, 1.5, 0, 0, 75) == Result::Success);
+        REQUIRE(scene->add(SceneEffect::MotionBlur, 10.0, 45.0, 75) == Result::Success);
         REQUIRE(scene->add(SceneEffect::DropShadow, 128, 128, 128, 200, 45.0, 5.0, 2.0, 60) == Result::Success);
 
         REQUIRE(canvas->add(scene->duplicate()) == Result::Success);
@@ -498,6 +524,28 @@ TEST_CASE("GL Intersection", "[tvgGlEngine]")
         REQUIRE(canvas);
         engine.target(canvas.get());
 
+        // Fill rule: a circle and a rect in one path, both clockwise, overlapping at x 45..60
+        auto gen = [&](FillRule rule) {
+            auto shape = Shape::gen();
+            REQUIRE(shape->appendCircle(35, 50, 25, 25) == Result::Success);
+            REQUIRE(shape->appendRect(45, 25, 50, 50) == Result::Success);
+            REQUIRE(shape->fill(255, 255, 255) == Result::Success);
+            REQUIRE(shape->fillRule(rule) == Result::Success);
+            REQUIRE(canvas->add(shape) == Result::Success);
+            return shape;
+        };
+        auto nonZero = gen(FillRule::NonZero);
+        auto evenOdd = gen(FillRule::EvenOdd);
+        REQUIRE(canvas->update() == Result::Success);
+
+        // Either rule fills where only one contour covers the point
+        REQUIRE(nonZero->intersects(20, 50, 1, 1) == true);
+        REQUIRE(evenOdd->intersects(80, 50, 1, 1) == true);
+
+        // The overlap has winding 2: filled with NonZero, a hole with EvenOdd
+        REQUIRE(nonZero->intersects(52, 50, 1, 1) == true);
+        REQUIRE(evenOdd->intersects(52, 50, 1, 1) == false);
+
         ifstream file(TEST_DIR "/rawimage_250x375.raw");
         if (!file.is_open()) return;
         auto data = (uint32_t*)malloc(sizeof(uint32_t) * (250 * 375));
@@ -520,6 +568,28 @@ TEST_CASE("GL Intersection", "[tvgGlEngine]")
         // Case2. Partially overlapping
         REQUIRE(picture->intersects(25, 25, 50, 50, false) == true);
         REQUIRE(picture->intersects(125, 125, 50, 50, false) == true);
+
+        // An open path ">" with a stroke and no fill
+        auto shape = Shape::gen();
+        REQUIRE(shape);
+        REQUIRE(shape->moveTo(5, 5) == Result::Success);
+        REQUIRE(shape->lineTo(15, 10) == Result::Success);
+        REQUIRE(shape->lineTo(5, 15) == Result::Success);
+        REQUIRE(shape->strokeWidth(2) == Result::Success);
+        REQUIRE(shape->strokeFill(255, 0, 0) == Result::Success);
+        REQUIRE(canvas->add(shape) == Result::Success);
+        REQUIRE(canvas->update() == Result::Success);
+
+        // Case1. The stroke is hit
+        REQUIRE(shape->intersects(10, 7) == true);
+
+        // Case2. The implicitly closed interior is not hit without a fill
+        REQUIRE(shape->intersects(8, 10) == false);
+
+        // Case3. The interior is hit once filled
+        REQUIRE(shape->fill(0, 0, 255) == Result::Success);
+        REQUIRE(canvas->update() == Result::Success);
+        REQUIRE(shape->intersects(8, 10) == true);
 
         REQUIRE(canvas->sync() == Result::Success);
 

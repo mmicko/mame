@@ -2197,7 +2197,7 @@ function generate_thorvg_header()
 	file:write("#define THORVG_SVG_LOADER_SUPPORT 1\n")
 	file:write("#define THORVG_THREAD_SUPPORT 1\n")
 	file:write("#define THORVG_TTF_LOADER_SUPPORT 1\n")
-	file:write("#define THORVG_VERSION_STRING \"1.1.0\"\n")
+	file:write("#define THORVG_VERSION_STRING \"1.1.3\"\n")
 	file:write("#define WIN32_LEAN_AND_MEAN 1\n")                                                          
     file:close()
 end
@@ -2248,6 +2248,7 @@ project "thorvg"
     	MAME_DIR .. "3rdparty/thorvg/src/loaders/lottie/tvgLottieModifier.cpp",
     	MAME_DIR .. "3rdparty/thorvg/src/loaders/lottie/tvgLottieParserHandler.cpp",
     	MAME_DIR .. "3rdparty/thorvg/src/loaders/lottie/tvgLottieParser.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/loaders/lottie/tvgLottieProperty.cpp",
    
 		MAME_DIR .. "3rdparty/thorvg/src/loaders/raw/tvgRawLoader.cpp",
 
@@ -2277,6 +2278,7 @@ project "thorvg"
     	MAME_DIR .. "3rdparty/thorvg/src/renderer/cpu_engine/tvgSwMemPool.cpp",
     	MAME_DIR .. "3rdparty/thorvg/src/renderer/cpu_engine/tvgSwPostEffect.cpp",
     	MAME_DIR .. "3rdparty/thorvg/src/renderer/cpu_engine/tvgSwRaster.cpp",
+    	MAME_DIR .. "3rdparty/thorvg/src/renderer/cpu_engine/tvgSwRasterCore.cpp",
     	MAME_DIR .. "3rdparty/thorvg/src/renderer/cpu_engine/tvgSwRenderer.cpp",
     	MAME_DIR .. "3rdparty/thorvg/src/renderer/cpu_engine/tvgSwRle.cpp",
     	MAME_DIR .. "3rdparty/thorvg/src/renderer/cpu_engine/tvgSwShape.cpp",

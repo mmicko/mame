@@ -66,7 +66,7 @@ private:
     WgRenderTarget targetTemp1;
     WGPUBindGroup bindGroupStorageTemp{};
     // composition and blend geometries
-    WgMeshData meshDataBlit;
+    WgMesh meshDataBlit;
     // render target dimensions
     uint32_t width{};
     uint32_t height{};
@@ -77,33 +77,32 @@ private:
     void copyTexture(const WgRenderTarget* dst, const WgRenderTarget* src, const RenderRegion& region);
 
     // base meshes draw
-    void drawMesh(WgContext& context, WgMeshData* meshData);
-    void drawMeshSolid(WgContext& context, WgMeshData* meshData, uint32_t solidColorInd);
-    void drawMeshImage(WgContext& context, WgMeshData* meshData);
+    void drawMesh(WgContext& context, WgMesh* meshData);
+    void drawMeshSolid(WgContext& context, WgMesh* meshData, uint32_t solidColorInd);
+    void drawMeshImage(WgContext& context, WgMesh* meshData);
 
     // shapes
-    void drawShape(WgContext& context, WgRenderDataShape* renderData);
-    void blendShape(WgContext& context, WgRenderDataShape* renderData, BlendMethod blendMethod);
-    void clipShape(WgContext& context, WgRenderDataShape* renderData);
+    void drawShape(WgContext& context, WgShape* rdata);
+    void blendShape(WgContext& context, WgShape* rdata, BlendMethod blendMethod);
+    void clipShape(WgContext& context, WgShape* rdata);
 
     // strokes
-    void drawStrokes(WgContext& context, WgRenderDataShape* renderData);
-    void blendStrokes(WgContext& context, WgRenderDataShape* renderData, BlendMethod blendMethod);
-    void clipStrokes(WgContext& context, WgRenderDataShape* renderData);
+    void drawStrokes(WgContext& context, WgShape* rdata);
+    void blendStrokes(WgContext& context, WgShape* rdata, BlendMethod blendMethod);
 
     // images
-    void drawImage(WgContext& context, WgRenderDataPicture* renderData);
-    void blendImage(WgContext& context, WgRenderDataPicture* renderData, BlendMethod blendMethod);
-    void clipImage(WgContext& context, WgRenderDataPicture* renderData);
+    void drawImage(WgContext& context, WgImage* rdata);
+    void blendImage(WgContext& context, WgImage* rdata, BlendMethod blendMethod);
+    void clipImage(WgContext& context, WgImage* rdata);
 
     // scenes
     void drawScene(WgContext& context, WgRenderTarget* scene, WgCompose* compose);
     void blendScene(WgContext& context, WgRenderTarget* src, WgCompose* compose);
 
     // the renderer prioritizes clipping with the stroke over the shape's fill
-    void markupClipPath(WgContext& context, WgRenderDataShape* renderData);
-    void renderClipPath(WgContext& context, WgRenderDataPaint* paint);
-    void clearClipPath(WgContext& context, WgRenderDataPaint* paint);
+    void markupClipPath(WgContext& context, WgShape* rdata);
+    void renderClipPath(WgContext& context, WgPaint* paint);
+    void clearClipPath(WgContext& context, WgPaint* paint);
     void updateViewMat(WgContext& context, uint32_t width, uint32_t height);
 public:
     void initialize(WgContext& context, uint32_t width, uint32_t height);
@@ -113,7 +112,7 @@ public:
     void resize(WgContext& context, uint32_t width, uint32_t height);
 
     // render passes workflow
-    void beginRenderPassMS(WGPUCommandEncoder encoder, WgRenderTarget* target, bool clear, WGPUColor clearColor = { 0.0, 0.0, 0.0, 0.0 });
+    void beginRenderPassMS(WGPUCommandEncoder encoder, WgRenderTarget* target, bool clearBuffer);
     void beginRenderPass(WGPUCommandEncoder encoder, WgRenderTarget* target);
     void endRenderPass();
 
@@ -122,24 +121,31 @@ public:
     void flush(WgContext& context);
 
     // request shapes for drawing (staging)
-    void requestShape(WgRenderDataShape* renderData);
-    void requestImage(WgRenderDataPicture* renderData);
+    void requestShape(WgShape* shape);
+    void requestImage(WgImage* image);
+    void requestSolidBatch(const Array<WgShape*>& renderShapes, WgSolidBatchRange& range);
+    void requestImageBatch(const Array<WgImage*>& renderImages, WgImageBatchRange& range);
+    void requestStencilBatch(const Array<WgShape*>& renderShapes, WgStencilBatchRange& range);
 
     // render shapes, images and scenes
-    void renderShape(WgContext& context, WgRenderDataShape* renderData, BlendMethod blendMethod);
-    void renderImage(WgContext& context, WgRenderDataPicture* renderData, BlendMethod blendMethod);
+    void renderShape(WgContext& context, WgShape* rdata, BlendMethod blendMethod);
+    void renderSolidBatch(const WgSolidBatchRange& range);
+    void renderImageBatch(WgImage* image, const WgImageBatchRange& range);
+    void renderStencilBatch(const Array<WgShape*>& renderShapes, const WgStencilBatchRange& range);
+    void renderImage(WgContext& context, WgImage* rdata, BlendMethod blendMethod);
     void renderScene(WgContext& context, WgRenderTarget* scene, WgCompose* compose);
     void composeScene(WgContext& context, WgRenderTarget* src, WgRenderTarget* mask, WgCompose* compose);
 
     // blit render target to texture view (f.e. screen buffer)
-    void blit(WgContext& context, WGPUCommandEncoder encoder, WgRenderTarget* src, WGPUTextureView dstView, bool premultiplied);
+    void blit(WgContext& context, WGPUCommandEncoder encoder, WgRenderTarget* src, WGPUTextureView dstView, bool premultiplied, bool clearBuffer);
 
     // effects
-    bool gaussianBlur(WgContext& context, WgRenderTarget* dst, const RenderEffectGaussianBlur* params, const WgCompose* compose);
-    bool dropShadow(WgContext& context, WgRenderTarget* dst, const RenderEffectDropShadow* params, const WgCompose* compose);
-    bool fillEffect(WgContext& context, WgRenderTarget* dst, const RenderEffectFill* params, const WgCompose* compose);
-    bool tintEffect(WgContext& context, WgRenderTarget* dst, const RenderEffectTint* params, const WgCompose* compose);
-    bool tritoneEffect(WgContext& context, WgRenderTarget* dst, const RenderEffectTritone* params, const WgCompose* compose);
+    bool gaussianBlur(WgContext& context, WgRenderTarget* dst, const RenderEffectGaussianBlur* blur, const WgCompose* compose);
+    bool dropShadow(WgContext& context, WgRenderTarget* dst, const RenderEffectDropShadow* shadow, const WgCompose* compose);
+    bool fillEffect(WgContext& context, WgRenderTarget* dst, const RenderEffectFill* fill, const WgCompose* compose);
+    bool tintEffect(WgContext& context, WgRenderTarget* dst, const RenderEffectTint* tint, const WgCompose* compose);
+    bool tritoneEffect(WgContext& context, WgRenderTarget* dst, const RenderEffectTritone* tritone, const WgCompose* compose);
+    bool motionBlur(WgContext& context, WgRenderTarget* dst, const RenderEffectMotionBlur* params, const WgCompose* compose);
 };
 
 #endif // _TVG_WG_COMPOSITOR_H_

@@ -30,6 +30,7 @@
 #include "tvgGlTextureMgr.h"
 #include "tvgGlRenderPass.h"
 #include "tvgGlEffect.h"
+#include "tvgGlStateCache.h"
 #include "tvgGlSolidBatch.h"
 #include "tvgGlStencilCoverBatch.h"
 
@@ -40,6 +41,7 @@ struct GlRenderer : RenderMethod
         RT_Color = 0,
         RT_LinGradient,
         RT_RadGradient,
+        RT_ConGradient,
         RT_Image,
         RT_MaskAlpha,
         RT_MaskAlphaInv,
@@ -143,6 +145,24 @@ struct GlRenderer : RenderMethod
         RT_ShapeBlend_Radial_Color,
         RT_ShapeBlend_Radial_Luminosity,
         RT_ShapeBlend_Radial_Add,
+        // shape blends (conic gradient)
+        RT_ShapeBlend_Conic_Normal,
+        RT_ShapeBlend_Conic_Multiply,
+        RT_ShapeBlend_Conic_Screen,
+        RT_ShapeBlend_Conic_Overlay,
+        RT_ShapeBlend_Conic_Darken,
+        RT_ShapeBlend_Conic_Lighten,
+        RT_ShapeBlend_Conic_ColorDodge,
+        RT_ShapeBlend_Conic_ColorBurn,
+        RT_ShapeBlend_Conic_HardLight,
+        RT_ShapeBlend_Conic_SoftLight,
+        RT_ShapeBlend_Conic_Difference,
+        RT_ShapeBlend_Conic_Exclusion,
+        RT_ShapeBlend_Conic_Hue,
+        RT_ShapeBlend_Conic_Saturation,
+        RT_ShapeBlend_Conic_Color,
+        RT_ShapeBlend_Conic_Luminosity,
+        RT_ShapeBlend_Conic_Add,
         RT_None
     };
 
@@ -181,13 +201,18 @@ struct GlRenderer : RenderMethod
     //partial rendering
     void damage(RenderData rd, const RenderRegion& region) override;
     bool partial(bool disable) override;
+    uint32_t dirtyRegions() const override;
+    Result dirtyRegions(Region* regions, uint32_t cnt) const override;
 
     static GlRenderer* gen(uint32_t threads, EngineOption op);
     static bool term();
 
-private:
-    enum class BlendSource { Image, Scene, Solid, LinearGradient, RadialGradient };
-    friend class GlSolidBatch;
+    // gl renderer specific
+    void disposeTexture(GLuint texId);
+
+    TextureMgr textures;
+
+    enum class BlendSource { Image, Scene, Solid, LinearGradient, RadialGradient, ConicGradient };
 
     GlRenderer(); 
     ~GlRenderer();
@@ -208,7 +233,6 @@ private:
     void prepareBlitTask(GlBlitTask* task);
     void prepareCmpTask(GlRenderTask* task, const RenderRegion& vp, uint32_t cmpWidth, uint32_t cmpHeight);
     void endRenderPass(RenderCompositor* cmp);
-    void disposeTexture(GLuint texId);
 
     void flush();
     void clearDisposes();
@@ -220,6 +244,7 @@ private:
 
     RenderSurface surface;
     GLint mTargetFboId = 0;
+    GlStateCache mStateCache;
     GlStageBuffer mGpuBuffer;
     GlRenderTarget mRootTarget;
     GlEffect mEffect;
@@ -229,7 +254,6 @@ private:
     Array<GlRenderTargetPool*> mBlendPool;
     Array<GlRenderPass*> mRenderPassStack;
     Array<GlCompositor*> mComposeStack;
-    TextureMgr mTextures;
     GlSolidBatch mSolidBatch;
     GlStencilCoverBatch mStencilCoverBatch;
 

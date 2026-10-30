@@ -10,7 +10,7 @@
 
 #define TVG_VERSION_MAJOR 1  // for compile-time checks
 #define TVG_VERSION_MINOR 1  // for compile-time checks
-#define TVG_VERSION_MICRO 0  // for compile-time checks
+#define TVG_VERSION_MICRO 3  // for compile-time checks
 
 #ifndef TVG_STATIC
     #ifdef _WIN32
@@ -53,6 +53,8 @@ extern "C"
  * @defgroup ThorVG_CAPI ThorVG_CAPI
  * @brief ThorVG C language binding APIs.
  *
+ * @note Memory allocation failure is not guaranteed to be recoverable:
+ *       object-creation APIs may terminate the process instead of returning a null handle or \c TVG_RESULT_FAILED_ALLOCATION.
  * \{
  */
 
@@ -91,6 +93,13 @@ typedef struct _Tvg_Animation* Tvg_Animation;
 typedef struct _Tvg_Accessor* Tvg_Accessor;
 
 /**
+ * @brief A structure representing a video playback controller object.
+ *
+ * @note Experimental API
+ */
+typedef struct _Tvg_Video* Tvg_Video;
+
+/**
  * @brief Enumeration specifying the result from the APIs.
  *
  * All ThorVG APIs could potentially return one of the values in the list.
@@ -105,6 +114,7 @@ typedef enum
     TVG_RESULT_FAILED_ALLOCATION,      ///< The value returned in case of unsuccessful memory allocation.
     TVG_RESULT_MEMORY_CORRUPTION,      ///< The value returned in the event of bad memory handling - e.g. failing in pointer releasing or casting
     TVG_RESULT_NOT_SUPPORTED,          ///< The value returned in case of choosing unsupported engine features(options).
+    TVG_RESULT_SYSTEM_ERROR,           ///< The value returned when an underlying system operation fails. @note Experimental API
     TVG_RESULT_UNKNOWN = 255           ///< The value returned in all other cases.
 } Tvg_Result;
 
@@ -131,6 +141,19 @@ typedef struct
 } Tvg_Matrix;
 
 /**
+ * @brief A data structure representing an axis-aligned rectangular region.
+ *
+ * The region is defined by its minimum and maximum x and y coordinates.
+ *
+ * @note Experimental API
+ */
+typedef struct
+{
+    int32_t xMin, yMin;
+    int32_t xMax, yMax;
+} Tvg_Region;
+
+/**
  * @brief Enumeration specifying the methods of combining the 8-bit color channels into 32-bit color.
  *
  * @ingroup ThorVGCapi_Canvas
@@ -139,10 +162,12 @@ typedef enum
 {
     TVG_COLORSPACE_ABGR8888 = 0,   ///< The channels are joined in the order: alpha, blue, green, red. Colors are alpha-premultiplied.
     TVG_COLORSPACE_ARGB8888,       ///< The channels are joined in the order: alpha, red, green, blue. Colors are alpha-premultiplied.
-    TVG_COLORSPACE_ABGR8888S,      ///< The channels are joined in the order: alpha, blue, green, red. Colors are un-alpha-premultiplied. (since 0.13)
-    TVG_COLORSPACE_ARGB8888S,      ///< The channels are joined in the order: alpha, red, green, blue. Colors are un-alpha-premultiplied. (since 0.13)
-    TVG_COLORSPACE_GRAYSCALE8,     ///< Single channel, 1 byte per pixel 8-bit grayscale. (since 1.1)
-    TVG_COLORSPACE_UNKNOWN = 255,  ///< Unknown channel data. This is reserved for an initial ColorSpace value. (since 1.0)
+    TVG_COLORSPACE_ABGR8888S,      ///< The channels are joined in the order: alpha, blue, green, red. Colors are un-alpha-premultiplied. @since 0.13
+    TVG_COLORSPACE_ARGB8888S,      ///< The channels are joined in the order: alpha, red, green, blue. Colors are un-alpha-premultiplied. @since 0.13
+    TVG_COLORSPACE_GRAYSCALE8,     ///< Single channel, 1 byte per pixel 8-bit grayscale. @since 1.1
+    TVG_COLORSPACE_XBGR8888,       ///< 32-bit opaque color in the order: unused, blue, green, red. @note Experimental API
+    TVG_COLORSPACE_XRGB8888,       ///< 32-bit opaque color in the order: unused, red, green, blue. @note Experimental API
+    TVG_COLORSPACE_UNKNOWN = 255,  ///< Unknown channel data. This is reserved for an initial ColorSpace value. @since 1.0
 } Tvg_Colorspace;
 
 /**
@@ -238,7 +263,8 @@ typedef enum
     TVG_TYPE_PICTURE,          ///< A picture type paint.
     TVG_TYPE_TEXT,             ///< A text type paint.
     TVG_TYPE_LINEAR_GRAD = 10, ///< A linear gradient type.
-    TVG_TYPE_RADIAL_GRAD       ///< A radial gradient type.
+    TVG_TYPE_RADIAL_GRAD,      ///< A radial gradient type.
+    TVG_TYPE_CONIC_GRAD        ///< A conic gradient type.
 } Tvg_Type;
 
 /**
@@ -430,15 +456,19 @@ typedef bool (*Tvg_Picture_Asset_Resolver)(Tvg_Paint paint, const char* src, voi
 /**
  * @brief Initializes the ThorVG engine.
  *
- * ThorVG requires an active runtime environment to operate.
- * Internally, it utilizes a task scheduler to efficiently parallelize rendering operations.
- * You can specify the number of worker threads using the @p threads parameter.
- * During initialization, ThorVG will spawn the specified number of threads.
+ * Sets up the internal task scheduler and launches the specified
+ * number of worker threads for parallel rendering operations.
  *
- * @param[in] threads The number of worker threads to create. A value of zero indicates that only the main thread will be used.
+ * @param[in] threads The number of worker threads to create. A value of 0 disables worker threads.
  *
- * @note The initializer uses internal reference counting to track multiple calls.
- *       The number of threads is fixed on the first call to tvg_engine_init() and cannot be changed in subsequent calls.
+ * @return Tvg_Result indicating success or failure of initialization.
+ *
+ * @note Initialization is reference-counted. Each successful call increments the reference count.
+ *       The worker thread count is determined by the first successful initialization and remains
+ *       unchanged until the engine is fully terminated.
+ *
+ * @warning Each @ref tvg_engine_init() call must be paired with a @ref tvg_engine_term() call on the same thread.
+ *
  * @see tvg_engine_term()
  */
 TVG_API Tvg_Result tvg_engine_init(unsigned threads);
@@ -446,11 +476,15 @@ TVG_API Tvg_Result tvg_engine_init(unsigned threads);
 /**
  * @brief Terminates the ThorVG engine.
  *
- * Cleans up resources and stops any internal threads initialized by tvg_engine_init().
+ * Releases internal resources and shuts down worker threads initialized by tvg_engine_init().
  *
- * @retval TVG_RESULT_INSUFFICIENT_CONDITION Returned if there is nothing to terminate (e.g., tvg_engine_init() was not called).
+ * @retval TVG_RESULT_INSUFFICIENT_CONDITION If the engine is not initialized.
  *
- * @note The initializer maintains a reference count for safe repeated use. Only the final call to tvg_engine_term() will fully shut down the engine.
+ * @note Initialization is reference-counted. Each call to @ref tvg_engine_term() decrements the reference count,
+ *       and the engine is fully terminated only when the count reaches zero.
+ *
+ * @warning Each @ref tvg_engine_init() call must be paired with a @ref tvg_engine_term() call on the same thread.
+ *
  * @see tvg_engine_init()
  */
 TVG_API Tvg_Result tvg_engine_term(void);
@@ -522,7 +556,7 @@ TVG_API Tvg_Canvas tvg_swcanvas_create(Tvg_Engine_Option op);
  * @param[in] h The height of the raster image.
  * @param[in] cs The colorspace value defining the way the 32-bits colors should be read/written.
  *
- * @retval TVG_RESULT_INVALID_ARGUMENTS An invalid canvas or buffer pointer passed or one of the @p stride, @p w or @p h being zero.
+ * @retval TVG_RESULT_INVALID_ARGUMENT An invalid canvas or buffer pointer passed or one of the @p stride, @p w or @p h being zero.
  * @retval TVG_RESULT_INSUFFICIENT_CONDITION if the canvas is performing rendering. Please ensure the canvas is synced.
  * @retval TVG_RESULT_NOT_SUPPORTED The software engine is not supported.
  *
@@ -648,13 +682,14 @@ TVG_API Tvg_Canvas tvg_wgcanvas_create(Tvg_Engine_Option op);
  * @param[in] target Either WGPUSurface or WGPUTexture, serving as handles to a presentable surface or texture.
  * @param[in] w The width of the target.
  * @param[in] h The height of the target.
- * @param[in] cs Specifies how the pixel values should be interpreted. Currently, it allows @c TVG_COLORSPACE_ABGR8888 and @c TVG_COLORSPACE_ABGR8888S.
+ * @param[in] cs Specifies how the pixel values should be interpreted. Currently, it allows @c TVG_COLORSPACE_ABGR8888, @c TVG_COLORSPACE_ABGR8888S, and @c TVG_COLORSPACE_XBGR8888.
  * @param[in] type @c 0: surface, @c 1: texture are used as presentable target.
  *
  * @retval TVG_RESULT_INSUFFICIENT_CONDITION if the canvas is performing rendering. Please ensure the canvas is synced.
  * @retval TVG_RESULT_NOT_SUPPORTED In case the wg engine is not supported.
  *
- * @warning Regardless of the value of @p cs, this target API uses the default alpha mode.
+ * @warning For alpha formats, this target API uses the default alpha mode.
+ * @note @c TVG_COLORSPACE_XBGR8888 selects opaque surface composition and ignores output alpha. This format requires @p type to be @c 0.
  *
  * @see tvg_wgcanvas_set_target_with_context()
  *
@@ -669,12 +704,13 @@ TVG_API Tvg_Result tvg_wgcanvas_set_target(Tvg_Canvas canvas, void* device, void
  * @param[in] target Either WGPUSurface or WGPUTexture, serving as handles to a presentable surface or texture.
  * @param[in] w The width of the target.
  * @param[in] h The height of the target.
- * @param[in] cs Specifies how the pixel values should be interpreted. Currently, it allows @c TVG_COLORSPACE_ABGR8888 and @c TVG_COLORSPACE_ABGR8888S.
+ * @param[in] cs Specifies how the pixel values should be interpreted. Currently, it allows @c TVG_COLORSPACE_ABGR8888, @c TVG_COLORSPACE_ABGR8888S, and @c TVG_COLORSPACE_XBGR8888.
  * @param[in] type @c 0: surface, @c 1: texture are used as presentable target.
  *
  * @retval TVG_RESULT_INSUFFICIENT_CONDITION if the canvas is performing rendering. Please ensure the canvas is synced.
  * @retval TVG_RESULT_NOT_SUPPORTED In case the wg engine is not supported.
  *
+ * @note @c TVG_COLORSPACE_XBGR8888 selects opaque surface composition and ignores output alpha. This format requires @p type to be @c 0.
  * @note Experimental API
  */
 TVG_API Tvg_Result tvg_wgcanvas_set_target_with_context(Tvg_Canvas canvas, const Tvg_WgContext* context, void* target, uint32_t w, uint32_t h, Tvg_Colorspace cs, int type);
@@ -819,6 +855,40 @@ TVG_API Tvg_Result tvg_canvas_draw(Tvg_Canvas canvas, bool clear);
 TVG_API Tvg_Result tvg_canvas_sync(Tvg_Canvas canvas);
 
 /**
+ * @brief Returns the number of dirty regions of the canvas.
+ *
+ * @param[in] canvas The canvas object.
+ *
+ * @return The number of regions available for retrieval, or zero if @p canvas is NULL.
+ *
+ * @note This function must be called after @ref tvg_canvas_draw() and before @ref tvg_canvas_sync().
+ * @note If the active rendering backend does not support @c TVG_ENGINE_OPTION_SMART_RENDER, this function returns 1.
+ * @note Experimental API
+ *
+ * @see tvg_canvas_get_dirty_regions()
+ */
+TVG_API uint32_t tvg_canvas_get_dirty_regions_cnt(Tvg_Canvas canvas);
+
+/**
+ * @brief Retrieves the dirty regions of the canvas.
+ *
+ * @param[in] canvas The canvas object.
+ * @param[out] regions An array to receive the dirty regions.
+ * @param[in] cnt The number of Tvg_Region elements that the array can hold.
+ *
+ * @retval TVG_RESULT_INVALID_ARGUMENT If @p canvas or @p regions is @c NULL, or @p cnt is zero.
+ * @retval TVG_RESULT_INSUFFICIENT_CONDITION If called outside the interval after tvg_canvas_draw() and before tvg_canvas_sync().
+ *
+ * @note This function must be called after @ref tvg_canvas_draw() and before @ref tvg_canvas_sync().
+ * @note If the active rendering backend does not support @c TVG_ENGINE_OPTION_SMART_RENDER,
+ *       a single region covering the entire render target is returned.
+ * @note Experimental API
+ *
+ * @see tvg_canvas_get_dirty_regions_cnt()
+ */
+TVG_API Tvg_Result tvg_canvas_get_dirty_regions(Tvg_Canvas canvas, Tvg_Region* regions, uint32_t cnt);
+
+/**
  * @brief Sets the drawing region of the canvas.
  *
  * This function defines a rectangular area of the canvas to be used for drawing operations.
@@ -928,7 +998,7 @@ TVG_API uint16_t tvg_paint_get_ref(const Tvg_Paint paint);
  * This is useful for selectively excluding paint objects during rendering.
  *
  * @param[in] paint The paint object to set the visibility status.
- * @param[in] on A boolean flag indicating visibility. The default is @c true.
+ * @param[in] on A boolean flag indicating visibility. The initial value is @c true.
  *               @c true, the object will be rendered by the engine.
  *               @c false, the object will be excluded from the drawing process.
  *
@@ -990,10 +1060,37 @@ TVG_API uint32_t tvg_paint_get_id(const Tvg_Paint paint);
 TVG_API Tvg_Result tvg_paint_set_id(Tvg_Paint paint, uint32_t id);
 
 /**
+ * @brief Gets the user-defined data associated with the Paint object.
+ *
+ * @param[in] paint The paint object whose user-defined data will be returned.
+ *
+ * @return The user-defined data, or @c NULL if none is set or @p paint is invalid.
+ *
+ * @see tvg_paint_set_data()
+ *
+ * @note Experimental API
+ */
+TVG_API void* tvg_paint_get_data(const Tvg_Paint paint);
+
+/**
+ * @brief Associates user-defined data with the Paint object.
+ *
+ * ThorVG does not interpret or manage the lifetime of this data.
+ *
+ * @param[in] paint The paint object whose user-defined data will be set.
+ * @param[in] data The user-defined data to associate with the paint object.
+ *
+ * @see tvg_paint_get_data()
+ *
+ * @note Experimental API
+ */
+TVG_API Tvg_Result tvg_paint_set_data(Tvg_Paint paint, void* data);
+
+/**
  * @brief Scales the given Tvg_Paint object by the given factor.
  *
  * @param[in] paint The paint object to be scaled.
- * @param[in] factor The value of the scaling factor. The default value is 1.
+ * @param[in] factor The value of the scaling factor. The initial value is 1.
  *
  * @retval TVG_RESULT_INSUFFICIENT_CONDITION in case a custom transform is applied.
  *
@@ -1466,7 +1563,7 @@ TVG_API Tvg_Result tvg_shape_get_path(const Tvg_Paint paint, const Tvg_Path_Comm
  * path's geometry.
  *
  * @param[in] paint The shape object.
- * @param[in] width The width of the stroke in pixels. Must be positive value. (The default is 0)
+ * @param[in] width The width of the stroke in pixels. Must be positive value. (The initial value is 0)
  *
  * @note A value of @p width 0 disables the stroke.
  *
@@ -1487,12 +1584,12 @@ TVG_API Tvg_Result tvg_shape_get_stroke_width(const Tvg_Paint paint, float* widt
  * @brief Sets the shape's stroke color.
  *
  * @param[in] paint The shape object.
- * @param[in] r The red color channel value in the range [0 ~ 255]. The default value is 0.
- * @param[in] g The green color channel value in the range [0 ~ 255]. The default value is 0.
- * @param[in] b The blue color channel value in the range [0 ~ 255]. The default value is 0.
- * @param[in] a The alpha channel value in the range [0 ~ 255], where 0 is completely transparent and 255 is opaque.
+ * @param[in] r The red color channel value in the range [0 ~ 255]. The initial value is 0.
+ * @param[in] g The green color channel value in the range [0 ~ 255]. The initial value is 0.
+ * @param[in] b The blue color channel value in the range [0 ~ 255]. The initial value is 0.
+ * @param[in] a The alpha channel value in the range [0 ~ 255], where 0 is completely transparent and 255 is opaque. The initial value is 0.
  *
- * @note If the stroke width is 0 (default), the stroke will not be visible regardless of the color.
+ * @note If the stroke width is 0 (initial value), the stroke will not be visible regardless of the color.
  * @note Either a solid color or a gradient fill is applied, depending on what was set as last.
  *
  * @see tvg_shape_set_stroke_width()
@@ -1504,9 +1601,9 @@ TVG_API Tvg_Result tvg_shape_set_stroke_color(Tvg_Paint paint, uint8_t r, uint8_
  * @brief Gets the shape's stroke color.
  *
  * @param[in] paint The shape object.
- * @param[out] r The red color channel value in the range [0 ~ 255]. The default value is 0.
- * @param[out] g The green color channel value in the range [0 ~ 255]. The default value is 0.
- * @param[out] b The blue color channel value in the range [0 ~ 255]. The default value is 0.
+ * @param[out] r The red color channel value in the range [0 ~ 255].
+ * @param[out] g The green color channel value in the range [0 ~ 255].
+ * @param[out] b The blue color channel value in the range [0 ~ 255].
  * @param[out] a The alpha channel value in the range [0 ~ 255], where 0 is completely transparent and 255 is opaque.
  *
  * @retval TVG_RESULT_INSUFFICIENT_CONDITION No stroke was set.
@@ -1577,7 +1674,7 @@ TVG_API Tvg_Result tvg_shape_get_stroke_dash(const Tvg_Paint paint, const float*
  * The cap style specifies the shape to be used at the end of the open stroked sub-paths.
  *
  * @param[in] paint The shape object.
- * @param[in] cap The cap style value. The default value is @c TVG_STROKE_CAP_SQUARE.
+ * @param[in] cap The cap style value. The initial value is @c TVG_STROKE_CAP_SQUARE.
  *
  */
 TVG_API Tvg_Result tvg_shape_set_stroke_cap(Tvg_Paint paint, Tvg_Stroke_Cap cap);
@@ -1595,7 +1692,7 @@ TVG_API Tvg_Result tvg_shape_get_stroke_cap(const Tvg_Paint paint, Tvg_Stroke_Ca
  * @brief Sets the join style for stroked path segments.
  *
  * @param[in] paint The shape object.
- * @param[in] join The join style value. The default value is @c TVG_STROKE_JOIN_BEVEL.
+ * @param[in] join The join style value. The initial value is @c TVG_STROKE_JOIN_BEVEL.
  *
  */
 TVG_API Tvg_Result tvg_shape_set_stroke_join(Tvg_Paint paint, Tvg_Stroke_Join join);
@@ -1613,7 +1710,7 @@ TVG_API Tvg_Result tvg_shape_get_stroke_join(const Tvg_Paint paint, Tvg_Stroke_J
  * @brief Sets the stroke miterlimit.
  *
  * @param[in] paint The shape object.
- * @param[in] miterlimit The miterlimit imposes a limit on the extent of the stroke join when the @c TVG_STROKE_JOIN_MITER join style is set. The default value is 4.
+ * @param[in] miterlimit The miterlimit imposes a limit on the extent of the stroke join when the @c TVG_STROKE_JOIN_MITER join style is set. The initial value is 4.
  *
  * @retval TVG_RESULT_INVALID_ARGUMENT Unsupported @p miterlimit values (less than zero).
  *
@@ -1653,10 +1750,10 @@ TVG_API Tvg_Result tvg_shape_set_trimpath(Tvg_Paint paint, float begin, float en
  * The parts of the shape defined as inner are colored.
  *
  * @param[in] paint The shape object.
- * @param[in] r The red color channel value in the range [0 ~ 255]. The default value is 0.
- * @param[in] g The green color channel value in the range [0 ~ 255]. The default value is 0.
- * @param[in] b The blue color channel value in the range [0 ~ 255]. The default value is 0.
- * @param[in] a The alpha channel value in the range [0 ~ 255], where 0 is completely transparent and 255 is opaque. The default value is 0.
+ * @param[in] r The red color channel value in the range [0 ~ 255]. The initial value is 0.
+ * @param[in] g The green color channel value in the range [0 ~ 255]. The initial value is 0.
+ * @param[in] b The blue color channel value in the range [0 ~ 255]. The initial value is 0.
+ * @param[in] a The alpha channel value in the range [0 ~ 255], where 0 is completely transparent and 255 is opaque. The initial value is 0.
  *
  * @note Either a solid color or a gradient fill is applied, depending on what was set as last.
  * @see tvg_shape_set_fill_rule()
@@ -1667,10 +1764,10 @@ TVG_API Tvg_Result tvg_shape_set_fill_color(Tvg_Paint paint, uint8_t r, uint8_t 
  * @brief Gets the shape's solid color.
  *
  * @param[in] paint The shape object.
- * @param[out] r The red color channel value in the range [0 ~ 255]. The default value is 0.
- * @param[out] g The green color channel value in the range [0 ~ 255]. The default value is 0.
- * @param[out] b The blue color channel value in the range [0 ~ 255]. The default value is 0.
- * @param[out] a The alpha channel value in the range [0 ~ 255], where 0 is completely transparent and 255 is opaque. The default value is 0.
+ * @param[out] r The red color channel value in the range [0 ~ 255].
+ * @param[out] g The green color channel value in the range [0 ~ 255].
+ * @param[out] b The blue color channel value in the range [0 ~ 255].
+ * @param[out] a The alpha channel value in the range [0 ~ 255], where 0 is completely transparent and 255 is opaque.
  *
  */
 TVG_API Tvg_Result tvg_shape_get_fill_color(const Tvg_Paint paint, uint8_t* r, uint8_t* g, uint8_t* b, uint8_t* a);
@@ -1679,7 +1776,7 @@ TVG_API Tvg_Result tvg_shape_get_fill_color(const Tvg_Paint paint, uint8_t* r, u
  * @brief Sets the fill rule for the shape.
  *
  * Specifies how the interior of the shape is determined when its path intersects itself.
- * The default fill rule is @c TVG_FILL_RULE_NON_ZERO.
+ * The initial fill rule is @c TVG_FILL_RULE_NON_ZERO.
  *
  * @param[in] paint The shape object.
  * @param[in] rule The fill rule to apply to the shape.
@@ -1703,7 +1800,7 @@ TVG_API Tvg_Result tvg_shape_get_fill_rule(const Tvg_Paint paint, Tvg_Fill_Rule*
  * @brief Sets the rendering order of the stroke and the fill.
  *
  * @param[in] paint The shape object.
- * @param[in] strokeFirst If @c true the stroke is rendered before the fill, otherwise the stroke is rendered as the second one (the default option).
+ * @param[in] strokeFirst If @c true the stroke is rendered before the fill, otherwise the stroke is rendered as the second one (the initial option).
  *
  * @since 0.10
  */
@@ -1762,6 +1859,15 @@ TVG_API Tvg_Gradient tvg_linear_gradient_new(void);
  * @return A new radial gradient object.
  */
 TVG_API Tvg_Gradient tvg_radial_gradient_new(void);
+
+/**
+ * @brief Creates a new conic gradient object.
+ *
+ * @return A new conic gradient object.
+ *
+ * @note Experimental API
+ */
+TVG_API Tvg_Gradient tvg_conic_gradient_new(void);
 
 /**
  * @brief Sets the linear gradient bounds.
@@ -1841,6 +1947,40 @@ TVG_API Tvg_Result tvg_radial_gradient_set(Tvg_Gradient grad, float cx, float cy
  * @see tvg_radial_gradient_set()
  */
 TVG_API Tvg_Result tvg_radial_gradient_get(Tvg_Gradient grad, float* cx, float* cy, float* r, float* fx, float* fy, float* fr);
+
+/**
+ * @brief Sets the conic gradient attributes.
+ *
+ * The gradient sweeps a full turn clockwise around the center (@p cx, @p cy), beginning at @p angle.
+ * Color stop offsets from 0% to 100% map clockwise over one full turn from @p angle.
+ *
+ * @param[in] grad The Tvg_Gradient object of which attributes are to be set.
+ * @param[in] cx The horizontal coordinate of the center of the gradient.
+ * @param[in] cy The vertical coordinate of the center of the gradient.
+ * @param[in] angle The initial angle in degrees, measured clockwise from the 3 o'clock direction (positive x-axis).
+ *
+ * @note FillSpread options are ignored because the gradient always sweeps a full turn.
+ * @note Experimental API
+ *
+ * @see tvg_conic_gradient_get()
+ *
+ */
+TVG_API Tvg_Result tvg_conic_gradient_set(Tvg_Gradient grad, float cx, float cy, float angle);
+
+/**
+ * @brief Gets the conic gradient attributes.
+ *
+ * @param[in] grad The Tvg_Gradient object of which to get the gradient attributes.
+ * @param[out] cx The horizontal coordinate of the center of the gradient.
+ * @param[out] cy The vertical coordinate of the center of the gradient.
+ * @param[out] angle The initial angle in degrees.
+ *
+ * @note Experimental API
+ * 
+ * @see tvg_conic_gradient_set()
+ *
+ */
+TVG_API Tvg_Result tvg_conic_gradient_get(const Tvg_Gradient grad, float* cx, float* cy, float* angle);
 
 /**
  * @brief Sets the parameters of the colors of the gradient and their position.
@@ -1992,6 +2132,8 @@ TVG_API Tvg_Result tvg_picture_load(Tvg_Paint picture, const char* path);
  *
  * @retval TVG_RESULT_INVALID_ARGUMENT No data are provided or the @p w or @p h value is zero or less.
  *
+ * @note @c TVG_COLORSPACE_XBGR8888 and @c TVG_COLORSPACE_XRGB8888 overwrite fully covered pixels without alpha blending.
+ *
  * @since 0.9
  */
 TVG_API Tvg_Result tvg_picture_load_raw(Tvg_Paint picture, const uint32_t *data, uint32_t w, uint32_t h, Tvg_Colorspace cs, bool copy);
@@ -2128,7 +2270,7 @@ TVG_API Tvg_Result tvg_picture_get_origin(const Tvg_Paint picture, float* x, flo
  * @see tvg_accessor_generate_id()
  * @since 1.0
  */
-TVG_API const Tvg_Paint tvg_picture_get_paint(Tvg_Paint picture, uint32_t id);
+TVG_API Tvg_Paint tvg_picture_get_paint(Tvg_Paint picture, uint32_t id);
 
 /**
  * @brief Sets the image filtering method for rendering this picture.
@@ -2137,7 +2279,7 @@ TVG_API const Tvg_Paint tvg_picture_get_paint(Tvg_Paint picture, uint32_t id);
  * during rendering. This affects the visual quality and performance of the output.
  *
  * @param[in] picture A Tvg_Paint pointer to the picture object.
- * @param[in] method The filtering method to apply. Default is @c TVG_FILTER_METHOD_BILINEAR.
+ * @param[in] method The filtering method to apply. The initial value is @c TVG_FILTER_METHOD_BILINEAR.
  *
  * @see Tvg_Filter_Method
  * @since 1.1
@@ -2282,20 +2424,32 @@ TVG_API Tvg_Result tvg_scene_clear_effects(Tvg_Paint scene);
  * The blur can be applied in different directions with configurable border handling and quality settings.
  *
  * @param[in] scene The scene object.
- * @param[in] sigma The blur radius (sigma) value. Must be greater than 0.
+ * @param[in] sigma The blur radius (sigma) value. Must be >= 0.
  * @param[in] direction Blur direction: 0 = both directions, 1 = horizontal only, 2 = vertical only.
- * @param[in] border Border handling method: 0 = duplicate, 1 = wrap.
- * @param[in] quality Blur quality level [0 - 100].
+ * @param[in] border Reserved for border handling. Currently ignored.
+ * @param[in] quality Visual quality level [0 - 100].
  *
  * @since 1.0
  */
 TVG_API Tvg_Result tvg_scene_add_effect_gaussian_blur(Tvg_Paint scene, double sigma, int direction, int border, int quality);
 
 /**
+ * @brief Adds a centered linear motion blur.
+ *
+ * @param[in] scene The scene to apply the effect to.
+ * @param[in] distance Total blur length in scene-local units. Must be >= 0.
+ * @param[in] angle Angle in degrees, clockwise from the positive X axis. The scene transform applies to the blur vector.
+ * @param[in] quality Visual quality level [0 - 100].
+ *
+ * @note Experimental API
+ */
+TVG_API Tvg_Result tvg_scene_add_effect_motion_blur(Tvg_Paint scene, double distance, double angle, int quality);
+
+/**
  * @brief Adds a drop shadow effect to the scene.
  *
- * This function adds a drop shadow with a Gaussian blur to the scene. The shadow 
- * can be customized using color, opacity, angle, distance, blur radius (sigma), 
+ * This function adds a drop shadow with a Gaussian blur to the scene. The shadow
+ * can be customized using color, opacity, angle, distance, blur radius (sigma),
  * and quality parameters.
  *
  * @param[in] scene The scene object.
@@ -2306,7 +2460,7 @@ TVG_API Tvg_Result tvg_scene_add_effect_gaussian_blur(Tvg_Paint scene, double si
  * @param[in] angle Shadow direction in degrees [0 - 360].
  * @param[in] distance Distance of the shadow from the original object.
  * @param[in] sigma Gaussian blur sigma value for the shadow. Must be > 0.
- * @param[in] quality Blur quality level [0 - 100].
+ * @param[in] quality Visual quality level [0 - 100].
  *
  * @since 1.0
  */
@@ -2478,8 +2632,8 @@ TVG_API Tvg_Result tvg_text_set_text(Tvg_Paint text, const char* utf8);
  * the text box is pinned to the paint position.
  *
  * @param[in] text The text object.
- * @param[in] x Horizontal alignment/anchor in [0..1]: 0=left/start, 0.5=center, 1=right/end. (Default is 0)
- * @param[in] y Vertical alignment/anchor in [0..1]: 0=top, 0.5=middle, 1=bottom. (Default is 0)
+ * @param[in] x Horizontal alignment/anchor in [0..1]: 0=left/start, 0.5=center, 1=right/end. (The initial value is 0)
+ * @param[in] y Vertical alignment/anchor in [0..1]: 0=top, 0.5=middle, 1=bottom. (The initial value is 0)
  *
  * @since 1.0
  *
@@ -2495,8 +2649,8 @@ TVG_API Tvg_Result tvg_text_align(Tvg_Paint text, float x, float y);
  * unconstrained and @ref tvg_text_align() acts as an anchor on that axis.
  *
  * @param[in] text The text object.
- * @param[in] w Layout width in user space. Use 0 for no horizontal constraint. (Default is 0)
- * @param[in] h Layout height in user space. Use 0 for no vertical constraint. (Default is 0)
+ * @param[in] w Layout width in user space. Use 0 for no horizontal constraint. (The initial value is 0)
+ * @param[in] h Layout height in user space. Use 0 for no vertical constraint. (The initial value is 0)
  *
  * @note This defines constraints only; alignment/anchoring is controlled by @ref align().
  * @since 1.0
@@ -2514,7 +2668,7 @@ TVG_API Tvg_Result tvg_text_layout(Tvg_Paint text, float w, float h);
  * or adjusted automatically. An ellipsis mode is also available for truncation with "...".
  *
  * @param[in] text The text object.
- * @param[in] mode The wrapping strategy to apply. Default is @c TVG_TEXT_WRAP_NONE.
+ * @param[in] mode The wrapping strategy to apply. The initial value is @c TVG_TEXT_WRAP_NONE.
  *
  * @see Tvg_Text_Wrap
  * @see tvg_text_line_count()
@@ -2551,11 +2705,11 @@ TVG_API uint32_t tvg_text_line_count(Tvg_Paint text);
  * @param[in] text The text object.
  * @param[in] letter The scale factor for letter spacing.
  *                   Values > 1.0 increase spacing, values < 1.0 decrease it.
- *                   Must be greater than or equal to 0.0. (default: 1.0)
+ *                   Must be greater than or equal to 0.0. The initial value is 1.0.
  *
  * @param[in] line The scale factor for line spacing.
  *                 Values > 1.0 increase line spacing, values < 1.0 decrease it.
- *                 Must be greater than or equal to 0.0. (default: 1.0)
+ *                 Must be greater than or equal to 0.0. The initial value is 1.0.
  *
  * @since 1.0
  */
@@ -2591,7 +2745,7 @@ TVG_API Tvg_Result tvg_text_set_italic(Tvg_Paint text, float shear);
  * The outline enhances the visibility of the text by rendering a stroke around its glyphs.
  *
  * @param[in] text The text object.
- * @param width The width of the outline. Must be positive value. (The default is 0)
+ * @param width The width of the outline. Must be positive value. (The initial value is 0)
  * @param r     Red component of the outline color (0–255).
  * @param g     Green component of the outline color (0–255).
  * @param b     Blue component of the outline color (0–255).
@@ -2607,9 +2761,9 @@ TVG_API Tvg_Result tvg_text_set_outline(Tvg_Paint text, float width, uint8_t r, 
  * @brief Sets the text solid color.
  *
  * @param[in] paint The text object.
- * @param[in] r The red color channel value in the range [0 ~ 255]. The default value is 0.
- * @param[in] g The green color channel value in the range [0 ~ 255]. The default value is 0.
- * @param[in] b The blue color channel value in the range [0 ~ 255]. The default value is 0.
+ * @param[in] r The red color channel value in the range [0 ~ 255]. The initial value is 0.
+ * @param[in] g The green color channel value in the range [0 ~ 255]. The initial value is 0.
+ * @param[in] b The blue color channel value in the range [0 ~ 255]. The initial value is 0.
  *
  * @note Either a solid color or a gradient fill is applied, depending on what was set as last.
  *
@@ -3243,7 +3397,7 @@ TVG_API Tvg_Result tvg_lottie_animation_tween_go(Tvg_Animation animation, float 
  *
  * @param[in] animation The Lottie animation object.
  * @param[in] value The quality level (0-100). 0 represents lowest quality/best performance,
- *                  100 represents highest quality/lowest performance, default is 50.
+ *                  100 represents highest quality/lowest performance, the initial value is 50.
  *
  * @retval TVG_RESULT_INSUFFICIENT_CONDITION If the animation is not loaded.
  *
@@ -3252,6 +3406,15 @@ TVG_API Tvg_Result tvg_lottie_animation_tween_go(Tvg_Animation animation, float 
  * @since 1.0
  */
 TVG_API Tvg_Result tvg_lottie_animation_set_quality(Tvg_Animation animation, uint8_t value);
+
+/**
+ * @brief Checks whether Lottie expressions are supported.
+ *
+ * @return @c true if expression support is enabled in this build, otherwise @c false.
+ *
+ * @note Experimental API
+ */
+TVG_API bool tvg_lottie_animation_expressions_supported(void);
 
 /**
  * @brief Describes the current state of a Lottie audio layer.
@@ -3320,7 +3483,245 @@ typedef void (*Tvg_Audio_Resolver)(const Tvg_Audio_Info* info, void* data);
  */
 TVG_API Tvg_Result tvg_lottie_animation_set_audio_resolver(Tvg_Animation animation, Tvg_Audio_Resolver resolver, void* data);
 
+/**
+ * @brief Sets the master playback volume of the Lottie animation.
+ *
+ * The specified volume is applied to all media assets in the animation.
+ * Each media asset preserves its own volume, and the effective playback
+ * volume is calculated by multiplying the master volume by the media
+ * asset's volume.
+ *
+ * A value of 1.0 preserves the original volume.
+ * A value of 0.0 mutes all media.
+ * Values greater than 1.0 amplify the playback volume.
+ *
+ * The recommended range is [0.0, 2.0].
+ *
+ * @param[in] animation A Lottie animation object.
+ * @param[in] volume Master playback volume.
+ *
+ * @retval TVG_RESULT_INSUFFICIENT_CONDITION If the animation is not loaded.
+ *
+ * @note Experimental API
+ *
+ * @see tvg_lottie_animation_get_volume()
+ */
+TVG_API Tvg_Result tvg_lottie_animation_set_volume(Tvg_Animation animation, float volume);
+
+/**
+ * @brief Retrieves the master playback volume of the Lottie animation.
+ *
+ * @param[in] animation A Lottie animation object.
+ *
+ * @return The current master playback volume, otherwise 0 if the animation is invalid.
+ *
+ * @note Experimental API
+ *
+ * @see tvg_lottie_animation_set_volume()
+ */
+TVG_API float tvg_lottie_animation_get_volume(const Tvg_Animation animation);
+
 /** \} */   // end addtogroup ThorVGCapi_LottieAnimation
+
+/**
+ * @defgroup ThorVGCapi_Video Video
+ * @brief A module for controlling video playback.
+ *
+ * The module enables control of video playback features.
+ *
+ * @{
+ */
+
+/**
+ * @brief Creates a new video playback.
+ *
+ * @return Tvg_Video A new video object.
+ *
+ * @note Experimental API
+ */
+TVG_API Tvg_Video tvg_video_new(void);
+
+/**
+ * @brief Releases the given video object and its resources.
+ *
+ * @param[in] video The video object to release.
+ *
+ * @note Experimental API
+ */
+TVG_API Tvg_Result tvg_video_del(Tvg_Video video);
+
+/**
+ * @brief Retrieves the picture instance associated with this video object.
+ *
+ * This function provides access to the internal picture used by the video object
+ * for rendering video frames. After obtaining the picture, it can be added to a canvas
+ * enabling control over video frames with this Video object.
+ *
+ * @param[in] video The video object.
+ *
+ * @return A picture instance representing the visual content of the video.
+ *
+ * @warning The picture instance is owned by the video object and should not be deleted manually.
+ *
+ * @note Experimental API
+ */
+TVG_API Tvg_Paint tvg_video_get_picture(Tvg_Video video);
+
+/**
+ * @brief Starts or resumes playback.
+ *
+ * @param[in] video The video object.
+ *
+ * @retval TVG_RESULT_INSUFFICIENT_CONDITION If the video is not loaded.
+ *
+ * @note Experimental API
+ */
+TVG_API Tvg_Result tvg_video_play(Tvg_Video video);
+
+/**
+ * @brief Pauses playback while keeping the current position.
+ *
+ * @param[in] video The video object.
+ *
+ * @retval TVG_RESULT_INSUFFICIENT_CONDITION If the video is not started playing.
+ *
+ * @note Experimental API
+ */
+TVG_API Tvg_Result tvg_video_pause(Tvg_Video video);
+
+/**
+ * @brief Stops playback and rewinds to the start.
+ *
+ * @param[in] video The video object.
+ *
+ * @retval TVG_RESULT_INSUFFICIENT_CONDITION If the video is not loaded.
+ *
+ * @note Experimental API
+ */
+TVG_API Tvg_Result tvg_video_stop(Tvg_Video video);
+
+/**
+ * @brief Sets the playback position.
+ *
+ * @param[in] video The video object.
+ * @param[in] seconds The target playback position in seconds.
+ *
+ * @retval TVG_RESULT_INSUFFICIENT_CONDITION If the video is not loaded.
+ * @retval TVG_RESULT_INVALID_ARGUMENT If @p seconds is out of range.
+ *
+ * @note Experimental API
+ */
+TVG_API Tvg_Result tvg_video_seek(Tvg_Video video, float seconds);
+
+/**
+ * @brief Enables or disables repeated playback.
+ *
+ * @param[in] video The video object.
+ * @param[in] on @c true to repeat playback, @c false to play once.
+ *               The initial value is @c false.
+ *
+ * @retval TVG_RESULT_INSUFFICIENT_CONDITION If the video is not loaded.
+ *
+ * @see tvg_video_get_loop()
+ *
+ * @note Experimental API
+ */
+TVG_API Tvg_Result tvg_video_set_loop(Tvg_Video video, bool on);
+
+/**
+ * @brief Retrieves whether repeated playback is enabled.
+ *
+ * @return @c true if repeated playback is enabled, @c false otherwise.
+ *
+ * @see tvg_video_set_loop()
+ *
+ * @note Experimental API
+ */
+TVG_API bool tvg_video_get_loop(Tvg_Video video);
+
+/**
+ * @brief Sets the audio volume level.
+ *
+ * @param[in] video The video object.
+ * @param[in] volume The audio volume level in the range [0.0, 1.0].
+ *                   The initial value is @c 1.0.
+ *
+ * @retval TVG_RESULT_INVALID_ARGUMENT If @p volume is out of range.
+ * @retval TVG_RESULT_INSUFFICIENT_CONDITION If the video is not loaded.
+ *
+ * @see tvg_video_get_volume()
+ *
+ * @note Experimental API
+ */
+TVG_API Tvg_Result tvg_video_set_volume(Tvg_Video video, float volume);
+
+/**
+ * @brief Retrieves the current audio volume level.
+ *
+ * @param[in] video The video object.
+ *
+ * @return The current audio volume level in the range [0.0, 1.0].
+ *
+ * @see tvg_video_set_volume()
+ *
+ * @note Experimental API
+ */
+TVG_API float tvg_video_get_volume(Tvg_Video video);
+
+/**
+ * @brief Mutes or unmutes the audio without changing the volume level.
+ *
+ * @param[in] video The video object.
+ * @param[in] on @c true to mute the audio, @c false to unmute.
+ *               The initial value is @c false.
+ *
+ * @retval TVG_RESULT_INSUFFICIENT_CONDITION If the video is not loaded.
+ *
+ * @see tvg_video_get_muted()
+ *
+ * @note Experimental API
+ */
+TVG_API Tvg_Result tvg_video_set_mute(Tvg_Video video, bool on);
+
+/**
+ * @brief Retrieves whether the audio is currently muted.
+ *
+ * @param[in] video The video object.
+ *
+ * @return @c true if the audio is muted, @c false otherwise.
+ *
+ * @see tvg_video_set_mute()
+ *
+ * @note Experimental API
+ */
+TVG_API bool tvg_video_get_muted(Tvg_Video video);
+
+/**
+ * @brief Retrieves the current playback position.
+ *
+ * @param[in] video The video object.
+ *
+ * @return The current playback position in seconds.
+ *
+ * @see tvg_video_seek()
+ * @see tvg_video_get_duration()
+ *
+ * @note Experimental API
+ */
+TVG_API float tvg_video_get_time(Tvg_Video video);
+
+/**
+ * @brief Retrieves the total duration of the video.
+ *
+ * @param[in] video The video object.
+ *
+ * @return The total duration in seconds.
+ *
+ * @note Experimental API
+ */
+TVG_API float tvg_video_get_duration(Tvg_Video video);
+
+/** @} */  // end addtogroup ThorVGCapi_Video
 
 /** \} */   // end defgroup ThorVGCapi
 

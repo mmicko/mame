@@ -35,24 +35,19 @@ void WebpLoader::run(unsigned tid)
     WebPDecoderConfig config;
     if (!WebPInitDecoderConfig(&config)) return;
 
+    ColorSpace cs;
+
     // request premultiplied image data
-    if (ImageLoader::cs == ColorSpace::ARGB8888 || ImageLoader::cs == ColorSpace::ARGB8888S) {
+    if (BitmapLoader::cs == ColorSpace::ARGB8888 || BitmapLoader::cs == ColorSpace::ARGB8888S) {
         config.output.colorspace = MODE_bgrA;
         if (WebPDecode(data, size, &config) != VP8_STATUS_OK) return;
-        surface.buf8 = config.output.u.RGBA.rgba;
-        surface.cs = ColorSpace::ARGB8888;
+        cs = surface.opaque ? ColorSpace::XRGB8888 : ColorSpace::ARGB8888;
     } else {
         config.output.colorspace = MODE_rgbA;
         if (WebPDecode(data, size, &config) != VP8_STATUS_OK) return;
-        surface.buf8 = config.output.u.RGBA.rgba;
-        surface.cs = ColorSpace::ABGR8888;
+        cs = surface.opaque ? ColorSpace::XBGR8888 : ColorSpace::ABGR8888;
     }
-
-    surface.stride = (uint32_t)w;
-    surface.w = (uint32_t)w;
-    surface.h = (uint32_t)h;
-    surface.channelSize = sizeof(uint32_t);
-    surface.premultiplied = true;
+    surface.setup((pixel_t*)config.output.u.RGBA.rgba, (uint32_t)w, (uint32_t)w, (uint32_t)h, sizeof(uint32_t), cs);
 }
 
 
@@ -60,58 +55,51 @@ void WebpLoader::run(unsigned tid)
 /* External Class Implementation                                        */
 /************************************************************************/
 
-WebpLoader::WebpLoader() : ImageLoader(FileType::Webp)
-{
-}
-
-
 WebpLoader::~WebpLoader()
 {
     done();
 
-    if (freeData) tvg::free(data);
+    if (owner != Ownership::Borrow) tvg::free(data);
     data = nullptr;
     size = 0;
-    freeData = false;
+    owner = Ownership::Borrow;
     WebPFree(surface.buf8);
 }
 
-bool WebpLoader::open(const char* path, TVG_UNUSED const LoaderOps* ops)
+Result WebpLoader::open(const char* path, const LoaderOps& ops)
 {
 #ifdef THORVG_FILE_IO_SUPPORT
-    if (!(data = (unsigned char*)Loader::open(path, size))) return false;
+    if (!(data = (unsigned char*)Loader::open(path, size))) return Result::InvalidArguments;
+    owner = Ownership::Transfer;
 
     WebPBitstreamFeatures features;
-    if (WebPGetFeatures(data, size, &features)) return false;
+    if (WebPGetFeatures(data, size, &features)) return Result::InvalidArguments;
     w = static_cast<float>(features.width);
     h = static_cast<float>(features.height);
-    surface.alphaIgnored = !features.has_alpha;
-    freeData = true;
-    return true;
+    surface.opaque = !features.has_alpha;
+    return Result::Success;
 #else
-    return false;
+    return Result::NonSupport;
 #endif
 }
 
-bool WebpLoader::open(const char* data, uint32_t size, TVG_UNUSED const LoaderOps* ops, bool copy)
+Result WebpLoader::open(const char* data, uint32_t size, const LoaderOps& ops)
 {
-    if (copy) {
+    if (ops.owner == Ownership::Copy) {
         this->data = tvg::malloc<unsigned char>(size);
-        if (!this->data) return false;
         memcpy((unsigned char *)this->data, data, size);
-        freeData = true;
     } else {
         this->data = (unsigned char *) data;
-        freeData = false;
     }
+    owner = ops.owner;
 
     WebPBitstreamFeatures features;
-    if (WebPGetFeatures(this->data, size, &features)) return false;
+    if (WebPGetFeatures(this->data, size, &features)) return Result::InvalidArguments;
     w = static_cast<float>(features.width);
     h = static_cast<float>(features.height);
-    surface.alphaIgnored = !features.has_alpha;
+    surface.opaque = !features.has_alpha;
     this->size = size;
-    return true;
+    return Result::Success;
 }
 
 
@@ -131,5 +119,5 @@ RenderSurface* WebpLoader::bitmap()
 {
     this->done();
 
-    return ImageLoader::bitmap();
+    return BitmapLoader::bitmap();
 }

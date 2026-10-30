@@ -229,7 +229,7 @@ struct RleWorker
     SwPoint lineStack[LINE_STACK_SIZE];
     int levStack[32];
 
-    SwOutline* outline;
+    const SwOutline* outline;
 
     int bandSize;
     int bandShoot;
@@ -692,42 +692,40 @@ static bool _cubicTo(RleWorker& rw, const SwPoint& ctrl1, const SwPoint& ctrl2, 
 static bool _decomposeOutline(RleWorker& rw)
 {
     auto outline = rw.outline;
-    auto first = 0;  //index of first point in contour
+    auto pts = outline->out.data;
+    auto start = UPSCALE(*pts);
+    auto open = false;
 
-    ARRAY_FOREACH(p, outline->cntrs) {
-        auto last = *p;
-        auto limit = outline->out.data + last;
-        auto start = UPSCALE(outline->out[first]);
-        auto pt = outline->out.data + first;
-        auto types = outline->types.data + first;
-        ++types;
-
-        if (!_moveTo(rw, UPSCALE(outline->out[first]))) return false;
-
-        while (pt < limit) {
-            //emit a single line_to
-            if (types[0] == SW_CURVE_TYPE_POINT) {
-                ++pt;
-                ++types;
-                if (!_lineTo(rw, UPSCALE(*pt))) return false;
-            //types cubic
-            } else {
-                pt += 3;
-                types += 3;
-                if (pt <= limit) {
-                    if (!_cubicTo(rw, UPSCALE(pt[-2]), UPSCALE(pt[-1]), UPSCALE(pt[0]))) return false;
-                } else if (pt - 1 == limit) {
-                    if (!_cubicTo(rw, UPSCALE(pt[-2]), UPSCALE(pt[-1]), start)) return false;
-                }
-                else goto close;
+    for (auto cmd : outline->path->cmds) {
+        switch (cmd) {
+            case PathCommand::MoveTo: {
+                if (open && !_lineTo(rw, start)) return false;
+                start = UPSCALE(*pts++);
+                if (!_moveTo(rw, start)) return false;
+                open = true;
+                break;
+            }
+            case PathCommand::LineTo: {
+                if (!open && !_moveTo(rw, start)) return false;
+                if (!_lineTo(rw, UPSCALE(*pts++))) return false;
+                open = true;
+                break;
+            }
+            case PathCommand::CubicTo: {
+                if (!open && !_moveTo(rw, start)) return false;
+                if (!_cubicTo(rw, UPSCALE(pts[0]), UPSCALE(pts[1]), UPSCALE(pts[2]))) return false;
+                pts += 3;
+                open = true;
+                break;
+            }
+            case PathCommand::Close: {
+                if (open && !_lineTo(rw, start)) return false;
+                open = false;
+                break;
             }
         }
-    close:
-        if (!_lineTo(rw, start)) return false;
-        first = last + 1;
     }
-
-    return true;
+    return !open || _lineTo(rw, start);
 }
 
 
@@ -768,11 +766,11 @@ SwRle* rleRender(SwRle* rle, const SwOutline* outline, const RenderRegion& bbox,
     rw.area = 0;
     rw.cover = 0;
     rw.invalid = true;
-    rw.cellMin = {bbox.min.x, bbox.min.y};
-    rw.cellMax = {bbox.max.x, bbox.max.y};
+    rw.cellMin = {bbox.xMin, bbox.yMin};
+    rw.cellMax = {bbox.xMax, bbox.yMax};
     rw.cellXCnt = rw.cellMax.x - rw.cellMin.x;
     rw.cellYCnt = rw.cellMax.y - rw.cellMin.y;
-    rw.outline = const_cast<SwOutline*>(outline);
+    rw.outline = outline;
     rw.bandSize = rw.bufferSize / (sizeof(SwCell) * 2);
     rw.bandShoot = 0;
     rw.antiAlias = antiAlias;
@@ -872,8 +870,8 @@ SwRle* rleRender(const RenderRegion* bbox)
     rle->spans.count = bbox->h();
 
     //cheaper without push()
-    auto x = bbox->min.x;
-    auto y = bbox->min.y;
+    auto x = bbox->xMin;
+    auto y = bbox->yMin;
     auto len = (int32_t)bbox->w();
 
     ARRAY_FOREACH(p, rle->spans) {
@@ -924,24 +922,38 @@ bool rleClip(SwRle* rle, const SwRle *clip)
             ++cspans;
             continue;
         }
-        //try clipping with all clip spans which have a same y-coordinate.
-        auto temp = cspans;
-        while(temp < cend && temp->y == cspans->y) {
-            //span must be left(x1) to right(x2) direction. Not intersected.
-            if ((spans->x + spans->len) < spans->x || (temp->x + temp->len) < temp->x) {
-                ++temp;
-                continue;
-            }
-            //clip span region
-            auto x = std::max(spans->x, temp->x);
-            auto len = std::min((spans->x + spans->len), (temp->x + temp->len)) - x;
-            if (len > 0) out.next() = {x, temp->y, len, (uint8_t)(((spans->coverage * temp->coverage) + 0xff) >> 8)};
-            ++temp;
+
+        // Both span lists are ordered and non-overlapping within a scanline.
+        if (spans->len <= 0) {
+            ++spans;
+            continue;
         }
-        ++spans;
+        if (cspans->len <= 0) {
+            ++cspans;
+            continue;
+        }
+
+        auto spanEnd = spans->x + spans->len;
+        auto clipEnd = cspans->x + cspans->len;
+
+        if (spanEnd <= cspans->x) {
+            ++spans;
+            continue;
+        }
+        if (clipEnd <= spans->x) {
+            ++cspans;
+            continue;
+        }
+
+        auto x = std::max(spans->x, cspans->x);
+        auto len = std::min(spanEnd, clipEnd) - x;
+        out.next() = {x, spans->y, len, (uint8_t)(((spans->coverage * cspans->coverage) + 0xff) >> 8)};
+
+        if (spanEnd <= clipEnd) ++spans;
+        if (clipEnd <= spanEnd) ++cspans;
     }
     out.move(rle->spans);
-    return true;
+    return !rle->spans.empty();
 }
 
 
@@ -950,9 +962,6 @@ bool rleClip(SwRle *rle, const RenderRegion* clip)
 {
     if (rle->spans.empty() || clip->invalid()) return false;
 
-    auto& min = clip->min;
-    auto& max = clip->max;
-
     Array<SwSpan> out;
     out.reserve(rle->spans.count);
     auto data = out.data;
@@ -960,14 +969,14 @@ bool rleClip(SwRle *rle, const RenderRegion* clip)
     int32_t x, len;
 
     for (auto p = rle->fetch(*clip, &end); p < end; ++p) {
-        if (p->y >= max.y) break;
-        if (p->y < min.y || p->x >= max.x || (p->x + p->len) <= min.x) continue;
-        if (p->x < min.x) {
-            x = min.x;
-            len = std::min(p->len - (x - p->x), (max.x - x));
+        if (p->y >= clip->yMax) break;
+        if (p->y < clip->yMin || p->x >= clip->xMax || (p->x + p->len) <= clip->xMin) continue;
+        if (p->x < clip->xMin) {
+            x = clip->xMin;
+            len = std::min(p->len - (x - p->x), (clip->xMax - x));
         } else {
             x = p->x;
-            len = std::min(p->len, max.x - x);
+            len = std::min(p->len, clip->xMax - x);
         }
         if (len > 0) {
             *data = {x, p->y, len, p->coverage};
@@ -976,7 +985,7 @@ bool rleClip(SwRle *rle, const RenderRegion* clip)
         }
     }
     out.move(rle->spans);
-    return true;
+    return !rle->spans.empty();
 }
 
 
@@ -984,13 +993,10 @@ bool rleIntersect(const SwRle* rle, const RenderRegion& region)
 {
     if (!rle || rle->spans.empty()) return false;
 
-    auto& min = region.min;
-    auto& max = region.max;
-
     const SwSpan* end;
     for (auto p = rle->fetch(region, &end); p < end; ++p) {
-        if (p->y >= max.y) break;
-        if (p->y < min.y || p->x >= max.x || (p->x + p->len) <= min.x) continue;
+        if (p->y >= region.yMax) break;
+        if (p->y < region.yMin || p->x >= region.xMax || (p->x + p->len) <= region.xMin) continue;
         return true;
     }
     return false;

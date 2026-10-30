@@ -30,12 +30,14 @@ extern const char* cShaderSrc_Depth;
 extern const char* cShaderSrc_Solid;
 extern const char* cShaderSrc_Linear;
 extern const char* cShaderSrc_Radial;
+extern const char* cShaderSrc_Conic;
 extern const char* cShaderSrc_Image;
 extern const char* cShaderSrc_Scene;
 // shaders custrom blend
 extern const char* cShaderSrc_Solid_Blend;
 extern const char* cShaderSrc_Linear_Blend;
 extern const char* cShaderSrc_Radial_Blend;
+extern const char* cShaderSrc_Conic_Blend;
 extern const char* cShaderSrc_Image_Blend;
 extern const char* cShaderSrc_Scene_Blend;
 extern const char* cShaderSrc_BlendFuncs;
@@ -47,5 +49,8 @@ extern const char* cShaderSrc_Blit;
 // shader sources effects
 extern const char* cShaderSrc_Shadow;
 extern const char* cShaderSrc_Effects;
+
+// compute shaders
+extern const char* cShaderSrc_Texture_Preprocess;
 
 #endif // _TVG_WG_SHEDER_SRC_H_

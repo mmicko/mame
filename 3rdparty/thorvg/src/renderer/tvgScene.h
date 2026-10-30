@@ -115,7 +115,7 @@ struct SceneImpl : Scene
 
         if (fixed) {
             auto pt = fsize * transform;
-            vport.intersect({{int32_t(round(transform.e13)), int32_t(round(transform.e23))}, {int32_t(round(pt.x)), int32_t(round(pt.y))}});
+            vport.intersect({int32_t(round(transform.e13)), int32_t(round(transform.e23)), int32_t(round(pt.x)), int32_t(round(pt.y))});
         } else {
             vdirty = true;
         }
@@ -169,28 +169,27 @@ struct SceneImpl : Scene
         vdirty = false;
 
         //Merge regions
-        RenderRegion pRegion = {{INT32_MAX, INT32_MAX}, {0, 0}};
+        RenderRegion pRegion = {INT32_MAX, INT32_MAX, 0, 0};
         for (auto paint : paints) {
             auto region = paint->pImpl->bounds();
-            if (region.min.x < pRegion.min.x) pRegion.min.x = region.min.x;
-            if (pRegion.max.x < region.max.x) pRegion.max.x = region.max.x;
-            if (region.min.y < pRegion.min.y) pRegion.min.y = region.min.y;
-            if (pRegion.max.y < region.max.y) pRegion.max.y = region.max.y;
+            if (region.xMin < pRegion.xMin) pRegion.xMin = region.xMin;
+            if (pRegion.xMax < region.xMax) pRegion.xMax = region.xMax;
+            if (region.yMin < pRegion.yMin) pRegion.yMin = region.yMin;
+            if (pRegion.yMax < region.yMax) pRegion.yMax = region.yMax;
         }
 
         //Extends the render region if post effects require
-        RenderRegion eRegion{};
         if (effects) {
             ARRAY_FOREACH(p, *effects) {
                 auto effect = *p;
-                if (effect->valid && impl.renderer->region(effect)) eRegion.add(effect->extend);
+                if (!effect->valid || !impl.renderer->region(effect)) continue;
+                // Each effect expands the output of the preceding effects.
+                pRegion.xMin += effect->extend.xMin;
+                pRegion.yMin += effect->extend.yMin;
+                pRegion.xMax += effect->extend.xMax;
+                pRegion.yMax += effect->extend.yMax;
             }
         }
-
-        pRegion.min.x += eRegion.min.x;
-        pRegion.min.y += eRegion.min.y;
-        pRegion.max.x += eRegion.max.x;
-        pRegion.max.y += eRegion.max.y;
 
         vport = RenderRegion::intersect(vport, pRegion);
         return vport;
@@ -265,6 +264,10 @@ struct SceneImpl : Scene
                 switch ((*p)->type) {
                     case SceneEffect::GaussianBlur: {
                         ret = new RenderEffectGaussianBlur(*(RenderEffectGaussianBlur*)(*p));
+                        break;
+                    }
+                    case SceneEffect::MotionBlur: {
+                        ret = new RenderEffectMotionBlur(*(RenderEffectMotionBlur*)(*p));
                         break;
                     }
                     case SceneEffect::DropShadow: {
@@ -353,9 +356,7 @@ struct SceneImpl : Scene
             if (itr == paints.end()) return Result::InvalidArguments;
             paints.insert(itr, target);
         }
-        timpl->parent = this;
-        if (timpl->clipper) PAINT(timpl->clipper)->parent = this;
-        if (timpl->maskData) PAINT(timpl->maskData->target)->parent = this;
+        timpl->attachTo(this);
         return Result::Success;
     }
 
@@ -424,6 +425,10 @@ struct SceneImpl : Scene
             }
             case SceneEffect::Tritone: {
                 re = RenderEffectTritone::gen(args);
+                break;
+            }
+            case SceneEffect::MotionBlur: {
+                re = RenderEffectMotionBlur::gen(args);
                 break;
             }
             default: break;

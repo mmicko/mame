@@ -28,13 +28,13 @@
 using tjhandle = void*;
 
 //TODO: Use Task?
-struct JpgLoader : ImageLoader
+struct JpgLoader : BitmapLoader
 {
     JpgLoader();
     ~JpgLoader();
 
-    bool open(const char* path, const LoaderOps* ops) override;
-    bool open(const char* data, uint32_t size, const LoaderOps* ops, bool copy) override;
+    Result open(const char* path, const LoaderOps& ops) override;
+    Result open(const char* data, uint32_t size, const LoaderOps& ops) override;
     bool read() override;
 
 private:
@@ -43,7 +43,6 @@ private:
     tjhandle jpegDecompressor;
     unsigned char* data = nullptr;
     uint32_t size = 0;
-    bool freeData = false;
 };
 
 #endif //_TVG_JPG_LOADER_H_

@@ -36,16 +36,10 @@ void PngLoader::run(unsigned tid)
 
     state.info_raw.colortype = LCT_RGBA;   //request this image format
 
-    if (lodepng_decode(&surface.buf8, &width, &height, &state, data, size)) {
-        TVGERR("PNG", "Failed to decode image");
-    }
+    if (lodepng_decode(&surface.buf8, &width, &height, &state, data, size)) TVGERR("PNG", "Failed to decode image");
+    else if (state.info_png.iccp_defined && lodepng_toSrgb(surface.buf8, surface.buf8, width, height, &state)) TVGERR("PNG", "Unsupported ICC color profile");
 
-    //setup the surface
-    surface.stride = width;
-    surface.w = width;
-    surface.h = height;
-    surface.cs = ColorSpace::ABGR8888S;
-    surface.channelSize = sizeof(uint32_t);
+    surface.setup(surface.buf32, width, width, height, sizeof(uint32_t), ColorSpace::ABGR8888S);
 }
 
 
@@ -53,7 +47,7 @@ void PngLoader::run(unsigned tid)
 /* External Class Implementation                                        */
 /************************************************************************/
 
-PngLoader::PngLoader() : ImageLoader(FileType::Png)
+PngLoader::PngLoader() : BitmapLoader(FileType::Png)
 {
     lodepng_state_init(&state);
 }
@@ -62,49 +56,46 @@ PngLoader::PngLoader() : ImageLoader(FileType::Png)
 PngLoader::~PngLoader()
 {
     done();
-    if (freeData) tvg::free(data);
+    if (owner != Ownership::Borrow) tvg::free(data);
     tvg::free(surface.buf8);
     lodepng_state_cleanup(&state);
 }
 
-bool PngLoader::open(const char* path, TVG_UNUSED const LoaderOps* ops)
+Result PngLoader::open(const char* path, const LoaderOps& ops)
 {
 #ifdef THORVG_FILE_IO_SUPPORT
-    if (!(data = (unsigned char*)Loader::open(path, size))) return false;
+    if (!(data = (unsigned char*)Loader::open(path, size))) return Result::InvalidArguments;
+    owner = Ownership::Transfer;
 
     lodepng_state_init(&state);
 
     unsigned int width, height;
-    if (lodepng_inspect(&width, &height, &state, data, size) > 0) return false;
+    if (lodepng_inspect(&width, &height, &state, data, size) > 0) return Result::InvalidArguments;
     w = static_cast<float>(width);
     h = static_cast<float>(height);
-    freeData = true;
-    return true;
+    return Result::Success;
 #else
-    return false;
+    return Result::NonSupport;
 #endif
 }
 
-bool PngLoader::open(const char* data, uint32_t size, TVG_UNUSED const LoaderOps* ops, bool copy)
+Result PngLoader::open(const char* data, uint32_t size, const LoaderOps& ops)
 {
     unsigned int width, height;
-    if (lodepng_inspect(&width, &height, &state, (unsigned char*)(data), size) > 0) return false;
+    if (lodepng_inspect(&width, &height, &state, (unsigned char*)(data), size) > 0) return Result::InvalidArguments;
 
-    if (copy) {
+    if (ops.owner == Ownership::Copy) {
         this->data = tvg::malloc<unsigned char>(size);
-        if (!this->data) return false;
         memcpy((unsigned char *)this->data, data, size);
-        freeData = true;
     } else {
         this->data = (unsigned char *) data;
-        freeData = false;
     }
-
+    owner = ops.owner;
     w = static_cast<float>(width);
     h = static_cast<float>(height);
     this->size = size;
 
-    return true;
+    return Result::Success;
 }
 
 
@@ -123,5 +114,5 @@ bool PngLoader::read()
 RenderSurface* PngLoader::bitmap()
 {
     this->done();
-    return ImageLoader::bitmap();
+    return BitmapLoader::bitmap();
 }

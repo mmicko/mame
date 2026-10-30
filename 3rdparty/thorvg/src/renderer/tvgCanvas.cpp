@@ -102,6 +102,16 @@ Result Canvas::sync() noexcept
     return pImpl->sync();
 }
 
+uint32_t Canvas::dirtyRegions() const noexcept
+{
+    return pImpl->dirtyRegions();
+}
+
+Result Canvas::dirtyRegions(Region* regions, uint32_t cnt) const noexcept
+{
+    if (!regions || cnt == 0) return Result::InvalidArguments;
+    return pImpl->dirtyRegions(regions, cnt);
+}
 
 /************************************************************************/
 /* SwCanvas Class Implementation                                        */
@@ -125,12 +135,12 @@ Result SwCanvas::target(uint32_t* buffer, uint32_t stride, uint32_t w, uint32_t 
     auto ret = static_cast<SwRenderer*>(pImpl->renderer)->target(buffer, stride, w, h, cs);
     if (ret != Result::Success) return ret;
 
-    pImpl->vport = {{0, 0}, {(int32_t)w, (int32_t)h}};
+    pImpl->vport = {0, 0, (int32_t)w, (int32_t)h};
     pImpl->renderer->viewport(pImpl->vport);
     pImpl->status = Status::Damaged;  // Paints must be updated again with this new target.
 
     //FIXME: The value must be associated with an individual canvas instance.
-    ImageLoader::cs = static_cast<ColorSpace>(cs);
+    BitmapLoader::cs = static_cast<ColorSpace>(cs);
 
     return Result::Success;
 #endif
@@ -176,12 +186,12 @@ Result GlCanvas::target(void* display, void* surface, void* context, int32_t id,
     auto ret = static_cast<GlRenderer*>(pImpl->renderer)->target(display, surface, context, id, w, h, cs);
     if (ret != Result::Success) return ret;
 
-    pImpl->vport = {{0, 0}, {(int32_t)w, (int32_t)h}};
+    pImpl->vport = {0, 0, (int32_t)w, (int32_t)h};
     pImpl->renderer->viewport(pImpl->vport);
     pImpl->status = Status::Damaged;  // Paints must be updated again with this new target.
 
     //FIXME: The value must be associated with an individual canvas instance.
-    ImageLoader::cs = static_cast<ColorSpace>(cs);
+    BitmapLoader::cs = static_cast<ColorSpace>(cs);
 
     return Result::Success;
 #endif
@@ -236,12 +246,12 @@ Result WgCanvas::target(const Context& context, void* target, uint32_t w, uint32
     auto ret = static_cast<WgRenderer*>(pImpl->renderer)->target(context, target, w, h, cs, type);
     if (ret != Result::Success) return ret;
 
-    pImpl->vport = {{0, 0}, {(int32_t)w, (int32_t)h}};
+    pImpl->vport = {0, 0, (int32_t)w, (int32_t)h};
     pImpl->renderer->viewport(pImpl->vport);
     pImpl->status = Status::Damaged;  // Paints must be updated again with this new target.
 
     //FIXME: The value must be associated with an individual canvas instance.
-    ImageLoader::cs = static_cast<ColorSpace>(cs);
+    BitmapLoader::cs = static_cast<ColorSpace>(cs);
 
     return Result::Success;
 #endif

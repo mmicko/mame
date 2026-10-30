@@ -164,9 +164,9 @@ static jerry_value_t _color(RGB32 rgb)
 {
     //OPTIMIZE: used a typed buffer instead of a object hash
     auto value = jerry_object();
-    auto r = jerry_number((float)rgb.r);
-    auto g = jerry_number((float)rgb.g);
-    auto b = jerry_number((float)rgb.b);
+    auto r = jerry_number(rgb.r / 255.0f);
+    auto g = jerry_number(rgb.g / 255.0f);
+    auto b = jerry_number(rgb.b / 255.0f);
     jerry_object_set_index(value, 0, r);
     jerry_object_set_index(value, 1, g);
     jerry_object_set_index(value, 2, b);
@@ -227,7 +227,11 @@ static RGB32 _color(jerry_value_t obj)
     auto r = jerry_object_get_index(obj, 0);
     auto g = jerry_object_get_index(obj, 1);
     auto b = jerry_object_get_index(obj, 2);
-    out = {jerry_value_as_int32(r), jerry_value_as_int32(g), jerry_value_as_int32(b)};
+    out = {
+      remap255<int32_t>(jerry_value_as_number(r)),
+      remap255<int32_t>(jerry_value_as_number(g)),
+      remap255<int32_t>(jerry_value_as_number(b))
+    };
     jerry_value_free(r);
     jerry_value_free(g);
     jerry_value_free(b);
@@ -466,8 +470,7 @@ static jerry_value_t _effect(const jerry_call_info_t* info, const jerry_value_t 
     return obj;
 }
 
-
-static void _buildLayer(jerry_value_t context, float frameNo, LottieLayer* layer, LottieLayer* comp, LottieExpression* exp)
+static void _buildLayer(jerry_value_t context, float frameNo, LottieLayer* layer, LottieRootLayer* comp, LottieExpression* exp)
 {
     auto width = jerry_number(layer->w);
     jerry_object_set_sz(context, EXP_WIDTH, width);
@@ -490,11 +493,11 @@ static void _buildLayer(jerry_value_t context, float frameNo, LottieLayer* layer
     jerry_object_set_sz(context, "hasParent", hasParent);
     jerry_value_free(hasParent);
 
-    auto inPoint = jerry_number(layer->inFrame / exp->comp->frameRate);
+    auto inPoint = jerry_number(layer->inPoint / exp->comp->frameRate);
     jerry_object_set_sz(context, "inPoint", inPoint);
     jerry_value_free(inPoint);
 
-    auto outPoint = jerry_number(layer->outFrame / exp->comp->frameRate);
+    auto outPoint = jerry_number(layer->outPoint / exp->comp->frameRate);
     jerry_object_set_sz(context, "outPoint", outPoint);
     jerry_value_free(outPoint);
 
@@ -886,7 +889,7 @@ static jerry_value_t _layerChild(const jerry_call_info_t* info, const jerry_valu
 static jerry_value_t _layer(const jerry_call_info_t* info, const jerry_value_t args[], const jerry_length_t argsCnt)
 {
     auto data = static_cast<ExpContent*>(jerry_object_get_native_ptr(info->function, &freeCb));
-    auto comp = static_cast<LottieLayer*>(data->obj);
+    auto comp = static_cast<LottieRootLayer*>(data->obj);
 
     //either index or name
     auto layer = jerry_value_is_number(args[0]) ? comp->layerByIdx((uint16_t)jerry_value_as_int32(args[0])) : comp->layerById(_idByName(args[0]));
@@ -1128,7 +1131,7 @@ static jerry_value_t _loopOut(const jerry_call_info_t* info, const jerry_value_t
     auto data = static_cast<ExpContent*>(jerry_object_get_native_ptr(info->function, &freeCb));
     auto mode = static_cast<LottieProperty::Loop>((int) _loopCommon(args, argsCnt) + LOOP_OUT_OFFSET);
     auto key = (argsCnt > 1) ? jerry_value_as_int32(args[1]) : 0;
-    return _buildValue(data->exp->property->loop(data->frameNo, key, mode, data->exp->layer->outFrame), data->exp->property);
+    return _buildValue(data->exp->property->loop(data->frameNo, key, mode, data->exp->layer->outPoint), data->exp->property);
 }
 
 
@@ -1146,7 +1149,7 @@ static jerry_value_t _loopIn(const jerry_call_info_t* info, const jerry_value_t 
     auto data = static_cast<ExpContent*>(jerry_object_get_native_ptr(info->function, &freeCb));
     auto mode = _loopCommon(args, argsCnt);
     auto key = (argsCnt > 1) ? jerry_value_as_int32(args[1]) : 0;
-    return _buildValue(data->exp->property->loop(data->frameNo, key, mode, data->exp->layer->outFrame), data->exp->property);
+    return _buildValue(data->exp->property->loop(data->frameNo, key, mode, data->exp->layer->outPoint), data->exp->property);
 }
 
 
@@ -1419,17 +1422,16 @@ void LottieExpressions::buildGlobal(Context& context, float frameNo, LottieExpre
     jerry_object_set_sz(context.global, EXP_INDEX, index);
     jerry_value_free(index);
 
-    auto inPoint = jerry_number(exp->layer->inFrame / exp->comp->frameRate);
+    auto inPoint = jerry_number(exp->layer->inPoint / exp->comp->frameRate);
     jerry_object_set_sz(context.global, "inPoint", inPoint);
     jerry_value_free(inPoint);
 
-    auto outPoint = jerry_number(exp->layer->outFrame / exp->comp->frameRate);
+    auto outPoint = jerry_number(exp->layer->outPoint / exp->comp->frameRate);
     jerry_object_set_sz(context.global, "outPoint", outPoint);
     jerry_value_free(outPoint);
 }
 
-
-void LottieExpressions::buildComp(jerry_value_t context, float frameNo, LottieLayer* comp, LottieExpression* exp)
+void LottieExpressions::buildComp(jerry_value_t context, float frameNo, LottieRootLayer* comp, LottieExpression* exp)
 {
     //layer(index) / layer(name) / layer(otherLayer, reIndex)
     auto layer = jerry_function_external(_layer);
@@ -1527,7 +1529,7 @@ jerry_value_t LottieExpressions::evaluate(float frameNo, LottieExpression* exp)
     buildComp(context, exp->comp, frameNo, exp);
 
     //this composition
-    buildComp(context.thisComp, frameNo, exp->layer->comp, exp);
+    buildComp(context.thisComp, frameNo, exp->layer->precomp, exp);
 
     //update global context values
     _buildProperty(frameNo, context.global, exp);

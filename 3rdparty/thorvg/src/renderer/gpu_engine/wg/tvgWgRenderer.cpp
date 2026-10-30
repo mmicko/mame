@@ -20,11 +20,122 @@
  * SOFTWARE.
  */
 
+#include <cassert>
 #include "tvgTaskScheduler.h"
 #include "tvgWgRenderer.h"
 
 /************************************************************************/
-/* Internal Class Implementation                                        */
+/* WgPaintPool                                                          */
+/************************************************************************/
+
+WgShape* WgPaintPool::shape()
+{
+    if (!shapes.empty()) return shapes.pick();
+
+    auto paint = new WgShape();
+    list.push(paint);
+    return paint;
+}
+
+WgImage* WgPaintPool::image()
+{
+    if (!images.empty()) return images.pick();
+
+    auto paint = new WgImage();
+    list.push(paint);
+    return paint;
+}
+
+void WgPaintPool::recycle(WgShape* shape)
+{
+    shapes.push(shape);
+}
+
+void WgPaintPool::recycle(WgImage* image)
+{
+    images.push(image);
+}
+
+void WgPaintPool::release(WgContext& context)
+{
+    ARRAY_FOREACH(p, list) {
+        (*p)->release(context);
+        delete (*p);
+    }
+    shapes.clear();
+    images.clear();
+    list.clear();
+}
+
+/************************************************************************/
+/* WgIntersector Implementation                                         */
+/************************************************************************/
+
+struct WgIntersector
+{
+    bool intersect(const Array<WgPaint*>& clips, const Point& pt)
+    {
+        ARRAY_FOREACH(c, clips) {
+            auto clip = static_cast<const WgShape*>(*c);
+            const auto& mesh = clip->shape.mesh;
+            if (!clip->shape.bbox.inside(pt) || !gpuPointInFillMesh(pt, mesh.vbuffer.data, mesh.ibuffer.data, mesh.ibuffer.count, clip->fillRule)) return false;
+        }
+        return true;
+    }
+
+    bool intersect(const WgShape* shape, const RenderRegion& region)
+    {
+        auto validFill = shape->shape.setting.valid && !shape->shape.mesh.ibuffer.empty();
+        auto validStroke = shape->stroke.setting.valid && !shape->stroke.mesh.ibuffer.empty();
+        if (!validFill && !validStroke) return false;
+
+        Matrix itransform;
+        if (validStroke && !inverse(&shape->transform, &itransform)) validStroke = false;
+        auto sizeX = region.sw();
+        auto sizeY = region.sh();
+
+        for (int32_t y = 0; y < sizeY; y++) {
+            auto py = (y % 2 == 0) ? y : sizeY - y - sizeY % 2;
+            for (int32_t x = 0; x < sizeX; x++) {
+                Point pt{(float)x + region.xMin, (float)py + region.yMin};
+                const auto& mesh = shape->shape.mesh;
+                auto hit = validFill ? shape->shape.bbox.inside(pt) && gpuPointInFillMesh(pt, mesh.vbuffer.data, mesh.ibuffer.data, mesh.ibuffer.count, shape->fillRule) : false;
+                if (!hit && validStroke) {
+                    auto p = pt * itransform;
+                    const auto& mesh = shape->stroke.mesh;
+                    hit = shape->stroke.bbox.inside(p) && gpuPointInAnyMesh(p, mesh.vbuffer.data, mesh.ibuffer.data, mesh.ibuffer.count);
+                }
+                if (hit && intersect(shape->clips, pt)) return true;
+            }
+        }
+        return false;
+    }
+
+    bool intersect(const WgImage* image, const RenderRegion& region)
+    {
+        if (image->mesh.ibuffer.count < 6) return false;
+
+        const auto& mesh = image->mesh;
+        Point triangle[6];
+        for (uint32_t i = 0; i < 6; ++i) {
+            triangle[i] = mesh.vbuffer[mesh.ibuffer[i]];
+        }
+
+        auto sizeX = region.sw();
+        auto sizeY = region.sh();
+        for (int32_t y = 0; y < sizeY; y++) {
+            auto py = (y % 2 == 0) ? y : sizeY - y - sizeY % 2;
+            for (int32_t x = 0; x < sizeX; x++) {
+                Point pt{(float)x + region.xMin, (float)py + region.yMin};
+                if (gpuPointInQuad(pt, triangle) && intersect(image->clips, pt)) return true;
+            }
+        }
+        return false;
+    }
+};
+
+/************************************************************************/
+/* WgRenderer Implementation                                            */
 /************************************************************************/
 
 static int32_t _rendererCnt = -1;
@@ -38,9 +149,8 @@ void WgRenderer::release()
     mTextures.clear(mContext);
 
     // clear render data paint pools
-    mRenderDataShapePool.release(mContext);
-    mRenderDataPicturePool.release(mContext);
-    mRenderDataEffectParamsPool.release(mContext);
+    mPaintPool.release(mContext);
+    mEffectPool.release(mContext);
 
     // clear render  pool
     mRenderTargetPool.release(mContext);
@@ -58,22 +168,21 @@ void WgRenderer::release()
     clearTargets();
 }
 
-
 void WgRenderer::disposeObjects()
 {
-    ARRAY_FOREACH(p, mDisposeRenderDatas) {
-        auto renderData = (WgRenderDataPaint*)(*p);
-        if (renderData->type() == Type::Shape) {
-            mRenderDataShapePool.free(mContext, (WgRenderDataShape*)renderData);
+    ARRAY_FOREACH(p, mDisposedPaints) {
+        auto paint = (WgPaint*)(*p);
+        paint->clips.clear();
+        if (paint->type() == Type::Shape) {
+            static_cast<WgShape*>(paint)->reset();
+            mPaintPool.recycle(static_cast<WgShape*>(paint));
         } else {
-            auto rdp = (WgRenderDataPicture*)renderData;
-            rdp->releaseTexture(mTextures, mContext);
-            mRenderDataPicturePool.free(mContext, rdp);
+            static_cast<WgImage*>(paint)->release(mTextures, mContext);
+            mPaintPool.recycle(static_cast<WgImage*>(paint));
         }
     }
-    mDisposeRenderDatas.clear();
+    mDisposedPaints.clear();
 }
-
 
 void WgRenderer::releaseSurfaceTexture()
 {
@@ -90,25 +199,29 @@ void WgRenderer::clearTargets()
     if (surface) wgpuSurfaceUnconfigure(surface);
     targetTexture = nullptr;
     surface = nullptr;
-    mTargetSurface.stride = 0;
-    mTargetSurface.w = 0;
-    mTargetSurface.h = 0;
-
+    mSurface.stride = 0;
+    mSurface.w = 0;
+    mSurface.h = 0;
 }
 
-void WgRenderer::surfaceConfigure(WGPUSurface surface, WgContext& context, uint32_t width, uint32_t height, ColorSpace cs)
+void WgRenderer::surfaceConfigure(RenderSurface& rsurface, WGPUSurface wsurface, WgContext& context)
 {
-    this->surface = surface;
+    this->surface = wsurface;
 
     // setup surface configuration
     WGPUSurfaceConfiguration surfaceConfig{
         .device = context.device,
         .format = context.format,
         .usage = WGPUTextureUsage_RenderAttachment,
-        .width = width,
-        .height = height,
+        .width = rsurface.w,
+        .height = rsurface.h,
 #ifdef __EMSCRIPTEN__
-        .alphaMode = WGPUCompositeAlphaMode_Premultiplied,  // for v1.0 backward compat. this can be removed with old target() api.
+        // for v1.0 backward compat. this can be removed with old target() api.
+        .alphaMode = rsurface.opaque ? WGPUCompositeAlphaMode_Opaque : WGPUCompositeAlphaMode_Premultiplied,
+#else
+        .alphaMode = rsurface.opaque ? WGPUCompositeAlphaMode_Opaque : WGPUCompositeAlphaMode_Auto,
+#endif
+#ifdef __EMSCRIPTEN__
         .presentMode = WGPUPresentMode_Fifo
 #elif defined(__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__) || (defined(_WIN32) && !defined(__CYGWIN__))
         // Use Immediate only where it is known to be supported on desktop surfaces.
@@ -121,14 +234,14 @@ void WgRenderer::surfaceConfigure(WGPUSurface surface, WgContext& context, uint3
 
     // safe-guard for the system compatibility
     if (context.adapter) {
-        auto premultiplied = (cs == ColorSpace::ABGR8888);
-        auto alphaMode = premultiplied ? WGPUCompositeAlphaMode_Premultiplied : WGPUCompositeAlphaMode_Unpremultiplied;
+        auto premultiplied = (rsurface.cs != ColorSpace::ABGR8888S);
+        auto alphaMode = rsurface.opaque ? WGPUCompositeAlphaMode_Opaque : (premultiplied ? WGPUCompositeAlphaMode_Premultiplied : WGPUCompositeAlphaMode_Unpremultiplied);
         WGPUSurfaceCapabilities capabilities;
-        if (wgpuSurfaceGetCapabilities(surface, context.adapter, &capabilities) == WGPUStatus_Success) {
+        if (wgpuSurfaceGetCapabilities(wsurface, context.adapter, &capabilities) == WGPUStatus_Success) {
             for (size_t i = 0; i < capabilities.alphaModeCount; ++i) {
                 if (capabilities.alphaModes[i] == alphaMode) {
                     surfaceConfig.alphaMode = alphaMode;
-                    mTargetSurface.premultiplied = premultiplied;
+                    rsurface.premultiplied = premultiplied;
                     break;
                 }
             }
@@ -136,87 +249,72 @@ void WgRenderer::surfaceConfigure(WGPUSurface surface, WgContext& context, uint3
         }
     }
 
-    wgpuSurfaceConfigure(surface, &surfaceConfig);
+    wgpuSurfaceConfigure(wsurface, &surfaceConfig);
 }
-
-/************************************************************************/
-/* External Class Implementation                                        */
-/************************************************************************/
 
 RenderData WgRenderer::prepare(const RenderShape& rshape, RenderData data, const Matrix& transform, const Array<RenderData>& clips, uint8_t opacity, RenderUpdateFlag flags, bool clipper)
 {
-    auto rds = data ? (WgRenderDataShape*)data : mRenderDataShapePool.allocate(mContext);
+    auto shape = data ? (WgShape*)data : mPaintPool.shape();
+    if (!data) flags = RenderUpdateFlag::All;
 
     // update geometry
-    if (!data || (flags & (RenderUpdateFlag::Transform | RenderUpdateFlag::Path | RenderUpdateFlag::Stroke))) {
-        rds->updateMeshes(rshape, flags, transform);
-    }
+    if (flags & (RenderUpdateFlag::Transform | RenderUpdateFlag::Path | RenderUpdateFlag::Stroke)) shape->update(rshape, transform, flags);
 
     // update transform
-    if ((!data) || (flags & RenderUpdateFlag::Transform)) {
-        rds->transform = transform;
-        rds->updateAABB();
-    }
+    if (flags & RenderUpdateFlag::Transform) shape->transform = transform;
 
     // update paint settings
-    if ((!data) || (flags & (RenderUpdateFlag::Transform | RenderUpdateFlag::Blend | RenderUpdateFlag::Color))) {
-        rds->renderSettingsShape.update(mContext, mTargetSurface.cs, opacity);
-        rds->renderSettingsStroke.update(mContext, mTargetSurface.cs, opacity);
-        rds->fillRule = rshape.rule;
-    }
+    shape->update(rshape, vport, shape->shape.setting.update(mSurface.cs, opacity), shape->stroke.setting.update(mSurface.cs, opacity), opacity);
 
-    // setup fill settings
-    rds->viewport = vport;
-    rds->updateVisibility(rshape, opacity);
-    // update shape render settings
-    if (!rds->renderSettingsShape.skip) {
-        if (rshape.fill && (!data || (flags & (RenderUpdateFlag::Gradient | RenderUpdateFlag::Transform)))) {
-            bool updateColorRamp = !data || ((flags & RenderUpdateFlag::Gradient) != RenderUpdateFlag::None);
-            rds->renderSettingsShape.update(mContext, rshape.fill, &transform, updateColorRamp);
-        } else if (!data || (flags & RenderUpdateFlag::Color)) {
-            rds->renderSettingsShape.update(mContext, rshape.color);
+    // shape
+    if (shape->shape.setting.valid) {
+        if (rshape.fill && (flags & (RenderUpdateFlag::Gradient | RenderUpdateFlag::Transform))) {
+            shape->shape.setting.update(mContext, rshape.fill, &transform, (flags & RenderUpdateFlag::Gradient));
+        } else if (flags & (RenderUpdateFlag::Color | RenderUpdateFlag::Gradient)) {
+            shape->shape.solid.color = rshape.color;
+            shape->shape.setting.fillType = WgRenderSettingsType::Solid;
         }
     }
-    // update strokes render settings
-    if (rshape.stroke && !rds->renderSettingsStroke.skip) {
-        if (rshape.stroke->fill && (!data || (flags & (RenderUpdateFlag::GradientStroke | RenderUpdateFlag::Transform)))) {
-            bool updateColorRamp = !data || ((flags & RenderUpdateFlag::GradientStroke) != RenderUpdateFlag::None);
-            rds->renderSettingsStroke.update(mContext, rshape.stroke->fill, nullptr, updateColorRamp);
-        } else if (!data || (flags & RenderUpdateFlag::Stroke)) {
-            rds->renderSettingsStroke.update(mContext, rshape.stroke->color);
+    // stroke
+    if (shape->stroke.setting.valid) {
+        if (rshape.stroke->fill && flags & (RenderUpdateFlag::GradientStroke | RenderUpdateFlag::Transform)) {
+            shape->stroke.setting.update(mContext, rshape.stroke->fill, nullptr, (flags & RenderUpdateFlag::GradientStroke));
+        } else if (flags & (RenderUpdateFlag::Stroke | RenderUpdateFlag::GradientStroke)) {
+            shape->stroke.solid.color = rshape.stroke->color;
+            shape->stroke.setting.fillType = WgRenderSettingsType::Solid;
         }
     }
 
-    if (flags & RenderUpdateFlag::Clip) rds->updateClips(clips);
+    if (flags & RenderUpdateFlag::Clip) shape->assign(clips);
 
-    return rds;
+    return shape;
 }
 
 RenderData WgRenderer::prepare(RenderSurface* surface, RenderData data, const Matrix& transform, const Array<RenderData>& clips, uint8_t opacity, FilterMethod filter, RenderUpdateFlag flags)
 {
-    auto rdp = data ? (WgRenderDataPicture*)data : mRenderDataPicturePool.allocate(mContext);
+    auto image = data ? (WgImage*)data : mPaintPool.image();
+    if (!data) flags = RenderUpdateFlag::All;
 
     // update paint settings
-    rdp->viewport = vport;
-    rdp->transform = transform;
-    if (!data || (flags & (RenderUpdateFlag::Blend | RenderUpdateFlag::Color))) rdp->renderSettings.update(mContext, surface->cs, opacity);
+    image->viewport = vport;
+    image->transform = transform;
+    image->setting.update(surface->cs, opacity);
 
-    auto updateSurface = !data || (flags & (RenderUpdateFlag::Transform | RenderUpdateFlag::Path | RenderUpdateFlag::Image));
-    if (updateSurface) rdp->updateSurface(surface, transform);
+    if (flags & (RenderUpdateFlag::Transform | RenderUpdateFlag::Image)) image->update(surface, transform);
 
     // reload texture
-    auto cacheStale = rdp->imageTexture && (rdp->imageStamp != mTextures.stamp);
-    auto refreshTexture = ((flags & (RenderUpdateFlag::Path | RenderUpdateFlag::Image)) != RenderUpdateFlag::None);
-    auto needsImage = !rdp->imageTexture || (rdp->imageSource != surface) || (rdp->imageFilter != filter) || refreshTexture || cacheStale;
-    if (needsImage) {
-        rdp->releaseTexture(mTextures, mContext);
-        auto* entry = mTextures.retain(mContext, surface, filter, refreshTexture);
-        rdp->setImage(entry->texture, entry->bindGroup, surface, filter, mTextures.stamp);
+    auto cacheStale = !image->texture || (image->stamp != mTextures.stamp);
+    auto refreshTex = (flags & RenderUpdateFlag::Image);
+    auto update = cacheStale || refreshTex || (image->surface != surface) || (image->filter != filter);
+    if (update) {
+        image->release(mTextures, mContext);
+        auto* entry = mTextures.retain(mContext, surface, filter, refreshTex);
+        image->setup(entry->texture, entry->bindGroup, surface, filter, mTextures.stamp);
     }
 
-    if (flags & RenderUpdateFlag::Clip) rdp->updateClips(clips);
+    if (flags & RenderUpdateFlag::Clip) image->assign(clips);
 
-    return rdp;
+    return image;
 }
 
 
@@ -224,6 +322,8 @@ bool WgRenderer::preRender()
 {
     if (mContext.invalid()) return false;
 
+    mSolidBatch = {};
+    mStencilBatch = {};
     mCompositor.reset(mContext);
 
     assert(mRenderTargetStack.count == 0);
@@ -231,7 +331,7 @@ bool WgRenderer::preRender()
 
     // create root compose settings
     WgCompose* compose = new WgCompose();
-    compose->aabb = { { 0, 0 }, { (int32_t)mTargetSurface.w, (int32_t)mTargetSurface.h } };
+    compose->aabb = {0, 0, (int32_t)mSurface.w, (int32_t)mSurface.h};
     compose->blend = BlendMethod::Normal;
     compose->method = MaskMethod::None;
     compose->opacity = 255;
@@ -247,28 +347,37 @@ bool WgRenderer::preRender()
 
 bool WgRenderer::renderShape(RenderData data)
 {
-    WgPaintTask* paintTask = new WgPaintTask((WgRenderDataPaint*)data, mBlendMethod);
+    auto rdata = (WgShape*)data;
     WgSceneTask* sceneTask = mSceneTaskStack.last();
+
+    if (mSolidBatch.draw(sceneTask, rdata, mBlendMethod, mRenderTaskList)) return true;
+    if (mStencilBatch.draw(sceneTask, rdata, mBlendMethod, mRenderTaskList)) return true;
+
+    WgPaintTask* paintTask = new WgPaintTask(rdata, mBlendMethod);
     sceneTask->children.push(paintTask);
     mRenderTaskList.push(paintTask);
-    mCompositor.requestShape((WgRenderDataShape*)data);
     return true;
 }
 
 
 bool WgRenderer::renderImage(RenderData data)
 {
-    WgPaintTask* paintTask = new WgPaintTask((WgRenderDataPaint*)data, mBlendMethod);
+    auto rdata = (WgImage*)data;
     WgSceneTask* sceneTask = mSceneTaskStack.last();
+    if (mSolidBatch.draw(sceneTask, rdata, mBlendMethod, mRenderTaskList)) return true;
+
+    WgPaintTask* paintTask = new WgPaintTask(rdata, mBlendMethod);
     sceneTask->children.push(paintTask);
     mRenderTaskList.push(paintTask);
-    mCompositor.requestImage((WgRenderDataPicture*)data);
     return true;
 }
 
 
 bool WgRenderer::postRender()
 {
+    WgSceneTask* sceneTaskRoot = mSceneTaskStack.last();
+    sceneTaskRoot->stage(mCompositor);
+
     // flush stage data to gpu
     mCompositor.flush(mContext);
 
@@ -276,7 +385,7 @@ bool WgRenderer::postRender()
     WGPUCommandEncoder commandEncoder = mContext.createCommandEncoder();
 
     // run rendering (all the fun is here)
-    WgSceneTask* sceneTaskRoot = mSceneTaskStack.last();
+    sceneTaskRoot->clearBuffer = mClearBuffer;
     sceneTaskRoot->run(mContext, mCompositor, commandEncoder);
 
     // execute and release command encoder
@@ -297,33 +406,28 @@ bool WgRenderer::postRender()
 void WgRenderer::dispose(RenderData data) {
     if (!mContext.queue) return;
     ScopedLock lock(mDisposeKey);
-    mDisposeRenderDatas.push(data);
+    mDisposedPaints.push(data);
 }
 
 
 bool WgRenderer::bounds(RenderData data, Point* pt4, const Matrix& m)
 {
     if (data) {
-        auto renderDataPaint = (WgRenderDataPaint*)data;
-        if (renderDataPaint->type() == Type::Shape) {
-            auto renderData = (WgRenderDataShape*)data;
-            if (!renderData->renderSettingsStroke.skip) {
-                tvg::BBox bbox;
-                bbox.init();
-                auto& vertexes = renderData->meshStrokes.vbuffer;
-
-                for (uint32_t i = 0; i < vertexes.count; i++) {
-                    Point vert = vertexes[i] * m;
-                    bbox.min = min(bbox.min, vert);
-                    bbox.max = max(bbox.max, vert);
-                }
-
-                pt4[0] = bbox.min;
-                pt4[1] = {bbox.max.x, bbox.min.y};
-                pt4[2] = bbox.max;
-                pt4[3] = {bbox.min.x, bbox.max.y};
-                return true;
+        auto shape = static_cast<WgShape*>(data);
+        if (shape->stroke.setting.valid) {
+            tvg::BBox bbox;
+            bbox.init();
+            auto& vertexes = shape->stroke.mesh.vbuffer;
+            for (uint32_t i = 0; i < vertexes.count; i++) {
+                auto pt = vertexes[i] * m;
+                bbox.min = min(bbox.min, pt);
+                bbox.max = max(bbox.max, pt);
             }
+            pt4[0] = bbox.min;
+            pt4[1] = {bbox.max.x, bbox.min.y};
+            pt4[2] = bbox.max;
+            pt4[3] = {bbox.min.x, bbox.max.y};
+            return true;
         }
     }
     return false;
@@ -331,34 +435,25 @@ bool WgRenderer::bounds(RenderData data, Point* pt4, const Matrix& m)
 
 RenderRegion WgRenderer::region(RenderData data)
 {
-    if (!data) return {};
-    auto renderData = (WgRenderDataPaint*)data;
-    if (renderData->type() == Type::Shape) {
-        auto& v1 = renderData->aabb.min;
-        auto& v2 = renderData->aabb.max;
-        return {{int32_t(nearbyint(v1.x)), int32_t(nearbyint(v1.y))}, {int32_t(nearbyint(v2.x)), int32_t(nearbyint(v2.y))}};
-    }
-    return {{0, 0}, {(int32_t)mTargetSurface.w, (int32_t)mTargetSurface.h}};
+    return data ? static_cast<WgPaint*>(data)->region() : RenderRegion{};
 }
-
 
 bool WgRenderer::blend(BlendMethod method)
 {
     mBlendMethod = (method == BlendMethod::Composition ? BlendMethod::Normal : method);
-
     return true;
 }
 
 
 ColorSpace WgRenderer::colorSpace()
 {
-    return mTargetSurface.cs;
+    return mSurface.cs;
 }
 
 
 const RenderSurface* WgRenderer::mainSurface()
 {
-    return &mTargetSurface;
+    return &mSurface;
 }
 
 
@@ -366,7 +461,7 @@ bool WgRenderer::clear()
 {
     if (mContext.invalid()) return false;
 
-    //TODO: clear the current target buffer only if clear() is called
+    mClearBuffer = true;
     return true;
 }
 
@@ -378,33 +473,39 @@ bool WgRenderer::sync()
     disposeObjects();
 
     // if texture buffer used
-    WGPUTexture dstTexture = targetTexture;
+    auto dstTexture = targetTexture;
     if (surface) {
         releaseSurfaceTexture();
         wgpuSurfaceGetCurrentTexture(surface, &surfaceTexture);
         dstTexture = surfaceTexture.texture;
     }
 
-    if (!dstTexture) return false;
+    if (!dstTexture) {
+        TVGERR("WG_ENGINE", "Failed to acquire destination texture.");
+        return false;
+    }
 
     // insure that surface and offscreen target have the same size
-    if ((wgpuTextureGetWidth(dstTexture) == mRenderTargetRoot.width) && 
-        (wgpuTextureGetHeight(dstTexture) == mRenderTargetRoot.height)) {
-        WGPUTextureView dstTextureView = mContext.createTextureView(dstTexture);
-        WGPUCommandEncoder commandEncoder = mContext.createCommandEncoder();
+    if ((wgpuTextureGetWidth(dstTexture) == mRenderTargetRoot.width) && (wgpuTextureGetHeight(dstTexture) == mRenderTargetRoot.height)) {
+        auto dstTextureView = mContext.createTextureView(dstTexture);
+        auto commandEncoder = mContext.createCommandEncoder();
         // show root offscreen buffer
-        mCompositor.blit(mContext, commandEncoder, &mRenderTargetRoot, dstTextureView, mTargetSurface.premultiplied);
+        mCompositor.blit(mContext, commandEncoder, &mRenderTargetRoot, dstTextureView, mSurface.premultiplied, mClearBuffer);
         mContext.submitCommandEncoder(commandEncoder);
         mContext.releaseCommandEncoder(commandEncoder);
         mContext.releaseTextureView(dstTextureView);
     }
+
+    mClearBuffer = false;
 
     return true;
 }
 
 Result WgRenderer::target(const WgCanvas::Context& ctx, void* target, uint32_t w, uint32_t h, ColorSpace cs, int type)
 {
-    if (cs != ColorSpace::ABGR8888 && cs != ColorSpace::ABGR8888S) return Result::NonSupport;
+    auto opaque = (cs == ColorSpace::XBGR8888);
+    if (cs != ColorSpace::ABGR8888 && cs != ColorSpace::ABGR8888S && !opaque) return Result::NonSupport;
+    if (opaque && type != 0) return Result::InvalidArguments;
 
     if (!ctx.instance || !ctx.device || !target) {
         release();
@@ -413,31 +514,35 @@ Result WgRenderer::target(const WgCanvas::Context& ctx, void* target, uint32_t w
 
     if (w == 0 || h == 0) return Result::InvalidArguments;
 
+    if (opaque) cs = ColorSpace::ABGR8888;  // Opaque surface composition uses the internal ABGR format.
+
     // context has been changed, need to recreate all instances
     if ((mContext.device != ctx.device) || (mContext.instance != ctx.instance) || mContext.adapter != ctx.adapter) {
         release();
         mContext.initialize(ctx);
-        mRenderTargetPool.initialize(mContext, w, h);
+        mRenderTargetPool.initialize(w, h);
         mRenderTargetRoot.initialize(mContext, w, h);
         mCompositor.initialize(mContext, w, h);
     // update render targets dimensions
-    } else if ((mTargetSurface.w != w) || (mTargetSurface.h != h) || (type == 0 ? (surface != (WGPUSurface)target) : (targetTexture != (WGPUTexture)target))) {
+    } else if ((mSurface.w != w) || (mSurface.h != h) || (type == 0 ? (surface != (WGPUSurface)target) : (targetTexture != (WGPUTexture)target))) {
         mRenderTargetPool.release(mContext);
         mRenderTargetRoot.release(mContext);
         clearTargets();
-        mRenderTargetPool.initialize(mContext, w, h);
+        mRenderTargetPool.initialize(w, h);
         mRenderTargetRoot.initialize(mContext, w, h);
         mCompositor.resize(mContext, w, h);
     }
 
-    mTargetSurface.stride = w;
-    mTargetSurface.w = w;
-    mTargetSurface.h = h;
-    mTargetSurface.cs = cs;
-    mTargetSurface.premultiplied = true;  // TODO: by default for v1 backward compat. properly addressed later v2 by aligning with actual alpha mode.
+    mSurface.stride = w;
+    mSurface.w = w;
+    mSurface.h = h;
+    // Keep alpha for internal composition; opaque mode only affects surface presentation.
+    mSurface.cs = cs;
+    mSurface.premultiplied = true;  // TODO: by default for v1 backward compat. properly addressed later v2 by aligning with actual alpha mode.
+    mSurface.opaque = opaque;
 
     // configure surface (must be called after context creation)
-    if (type == 0) surfaceConfigure((WGPUSurface)target, mContext, w, h, cs);
+    if (type == 0) surfaceConfigure(mSurface, (WGPUSurface)target, mContext);
     else targetTexture = (WGPUTexture)target;
 
     return Result::Success;
@@ -520,13 +625,13 @@ bool WgRenderer::beginComposite(RenderCompositor* cmp, MaskMethod method, uint8_
 bool WgRenderer::endComposite(RenderCompositor* cmp)
 {
     // pop targets and scenes from render tree
-    mRenderTargetPool.free(mContext, mRenderTargetStack.last());
+    mRenderTargetPool.pool.push(mRenderTargetStack.last());
     mSceneTaskStack.pop();
     mRenderTargetStack.pop();
     // in a case of masked target we must pop mask targets and scenes also
     WgCompose* compose = (WgCompose*)cmp;
     if (compose->masked) {
-        mRenderTargetPool.free(mContext, mRenderTargetStack.last());
+        mRenderTargetPool.pool.push(mRenderTargetStack.last());
         mSceneTaskStack.pop();
         mRenderTargetStack.pop();
     }
@@ -536,19 +641,21 @@ bool WgRenderer::endComposite(RenderCompositor* cmp)
 
 void WgRenderer::prepare(RenderEffect* effect, const Matrix& transform)
 {
-    if (!effect->rd) effect->rd = mRenderDataEffectParamsPool.allocate(mContext);
-    auto renderData = (WgRenderDataEffectParams*)effect->rd;
+    if (!effect->rd) effect->rd = mEffectPool.allocate(mContext);
+    auto rdata = (WgRenderEffect*)effect->rd;
 
     if (effect->type == SceneEffect::GaussianBlur) {
-        renderData->update(mContext, (RenderEffectGaussianBlur*)effect, transform);
+        rdata->update(mContext, (RenderEffectGaussianBlur*)effect, transform);
     } else if (effect->type == SceneEffect::DropShadow) {
-        renderData->update(mContext, (RenderEffectDropShadow*)effect, transform);
+        rdata->update(mContext, (RenderEffectDropShadow*)effect, transform);
     } else if (effect->type == SceneEffect::Fill) {
-        renderData->update(mContext, (RenderEffectFill*)effect);
+        rdata->update(mContext, (RenderEffectFill*)effect);
     } else if (effect->type == SceneEffect::Tint) {
-        renderData->update(mContext, (RenderEffectTint*)effect);
+        rdata->update(mContext, (RenderEffectTint*)effect);
     } else if (effect->type == SceneEffect::Tritone) {
-        renderData->update(mContext, (RenderEffectTritone*)effect);
+        rdata->update(mContext, (RenderEffectTritone*)effect);
+    } else if (effect->type == SceneEffect::MotionBlur) {
+        rdata->update(mContext, (RenderEffectMotionBlur*)effect, transform);
     } else {
         TVGERR("WG_ENGINE", "Missing effect type? = %d", (int) effect->type);
         return;
@@ -558,25 +665,30 @@ void WgRenderer::prepare(RenderEffect* effect, const Matrix& transform)
 
 bool WgRenderer::region(RenderEffect* effect)
 {
+    auto rdata = (WgRenderEffect*)effect->rd;
+
     if (effect->type == SceneEffect::GaussianBlur) {
         auto gaussian = (RenderEffectGaussianBlur*)effect;
-        auto renderData = (WgRenderDataEffectParams*)gaussian->rd;
         if (gaussian->direction != 2) {
-            gaussian->extend.min.x = -renderData->extend;
-            gaussian->extend.max.x = +renderData->extend;
+            gaussian->extend.xMin = -rdata->extend;
+            gaussian->extend.xMax = +rdata->extend;
         }
         if (gaussian->direction != 1) {
-            gaussian->extend.min.y = -renderData->extend;
-            gaussian->extend.max.y = +renderData->extend;
+            gaussian->extend.yMin = -rdata->extend;
+            gaussian->extend.yMax = +rdata->extend;
         }
         return true;
     } else if (effect->type == SceneEffect::DropShadow) {
         auto dropShadow = (RenderEffectDropShadow*)effect;
-        auto renderData = (WgRenderDataEffectParams*)dropShadow->rd;
-        dropShadow->extend.min.x = -std::ceil(renderData->extend + std::abs(renderData->offset.x));
-        dropShadow->extend.min.y = -std::ceil(renderData->extend + std::abs(renderData->offset.y));
-        dropShadow->extend.max.x = +std::floor(renderData->extend + std::abs(renderData->offset.x));
-        dropShadow->extend.max.y = +std::floor(renderData->extend + std::abs(renderData->offset.y));
+        dropShadow->extend.xMin = -std::ceil(rdata->extend + std::abs(rdata->offset.x));
+        dropShadow->extend.yMin = -std::ceil(rdata->extend + std::abs(rdata->offset.y));
+        dropShadow->extend.xMax = +std::floor(rdata->extend + std::abs(rdata->offset.x));
+        dropShadow->extend.yMax = +std::floor(rdata->extend + std::abs(rdata->offset.y));
+        return true;
+    } else if (effect->type == SceneEffect::MotionBlur) {
+        auto x = int32_t(ceilf(fabsf(rdata->offset.x) * 0.5f));
+        auto y = int32_t(ceilf(fabsf(rdata->offset.y) * 0.5f));
+        effect->extend = {-x, -y, x, y};
         return true;
     }
     return false;
@@ -585,15 +697,16 @@ bool WgRenderer::region(RenderEffect* effect)
 
 bool WgRenderer::render(RenderCompositor* cmp, const RenderEffect* effect, TVG_UNUSED bool direct)
 {
-    mSceneTaskStack.last()->effect = effect;
+    auto sceneTask = mSceneTaskStack.last();
+    sceneTask->effects.push(effect);
     return true;
 }
 
 
 void WgRenderer::dispose(RenderEffect* effect)
 {
-    auto renderData = (WgRenderDataEffectParams*)effect->rd;
-    mRenderDataEffectParamsPool.free(mContext, renderData);
+    if (!effect->rd) return;
+    mEffectPool.free(mContext, (WgRenderEffect*)effect->rd);
     effect->rd = nullptr;
 };
 
@@ -608,7 +721,8 @@ bool WgRenderer::preUpdate()
 
 bool WgRenderer::postUpdate()
 {
-    return true;
+    if (mContext.invalid()) return false;
+    return mTextures.flushPreprocess(mContext);
 }
 
 
@@ -618,25 +732,34 @@ void WgRenderer::damage(TVG_UNUSED RenderData rd, TVG_UNUSED const RenderRegion&
 }
 
 
-bool WgRenderer::partial(bool disable)
+bool WgRenderer::partial(TVG_UNUSED bool disable)
 {
     //TODO
     return false;
 }
 
+uint32_t WgRenderer::dirtyRegions() const
+{
+    return 1;
+}
+
+Result WgRenderer::dirtyRegions(Region* regions, TVG_UNUSED uint32_t cnt) const
+{
+    *regions = {0, 0, int32_t(mSurface.w), int32_t(mSurface.h)};
+    return Result::Success;
+}
 
 bool WgRenderer::intersectsShape(RenderData data, TVG_UNUSED const RenderRegion& region)
 {
     if (!data) return false;
-    auto shape = (WgRenderDataShape*)data;
+    auto shape = (WgShape*)data;
     RenderRegion bbox = {
-        {(int32_t)shape->aabb.min.x, (int32_t)shape->aabb.min.y},
-        {(int32_t)shape->aabb.max.x, (int32_t)shape->aabb.max.y}
-    };
+        (int32_t)shape->bbox.min.x, (int32_t)shape->bbox.min.y,
+        (int32_t)shape->bbox.max.x, (int32_t)shape->bbox.max.y};
     if (region.intersected(bbox)) {
         if (region.contained(bbox)) return true;
         WgIntersector intersector;
-        return intersector.intersectShape(RenderRegion::intersect(region, bbox), shape);
+        return intersector.intersect(shape, RenderRegion::intersect(region, bbox));
     }
     return false;
 }
@@ -645,9 +768,9 @@ bool WgRenderer::intersectsShape(RenderData data, TVG_UNUSED const RenderRegion&
 bool WgRenderer::intersectsImage(RenderData data, TVG_UNUSED const RenderRegion& region)
 {
     if (!data) return false;
-    auto picture = (WgRenderDataPicture*)data;
+    auto picture = (WgImage*)data;
     WgIntersector intersector;
-    if (intersector.intersectImage(region, picture)) return true;
+    if (intersector.intersect(picture, region)) return true;
     return false;
 }
 

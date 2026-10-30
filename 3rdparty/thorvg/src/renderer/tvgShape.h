@@ -96,8 +96,7 @@ struct ShapeImpl : Shape
 
     bool skip(RenderUpdateFlag flag)
     {
-        if (flag == RenderUpdateFlag::None) return true;
-        return false;
+        return (flag == RenderUpdateFlag::None);
     }
 
     bool update(RenderMethod* renderer, const Matrix& transform, Array<RenderData>& clips, uint8_t opacity, RenderUpdateFlag flag, bool clipper)
@@ -285,9 +284,9 @@ struct ShapeImpl : Shape
             tvg::free(dash.pattern);
             dash.pattern = nullptr;
         }
+        dash.length = 0.0f;
         if (cnt > 0) {
             if (!dash.pattern) dash.pattern = tvg::malloc<float>(sizeof(float) * cnt);
-            dash.length = 0.0f;
             for (uint32_t i = 0; i < cnt; ++i) {
                 dash.pattern[i] = pattern[i] < 0.0f ? 0.0f : pattern[i];
                 dash.length += dash.pattern[i];

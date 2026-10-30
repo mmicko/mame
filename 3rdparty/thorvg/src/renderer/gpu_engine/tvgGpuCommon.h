@@ -38,11 +38,16 @@ struct GpuOptimizeResult
 };
 
 void gpuOptimize(const RenderPath& in, GpuOptimizeResult& result, const Matrix& matrix);
-bool gpuPointInTriangle(const Point& p, const Point& a, const Point& b, const Point& c);
 RenderRegion gpuTransformBounds(const RenderRegion& bounds, const Matrix& matrix);
 bool gpuEdgesCross(const Point& p0, const Point& p1, const Point& p2, const Point& p3);
 bool gpuStrokeDash(const RenderShape& rs, RenderPath& out, const Matrix* transform);
 uint32_t gpuArcSegmentsCnt(float arcAngle, float pixelRadius);
+Matrix gpuConicTransform(const Point& center, float angle);
+
+bool gpuPointInTriangle(const Point& p, const Point& a, const Point& b, const Point& c);
+bool gpuPointInAnyMesh(const Point& p, const void* vertices, const uint32_t* indices, uint32_t count);
+bool gpuPointInFillMesh(const Point& p, const void* vertices, const uint32_t* indices, uint32_t count, FillRule rule);
+bool gpuPointInQuad(const Point& p, const Point (&triangle)[6]);
 
 // Conservative triangle-fan safety check
 // The fill is emitted as (v0,v1,v2), (v0,v2,v3), (v0,v3,v4), ...

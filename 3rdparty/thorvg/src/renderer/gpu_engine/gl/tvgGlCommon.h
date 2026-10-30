@@ -29,11 +29,20 @@
 #include "tvgMath.h"
 #include "tvgGpuCommon.h"
 
+struct GlStageBuffer;
+struct GlRenderTask;
+struct GlRenderer;
+
 constexpr float MIN_GL_STROKE_WIDTH = 1.0f;
 constexpr float MIN_GL_STROKE_ALPHA = 0.25f;
 
 constexpr uint32_t GL_MAT3_STD140_SIZE = 12; // mat3 is 3 vec4 columns in std140
 constexpr uint32_t GL_MAT3_STD140_BYTES = GL_MAT3_STD140_SIZE * sizeof(float);
+
+// Texture allocation and parameter setup must choose a unit explicitly instead
+// of inheriting the last draw-time sampler unit. This unit is not reserved:
+// sampler 0 reuses it and the state cache restores its draw binding as needed.
+constexpr GLenum TVG_GL_TEXTURE_SETUP_UNIT = GL_TEXTURE0;
 
 // All GPU matrices use column major order.
 static inline void getMatrix3(const Matrix& mat3, float* matOut)
@@ -42,7 +51,6 @@ static inline void getMatrix3(const Matrix& mat3, float* matOut)
     matOut[1] = mat3.e21; matOut[4] = mat3.e22; matOut[7] = mat3.e23;
     matOut[2] = mat3.e31; matOut[5] = mat3.e32; matOut[8] = mat3.e33;
 }
-
 
 // All GPU matrices use column major order. std140 mat3 packs each column into a vec4 stride.
 static inline void getMatrix3Std140(const Matrix& mat3, float* matOut)
@@ -53,19 +61,16 @@ static inline void getMatrix3Std140(const Matrix& mat3, float* matOut)
     matOut[3] = 0.0f;     matOut[7] = 0.0f;     matOut[11] = 0.0f;
 }
 
-
-enum class GlStencilMode {
+enum class GlStencilMode
+{
     None,
     FillNonZero,
     FillEvenOdd,
     Stroke,
 };
 
-
-class GlStageBuffer;
-class GlRenderTask;
-
-struct GlGeometryBuffer {
+struct GlGeometryBuffer
+{
     Array<float> vertex;
     Array<uint32_t> index;
 
@@ -78,76 +83,93 @@ struct GlGeometryBuffer {
 
 struct GlGeometry
 {
-    const Matrix* inverseMatrix() const
+    const Matrix& itransform() const
     {
-        if (!inverseMatrixDirty) return &cachedInverseMatrix;
-        inverse(&matrix, &cachedInverseMatrix);
-        inverseMatrixDirty = false;
-        return &cachedInverseMatrix;
+        if (!mDirty) return imatrix;
+        inverse(&matrix, &imatrix);
+        mDirty = false;
+        return imatrix;
     }
 
-    void setMatrix(const Matrix& tr) { matrix = tr; inverseMatrixDirty = true;}
+    void transform(const Matrix& m)
+    {
+        matrix = m;
+        mDirty = true;
+    }
 
-    void prepare(const RenderShape& rshape);
-    bool tesselateShape(const RenderShape& rshape, float* opacityMultiplier = nullptr);
-    bool tesselateStroke(const RenderShape& rshape);
-    bool tesselateThinFill(const RenderPath& path);
-    void tesselateImage(const RenderSurface* image);
     bool drawable(RenderUpdateFlag flag) const
     {
         if (flag == RenderUpdateFlag::None) return false;
-        auto buffer = ((flag & RenderUpdateFlag::Stroke) || (flag & RenderUpdateFlag::GradientStroke)) ? &stroke : &fill;
-        return !buffer->index.empty();
+        auto& buffer = (flag & (RenderUpdateFlag::Stroke | RenderUpdateFlag::GradientStroke)) ? stroke : fill;
+        return !buffer.index.empty();
     }
+
+    void prepare(const RenderShape& rshape);
+    bool tesselateShape(const RenderShape& rshape, float& multiplier);
+    bool tesselateStroke(const RenderShape& rshape);
+    bool tesselateThinFill(const RenderPath& path);
+    void tesselateImage(const RenderSurface* image);
     void draw(GlRenderTask* task, GlStageBuffer* gpuBuffer, RenderUpdateFlag flag) const;
-    GlStencilMode getStencilMode(RenderUpdateFlag flag);
-    RenderRegion getBounds() const;
+    GlStencilMode stencilMode(RenderUpdateFlag flag) const;
+    RenderRegion bounds() const;
 
     GlGeometryBuffer fill, stroke;
-    Matrix matrix = {};
-    RenderRegion viewport = {};
-    RenderRegion fillBounds = {};
-    RenderRegion strokeBounds = {};
-    FillRule fillRule = FillRule::NonZero;
+    Matrix matrix;
+    RenderRegion viewport;
+    RenderRegion fillBBox, strokeBBox;
     RenderPath optPath;        // optimal transformed path
     RenderPath optStrokePath;  // matching local path using transformed-space tolerance
-    float strokeRenderWidth = 0.0f;
-    mutable Matrix cachedInverseMatrix = {};
-    mutable bool inverseMatrixDirty = true;
-    bool fillWorld = false;
-    bool optPathThin = false;
-    bool optPathSkipFill = false;
-    bool convex;
+    float strokeRenderWidth;
+    mutable Matrix imatrix;      // inverse matrix
+    mutable bool mDirty = true;  // matrix dirty
+    FillRule fillRule;
+    bool fillWorld : 1;
+    bool optPathThin : 1;
+    bool optPathSkipFill : 1;
+    bool convex : 1;
+    bool strokeDirect;
 };
 
-
-struct GlShape
+struct GlDrawable
 {
-  const RenderShape* rshape = nullptr;
-  float viewWd;
-  float viewHt;
-  uint32_t opacity = 0;
-  RenderUpdateFlag deferredFlags = RenderUpdateFlag::None;
-  GLuint texId = 0;
-  const RenderSurface* texSource = nullptr;
-  FilterMethod texFilter = FilterMethod::Bilinear;
-  uint32_t texFlipY = 0;
-  ColorSpace texColorSpace = ColorSpace::ABGR8888;
-  GlGeometry geometry;
-  Array<RenderData> clips;
-  uint16_t texStamp = 0;  // Tracks TextureMgr::stamp ownership of texId.
-  bool validFill = false;
-  bool validStroke = false;
+    virtual ~GlDrawable() = default;
+    virtual void destroy(GlRenderer& renderer) = 0;
+    bool prepare(RenderUpdateFlag& updateFlags, const Point& viewSize, uint8_t opacity, bool clipper);
+
+    GlGeometry geometry;
+    Array<RenderData> clips;
+    Point size;  // view size
+    uint32_t opacity;
+    RenderUpdateFlag flags = RenderUpdateFlag::None;  // a backup flag for deferred update
+};
+
+struct GlShape : GlDrawable
+{
+    void destroy(GlRenderer& renderer) override {}
+
+    const RenderShape* rshape;
+    float multiplier = 1.0f;
+    struct {
+        bool fill = false;
+        bool stroke = false;
+    } valid;
+};
+
+struct GlImage : GlDrawable
+{
+    void destroy(GlRenderer& renderer) override;
+
+    const RenderSurface* surface;
+    GLuint texId = 0;
+    uint16_t stamp;  // Tracks TextureMgr::stamp ownership of texId.
+    FilterMethod filter;
 };
 
 struct GlIntersector
 {
-    bool isPointInImage(const Point& p, const GlGeometryBuffer& mesh, const Matrix& tr);
-    bool isPointInTris(const Point& p, const GlGeometryBuffer& mesh);
-    bool isPointInMesh(const Point& p, const GlGeometryBuffer& mesh, const Matrix& tr);
-    bool intersectClips(const Point& pt, const tvg::Array<tvg::RenderData>& clips);
-    bool intersectShape(const RenderRegion region, const GlShape* shape);
-    bool intersectImage(const RenderRegion region, const GlShape* image);
+    bool intersect(const tvg::Array<tvg::RenderData>& clips, const Point& pt);
+    bool intersect(const GlShape* shape, const RenderRegion& region);
+    bool intersect(const GlImage* image, const RenderRegion& region);
 };
 
 #define MAX_GRADIENT_STOPS 16
@@ -166,6 +188,13 @@ struct GlRadialGradientBlock
     alignas(16) float nStops[4] = {};
     alignas(16) float centerPos[4] = {};
     alignas(16) float radius[2] = {};
+    alignas(16) float stopPoints[MAX_GRADIENT_STOPS] = {};
+    alignas(16) float stopColors[4 * MAX_GRADIENT_STOPS] = {};
+};
+
+struct GlConicGradientBlock
+{
+    alignas(16) float nStops[4] = {};
     alignas(16) float stopPoints[MAX_GRADIENT_STOPS] = {};
     alignas(16) float stopColors[4 * MAX_GRADIENT_STOPS] = {};
 };

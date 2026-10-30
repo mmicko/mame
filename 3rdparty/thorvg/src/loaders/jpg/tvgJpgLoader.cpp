@@ -29,24 +29,16 @@
 void JpgLoader::clear()
 {
     jpgdDelete(decoder);
-    if (freeData) tvg::free(data);
+    if (owner != Ownership::Borrow) tvg::free(data);
     decoder = nullptr;
     data = nullptr;
-    freeData = false;
+    owner = Ownership::Borrow;
 }
 
 
 void JpgLoader::run(unsigned tid)
 {
-    surface.cs = ColorSpace::ABGR8888;
-    surface.buf8 = jpgdDecompress(decoder);
-    surface.stride = static_cast<uint32_t>(w);
-    surface.w = static_cast<uint32_t>(w);
-    surface.h = static_cast<uint32_t>(h);
-    surface.channelSize = sizeof(uint32_t);
-    surface.premultiplied = true;
-    surface.alphaIgnored = true;
-
+    surface.setup((pixel_t*)jpgdDecompress(decoder), static_cast<uint32_t>(w), static_cast<uint32_t>(w), static_cast<uint32_t>(h), sizeof(uint32_t), ColorSpace::XBGR8888);
     clear();
 }
 
@@ -55,12 +47,6 @@ void JpgLoader::run(unsigned tid)
 /* External Class Implementation                                        */
 /************************************************************************/
 
-JpgLoader::JpgLoader() : ImageLoader(FileType::Jpg)
-{
-
-}
-
-
 JpgLoader::~JpgLoader()
 {
     done();
@@ -68,44 +54,41 @@ JpgLoader::~JpgLoader()
     tvg::free(surface.buf8);
 }
 
-bool JpgLoader::open(const char* path, TVG_UNUSED const LoaderOps* ops)
+Result JpgLoader::open(const char* path, const LoaderOps& ops)
 {
 #ifdef THORVG_FILE_IO_SUPPORT
     int width, height;
-    if (!(decoder = jpgdHeader(path, &width, &height))) return false;
+    if (!(decoder = jpgdHeader(path, &width, &height))) return Result::InvalidArguments;
 
     w = static_cast<float>(width);
     h = static_cast<float>(height);
+    owner = Ownership::Transfer;
 
-    return true;
+    return Result::Success;
 #else
-    return false;
+    return Result::NonSupport;
 #endif
 }
 
-bool JpgLoader::open(const char* data, uint32_t size, TVG_UNUSED const LoaderOps* ops, bool copy)
+Result JpgLoader::open(const char* data, uint32_t size, const LoaderOps& ops)
 {
-    if (copy) {
+    if (ops.owner == Ownership::Copy) {
         this->data = tvg::malloc<char>(size);
-        if (!this->data) return false;
         memcpy((char *)this->data, data, size);
-        freeData = true;
     } else {
         this->data = (char *) data;
-        freeData = false;
     }
+    owner = ops.owner;
 
     int width, height;
     decoder = jpgdHeader(this->data, size, &width, &height);
-    if (!decoder) return false;
+    if (!decoder) return Result::InvalidArguments;
 
     w = static_cast<float>(width);
     h = static_cast<float>(height);
 
-    return true;
+    return Result::Success;
 }
-
-
 
 bool JpgLoader::read()
 {
@@ -130,5 +113,5 @@ bool JpgLoader::close()
 RenderSurface* JpgLoader::bitmap()
 {
     this->done();
-    return ImageLoader::bitmap();
+    return BitmapLoader::bitmap();
 }
