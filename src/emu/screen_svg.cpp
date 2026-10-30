@@ -95,7 +95,7 @@ void screen_svg_device::render_state(std::vector<u32> &dest, const std::vector<b
 	tvg::Paint *picture = m_image->duplicate();
 	picture->scale(m_scale);
 	m_rasterizer->add(picture);
-	m_rasterizer->draw();
+	m_rasterizer->draw(true);
 	m_rasterizer->sync();
 	m_rasterizer->remove();
 }
