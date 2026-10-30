@@ -16,65 +16,41 @@
 #include "render.h"
 #include "video.h"
 
-#include <pugixml.hpp>
-
 #include <cstdio>
 #include <set>
 
 // device type definition
 DEFINE_DEVICE_TYPE(SCREEN_SVG, screen_svg_device, "screen_svg", "SVG Video Screen")
 
-using title_map = std::unordered_map<std::string, std::vector<std::string>>;
-
-static void extract_titles(const pugi::xml_node &node, title_map &map)
-{
-	if (auto id = node.attribute("id"))
-	{
-		if (auto title = node.child("title"))
-		{
-			std::string title_text = title.child_value();
-			if (!title_text.empty())
-				map[title_text].push_back(id.value());
-		}
-	}
-
-	for (auto child : node.children())
-		extract_titles(child, map);
-}
-
 void screen_svg_device::svg_init()
 {
-	const std::unique_ptr<char []> s(new char[m_svg_region->bytes() + 1]);
-	memcpy(s.get(), m_svg_region->base(), m_svg_region->bytes());
-	s[m_svg_region->bytes()] = 0;
-
-	title_map title_to_ids;
-	pugi::xml_document doc;
-	doc.load_string(s.get());
-	extract_titles(doc.document_element(), title_to_ids);
-
 	auto picture = tvg::Picture::gen();
-	picture->accessible = true;
-	picture->load(s.get(), strlen(s.get()), "svg", nullptr, true);
+	picture->load(reinterpret_cast<const char *>(m_svg_region->base()), m_svg_region->bytes(), "svg", nullptr, true);
 	picture->size(&m_width, &m_height);
 	m_image.reset(picture);
 	m_rasterizer.reset(tvg::SwCanvas::gen());
 
 	m_key_count = 0;
 
-	for (const auto &[title, ids] : title_to_ids)
-		for (const auto &id : ids)
-			if (auto *paint = const_cast<tvg::Paint *>(picture->paint(tvg::Accessor::id(id.c_str())))) {
-				const auto it = m_key_ids.find(title);
-				if(it != m_key_ids.end())
-					m_keyed_shapes[it->second].push_back(paint);
-				else {
-					const int key = m_key_count++;
-					m_keyed_shapes.resize(m_key_count);
-					m_keyed_shapes[key].push_back(paint);
-					m_key_ids[title] = key;
+	std::unique_ptr<tvg::Accessor> accessor(tvg::Accessor::gen());
+	accessor->set(
+			picture,
+			[this] (const tvg::Paint *paint, void *data)
+			{
+				if (paint->id) {
+					const auto it = m_key_ids.find(paint->id);
+					if(it != m_key_ids.end())
+						m_keyed_shapes[it->second].push_back(const_cast<tvg::Paint *>(paint));
+					else {
+						const int key = m_key_count++;
+						m_keyed_shapes.resize(m_key_count);
+						m_keyed_shapes[key].push_back(const_cast<tvg::Paint *>(paint));
+						m_key_ids[paint->id] = key;
+					}
 				}
-			}
+				return true;
+			},
+			nullptr);
 	m_key_state.resize(m_key_count);
 	std::fill(m_key_state.begin(),m_key_state.end(),false);
 }
@@ -124,7 +100,7 @@ void screen_svg_device::output_change(const osd::output_item &output)
 {
 	// for now, use the unqualified name for backwards compatibility
 	// TODO: migrate to using qualified output names
-	const auto l = m_key_ids.find(output.name());
+	const auto l = m_key_ids.find(tvg::Accessor::id(std::string(output.name()).c_str()));
 	if (l == m_key_ids.end())
 		return;
 	m_key_state[l->second] = output.value();

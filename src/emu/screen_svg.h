@@ -86,7 +86,7 @@ private:
 	std::unique_ptr<tvg::SwCanvas> m_rasterizer;
 	std::vector<bool> m_key_state;
 	std::vector<std::vector<tvg::Paint *>> m_keyed_shapes;
-	util::transparent_string_unordered_map<std::string, int> m_key_ids;
+	std::unordered_map<u32, int> m_key_ids;
 	int m_key_count;
 	u8              m_curbitmap;                // current bitmap index
 	u8              m_curtexture;               // current texture index
