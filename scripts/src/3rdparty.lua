@@ -2208,9 +2208,6 @@ project "thorvg"
 	kind "StaticLib"
 
 	generate_thorvg_header()
-	--os.mkdir(GEN_DIR .. "3rdparty/thorvg/include/thorvg-1")
-	--os.copyfile(MAME_DIR .. "3rdparty/thorvg/inc/thorvg.h", GEN_DIR .. "3rdparty/thorvg/include/thorvg-1/thorvg.h")
-	--os.copyfile(MAME_DIR .. "3rdparty/thorvg/src/loaders/lottie/thorvg_lottie.h", GEN_DIR .. "3rdparty/thorvg/include/thorvg-1/thorvg_lottie.h")
 
 	configuration { }
 		defines {
