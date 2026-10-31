@@ -6326,6 +6326,27 @@ end
 
 ---------------------------------------------------
 --
+--@src/devices/bus/unibus/unibus.h,BUSES["UNIBUS"] = true
+---------------------------------------------------
+
+if BUSES["UNIBUS"] then
+	files {
+		MAME_DIR .. "src/devices/bus/unibus/cards.cpp",
+		MAME_DIR .. "src/devices/bus/unibus/cards.h",
+		MAME_DIR .. "src/devices/bus/unibus/dl11.cpp",
+		MAME_DIR .. "src/devices/bus/unibus/dl11.h",
+		MAME_DIR .. "src/devices/bus/unibus/memory.cpp",
+		MAME_DIR .. "src/devices/bus/unibus/memory.h",
+		MAME_DIR .. "src/devices/bus/unibus/processor.cpp",
+		MAME_DIR .. "src/devices/bus/unibus/processor.h",
+		MAME_DIR .. "src/devices/bus/unibus/unibus.cpp",
+		MAME_DIR .. "src/devices/bus/unibus/unibus.h",
+	}
+end
+
+
+---------------------------------------------------
+--
 --@src/devices/bus/uts_kbd/uts_kbd.h,BUSES["UTS_KBD"] = true
 ---------------------------------------------------
 

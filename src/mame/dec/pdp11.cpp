@@ -90,6 +90,8 @@
 
 #include "emu.h"
 #include "bus/qbus/qbus.h"
+#include "bus/unibus/cards.h"
+#include "bus/unibus/unibus.h"
 #include "bus/rs232/rs232.h"
 #include "cpu/t11/t11.h"
 #include "cpu/i86/i186.h"
@@ -384,6 +386,44 @@ void pdp11_state::sms1000(machine_config &config)
 	subcpu.set_addrmap(AS_PROGRAM, &pdp11_state::sms1000_mem_188);
 }
 
+
+class unibus_state : public driver_device
+{
+public:
+	unibus_state(const machine_config &mconfig, device_type type, const char *tag)
+		: driver_device(mconfig, type, tag)
+		, m_unibus(*this, "unibus")
+	{ }
+
+	void pdp1105(machine_config &config) ATTR_COLD;
+	void pdp1120(machine_config &config) ATTR_COLD;
+
+private:
+	required_device<unibus_device> m_unibus;
+};
+
+// TODO: put proper cards in proper unibus slots
+
+// PDP-11/20 and PDP-11/15: KA11 processor
+void unibus_state::pdp1120(machine_config &config)
+{
+	UNIBUS(config, m_unibus);
+	UNIBUS_SLOT(config, "unibus:1", m_unibus, unibus_cpu_cards, "ka11", true);
+	UNIBUS_SLOT(config, "unibus:2", m_unibus, unibus_cards, "dl11");
+	UNIBUS_SLOT(config, "unibus:3", m_unibus, unibus_cards, nullptr);
+	UNIBUS_SLOT(config, "unibus:4", m_unibus, unibus_cards, "mm11u");
+}
+
+// PDP-11/05 and PDP-11/10: KD11-B processor (M7260 data paths, M7261 control)
+void unibus_state::pdp1105(machine_config &config)
+{
+	UNIBUS(config, m_unibus);
+	UNIBUS_SLOT(config, "unibus:1", m_unibus, unibus_cpu_cards, "kd11b", true);
+	UNIBUS_SLOT(config, "unibus:2", m_unibus, unibus_cards, "dl11");
+	UNIBUS_SLOT(config, "unibus:3", m_unibus, unibus_cards, nullptr);
+	UNIBUS_SLOT(config, "unibus:4", m_unibus, unibus_cards, "mm11u");
+}
+
 /* ROM definition */
 ROM_START( pdp11ub )
 	ROM_REGION( 0x10000, "maincpu", ROMREGION_ERASEFF )
@@ -442,6 +482,18 @@ ROM_START( pdp11qb )
 	ROM_LOAD16_BYTE( "m7195fa.2", 0xc001, 0x2000, CRC(15b6f60c) SHA1(80dd4f8ca3c27babb5e75111b04241596a07c53a))
 ROM_END
 
+ROM_START( pdp1105 )
+ROM_END
+
+ROM_START( pdp1115 )
+ROM_END
+
+ROM_START( pdp1120 )
+ROM_END
+
+ROM_START( pdp1110 )
+ROM_END
+
 ROM_START( sms1000 )
 	ROM_REGION( 0x10000, "maincpu", ROMREGION_ERASEFF )
 	ROM_LOAD( "21251001u",    0x00000, 0x010000, CRC(eec3ccbb) SHA1(69eedb2c3bffe0a2988b1c066df1fea195618087) )
@@ -488,3 +540,8 @@ COMP( 197?, pdp11ub,  0,       0,      pdp11,    pdp11, pdp11_state, empty_init,
 COMP( 197?, pdp11ub2, pdp11ub, 0,      pdp11ub2, pdp11, pdp11_state, empty_init, "Digital Equipment Corporation", "PDP-11 [Unibus](M9312)",           MACHINE_NOT_WORKING | MACHINE_NO_SOUND)
 COMP( 198?, pdp11qb,  pdp11ub, 0,      pdp11qb,  pdp11, pdp11_state, empty_init, "Digital Equipment Corporation", "PDP-11 [Q-BUS] (M7195 - MXV11-B)", MACHINE_NOT_WORKING | MACHINE_NO_SOUND)
 COMP( 1987, sms1000,  0,       0,      sms1000,  pdp11, pdp11_state, empty_init, "Scientific Micro Systems",      "SMS-1000",                         MACHINE_NO_SOUND | MACHINE_NOT_WORKING )
+
+COMP( 1970, pdp1120,  0,       0,      pdp1120,  0,     unibus_state, empty_init, "Digital Equipment Corporation", "PDP-11/20",                       MACHINE_NOT_WORKING | MACHINE_NO_SOUND)
+COMP( 1971, pdp1115,  pdp1120, 0,      pdp1120,  0,     unibus_state, empty_init, "Digital Equipment Corporation", "PDP-11/15",                       MACHINE_NOT_WORKING | MACHINE_NO_SOUND)
+COMP( 1972, pdp1105,  0,       0,      pdp1105,  0,     unibus_state, empty_init, "Digital Equipment Corporation", "PDP-11/05",                       MACHINE_NOT_WORKING | MACHINE_NO_SOUND)
+COMP( 1972, pdp1110,  pdp1105, 0,      pdp1105,  0,     unibus_state, empty_init, "Digital Equipment Corporation", "PDP-11/10",                       MACHINE_NOT_WORKING | MACHINE_NO_SOUND)

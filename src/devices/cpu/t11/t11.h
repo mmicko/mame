@@ -12,7 +12,7 @@
 
 enum
 {
-	T11_R0=1, T11_R1, T11_R2, T11_R3, T11_R4, T11_R5, T11_SP, T11_PC, T11_PSW
+	T11_R0=1, T11_R1, T11_R2, T11_R3, T11_R4, T11_R5, T11_SP, T11_PC, T11_PSW, T11_HALTED
 };
 
 
@@ -28,7 +28,13 @@ public:
 		CP3_LINE = 3,           // -AI1 (at PI time)
 		VEC_LINE = 4,           // -AI5 (at PI time)
 		PF_LINE = 5,            // -AI6 (at PI time)
-		HLT_LINE = 6            // -AI7 (at PI time)
+		HLT_LINE = 6,           // -AI7 (at PI time)
+
+		// bus requests at levels 4-7
+		BUS_BR4_LINE = 9,
+		BUS_BR5_LINE = 10,
+		BUS_BR6_LINE = 11,
+		BUS_BR7_LINE = 12
 	};
 
 	// generic hardware traps
@@ -159,7 +165,7 @@ protected:
 
 	void op_0000(uint16_t op);
 	void op_0001(uint16_t op);
-	void halt(uint16_t op);
+	virtual void halt(uint16_t op);
 	void illegal(uint16_t op);
 	void illegal4(uint16_t op);
 	void jmp_rgd(uint16_t op);
@@ -1283,9 +1289,67 @@ protected:
 };
 
 
+// ======================> pdp11_cpu_device
+
+class pdp11_cpu_device : public t11_device
+{
+public:
+	void set_iopage(offs_t base) { c_iopage = base; }
+	void bus_error();
+protected:
+	enum
+	{
+		// PDP-11 processor features
+		F_PSW       = 1 << 0,   // processor status word
+		F_IOSR      = 1 << 1,   // general registers
+		F_HALT      = 1 << 2    // HALT stops the processor
+	};
+
+	pdp11_cpu_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock);
+
+	// device-level overrides
+	virtual void device_start() override ATTR_COLD;
+	virtual void device_reset() override ATTR_COLD;
+
+	// device_execute_interface overrides
+	virtual void execute_run() override;
+	virtual void execute_set_input(int inputnum, int state) override;
+
+	virtual void t11_check_irqs() override;
+	virtual void halt(uint16_t op) override;
+
+	// the registers the processor maps in the I/O page
+	uint16_t psw_r() { return m_psw.w.l; }
+	void psw_w(offs_t offset, uint16_t data, uint16_t mem_mask);
+	uint16_t reg_r(offs_t offset) { return m_reg[offset & 7].w.l; }
+	void reg_w(offs_t offset, uint16_t data, uint16_t mem_mask) { COMBINE_DATA(&m_reg[offset & 7].w.l); }
+
+	uint32_t c_features;
+	uint16_t c_psw_mask;
+	offs_t c_iopage;
+
+	uint8_t m_bus_br;
+	uint8_t m_halted;
+};
+
+class ka11_device : public pdp11_cpu_device
+{
+public:
+	ka11_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock);
+};
+
+class kd11b_device : public pdp11_cpu_device
+{
+public:
+	kd11b_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock);
+};
+
+
 DECLARE_DEVICE_TYPE(T11,      t11_device)
 DECLARE_DEVICE_TYPE(LSI11,    lsi11_device)
 DECLARE_DEVICE_TYPE(K1801VM1, k1801vm1_device)
 DECLARE_DEVICE_TYPE(K1801VM2, k1801vm2_device)
+DECLARE_DEVICE_TYPE(KA11,     ka11_device)
+DECLARE_DEVICE_TYPE(KD11B,    kd11b_device)
 
 #endif // MAME_CPU_T11_T11_H

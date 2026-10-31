@@ -39,6 +39,8 @@ DEFINE_DEVICE_TYPE(T11,      t11_device,      "t11",      "DEC T11")
 DEFINE_DEVICE_TYPE(LSI11,    lsi11_device,    "lsi11",    "DEC LSI-11")
 DEFINE_DEVICE_TYPE(K1801VM1, k1801vm1_device, "k1801vm1", "K1801VM1")
 DEFINE_DEVICE_TYPE(K1801VM2, k1801vm2_device, "k1801vm2", "K1801VM2")
+DEFINE_DEVICE_TYPE(KA11,     ka11_device,     "ka11",     "DEC KA11")
+DEFINE_DEVICE_TYPE(KD11B,    kd11b_device,    "kd11b",    "DEC KD11-B")
 
 
 /*
@@ -891,4 +893,174 @@ void t11_device::execute_run()
 std::unique_ptr<util::disasm_interface> t11_device::create_disassembler()
 {
 	return std::make_unique<t11_disassembler>();
+}
+
+
+pdp11_cpu_device::pdp11_cpu_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, uint32_t clock)
+	: t11_device(mconfig, type, tag, owner, clock)
+	, c_features(F_PSW | F_HALT)
+	, c_psw_mask(0377)
+	, c_iopage(0160000)
+	, m_bus_br(0)
+	, m_halted(0)
+{
+	c_insn_set = 0;
+}
+
+void pdp11_cpu_device::device_start()
+{
+	t11_device::device_start();
+
+	save_item(NAME(m_bus_br));
+	save_item(NAME(m_halted));
+
+	state_add(T11_HALTED, "HALT", m_halted).mask(1);
+
+	// processor place own registers in Unibus
+	if (c_features & F_IOSR)
+		space(AS_PROGRAM).install_readwrite_handler(c_iopage + 017700, c_iopage + 017717,
+				read16sm_delegate(*this, FUNC(pdp11_cpu_device::reg_r)), write16s_delegate(*this, FUNC(pdp11_cpu_device::reg_w)));
+	if (c_features & F_PSW)
+		space(AS_PROGRAM).install_readwrite_handler(c_iopage + 017776, c_iopage + 017777,
+				read16smo_delegate(*this, FUNC(pdp11_cpu_device::psw_r)), write16s_delegate(*this, FUNC(pdp11_cpu_device::psw_w)));
+}
+
+void pdp11_cpu_device::device_reset()
+{
+	t11_device::device_reset();
+
+	m_bus_br = 0;
+	m_halted = 0;
+
+	// power up vector 24
+	PC = RWORD(T11_PWRFAIL);
+	PSW = RWORD(T11_PWRFAIL + 2) & c_psw_mask;
+	m_bus_error = false;
+}
+
+void pdp11_cpu_device::psw_w(offs_t offset, uint16_t data, uint16_t mem_mask)
+{
+	uint16_t psw = m_psw.w.l;
+	COMBINE_DATA(&psw);
+	m_psw.w.l = psw & c_psw_mask;
+	m_check_irqs = true;
+}
+
+// bus_error is used as read and write handler in CPU card implementation
+void pdp11_cpu_device::bus_error()
+{
+	if (!machine().side_effects_disabled())
+	{
+		m_bus_error = true;
+		m_check_irqs = true;
+	}
+}
+
+void pdp11_cpu_device::halt(uint16_t op)
+{
+	if (!(c_features & F_HALT))
+	{
+		t11_device::halt(op);
+		return;
+	}
+
+	logerror("HALT at %06o\n", m_ppc.w.l);
+	m_halted = 1;
+	m_icount = 0;
+}
+
+void pdp11_cpu_device::execute_run()
+{
+	if (m_halted)
+	{
+		debugger_wait_hook();
+		m_icount = 0;
+		return;
+	}
+
+	t11_device::execute_run();
+}
+
+void pdp11_cpu_device::execute_set_input(int inputnum, int state)
+{
+	switch (inputnum)
+	{
+	case BUS_BR4_LINE:
+	case BUS_BR5_LINE:
+	case BUS_BR6_LINE:
+	case BUS_BR7_LINE:
+		{
+			uint8_t const bit = 1 << (inputnum - BUS_BR4_LINE + 4);
+			if (state != CLEAR_LINE)
+				m_bus_br |= bit;
+			else
+				m_bus_br &= ~bit;
+			m_check_irqs = true;
+		}
+		break;
+
+	default:
+		t11_device::execute_set_input(inputnum, state);
+		break;
+	}
+}
+
+void pdp11_cpu_device::t11_check_irqs()
+{
+	// a bus timeout and a power failure are not maskable
+	if (m_bus_error)
+	{
+		m_bus_error = false;
+		take_interrupt(T11_TIMEOUT);
+		return;
+	}
+	else if (m_power_fail)
+	{
+		m_power_fail = false;
+		take_interrupt(T11_PWRFAIL);
+		return;
+	}
+
+	if (m_trace_trap)
+	{
+		if (GET_T)
+		{
+			take_interrupt(T11_BPT);
+			return;
+		}
+		m_trace_trap = false;
+	}
+	else if (GET_T)
+	{
+		m_trace_trap = true;
+	}
+
+	// handling of bus requests
+	int const ipl = (PSW & 0340) >> 5;
+	for (int level = 7; level > ipl; level--)
+	{
+		if (!BIT(m_bus_br, level))
+			continue;
+
+		int const vec = standard_irq_callback(BUS_BR4_LINE + level - 4, PC);
+		if (vec <= 0)
+			m_bus_br &= ~(1 << level);
+		else
+		{
+			take_interrupt(vec);
+			return;
+		}
+	}
+}
+
+ka11_device::ka11_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock)
+	: pdp11_cpu_device(mconfig, KA11, tag, owner, clock)
+{
+	c_features = F_PSW | F_HALT;
+}
+
+kd11b_device::kd11b_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock)
+	: pdp11_cpu_device(mconfig, KD11B, tag, owner, clock)
+{
+	c_features = F_PSW | F_IOSR | F_HALT;
 }
