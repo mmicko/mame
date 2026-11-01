@@ -25,9 +25,7 @@ public:
 	virtual void unibus_br_w(int level, int state) override;
 
 protected:
-	static constexpr offs_t IOPAGE = 0160000;
-
-	unibus_processor_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, u32 clock);
+	unibus_processor_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, u32 clock, offs_t iopage);
 
 	// device_t implementation
 	virtual void device_start() override ATTR_COLD { }
@@ -37,9 +35,14 @@ protected:
 
 	required_device<pdp11_cpu_device> m_cpu;
 
-private:
-	void mem(address_map &map) ATTR_COLD;
+	// address maps by physical address width
+	void mem16(address_map &map) ATTR_COLD;
+	void mem18(address_map &map) ATTR_COLD;
+	void mem22(address_map &map) ATTR_COLD;
 
+	offs_t const m_iopage;
+
+private:
 	IRQ_CALLBACK_MEMBER(irq_ack);
 
 	u16 nxm_r();

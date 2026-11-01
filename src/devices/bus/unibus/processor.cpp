@@ -18,17 +18,17 @@ DEFINE_DEVICE_TYPE(UNIBUS_KD11B, unibus_kd11b_device, "unibus_kd11b", "DEC KD11-
 //  PROCESSOR BASE
 //**************************************************************************
 
-unibus_processor_device::unibus_processor_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, u32 clock)
+unibus_processor_device::unibus_processor_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, u32 clock, offs_t iopage)
 	: device_t(mconfig, type, tag, owner, clock)
 	, device_unibus_card_interface(mconfig, *this)
 	, m_cpu(*this, "cpu")
+	, m_iopage(iopage)
 {
 }
 
 void unibus_processor_device::connect_cpu()
 {
-	m_cpu->set_iopage(IOPAGE);
-	m_cpu->set_addrmap(AS_PROGRAM, &unibus_processor_device::mem);
+	m_cpu->set_iopage(m_iopage);
 	m_cpu->set_irq_acknowledge_callback(FUNC(unibus_processor_device::irq_ack));
 	// the RESET instruction asserts INIT
 	m_cpu->out_reset().set([this] (int state) { if (state) unibus().init_w(); });
@@ -38,14 +38,26 @@ void unibus_processor_device::connect_cpu()
 	{
 		unibus_device &bus = slot->config_unibus();
 		bus.set_space(m_cpu, AS_PROGRAM);
-		bus.set_processor(*this, IOPAGE);
+		bus.set_processor(*this, m_iopage);
 	}
 }
 
-void unibus_processor_device::mem(address_map &map)
+void unibus_processor_device::mem16(address_map &map)
 {
 	map(0000000, 0177777).rw(FUNC(unibus_processor_device::nxm_r), FUNC(unibus_processor_device::nxm_w));
 	map(0177570, 0177571).r(FUNC(unibus_processor_device::swr_r)).nopw();
+}
+
+void unibus_processor_device::mem18(address_map &map)
+{
+	map(0000000, 0777777).rw(FUNC(unibus_processor_device::nxm_r), FUNC(unibus_processor_device::nxm_w));
+	map(0777570, 0777571).r(FUNC(unibus_processor_device::swr_r)).nopw();
+}
+
+void unibus_processor_device::mem22(address_map &map)
+{
+	map(000000000, 017777777).rw(FUNC(unibus_processor_device::nxm_r), FUNC(unibus_processor_device::nxm_w));
+	map(017777570, 017777571).r(FUNC(unibus_processor_device::swr_r)).nopw();
 }
 
 // no response from the bus: the processor takes a timeout trap
@@ -78,23 +90,25 @@ IRQ_CALLBACK_MEMBER(unibus_processor_device::irq_ack)
 //**************************************************************************
 
 unibus_ka11_device::unibus_ka11_device(const machine_config &mconfig, const char *tag, device_t *owner, u32 clock)
-	: unibus_processor_device(mconfig, UNIBUS_KA11, tag, owner, clock)
+	: unibus_processor_device(mconfig, UNIBUS_KA11, tag, owner, clock, 0160000)
 {
 }
 
 void unibus_ka11_device::device_add_mconfig(machine_config &config)
 {
 	KA11(config, m_cpu, 4'000'000);
+	m_cpu->set_addrmap(AS_PROGRAM, &unibus_ka11_device::mem16);
 	connect_cpu();
 }
 
 unibus_kd11b_device::unibus_kd11b_device(const machine_config &mconfig, const char *tag, device_t *owner, u32 clock)
-	: unibus_processor_device(mconfig, UNIBUS_KD11B, tag, owner, clock)
+	: unibus_processor_device(mconfig, UNIBUS_KD11B, tag, owner, clock, 0160000)
 {
 }
 
 void unibus_kd11b_device::device_add_mconfig(machine_config &config)
 {
 	KD11B(config, m_cpu, 4'000'000);
+	m_cpu->set_addrmap(AS_PROGRAM, &unibus_kd11b_device::mem16);
 	connect_cpu();
 }
